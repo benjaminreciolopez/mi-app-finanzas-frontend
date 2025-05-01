@@ -14,8 +14,9 @@ export const getTrabajos = async (): Promise<Trabajo[]> => {
   const res = await axios.get<{ data: Trabajo[] }>(API_URL);
   return res.data.data;
 };
+
 export const updateTrabajo = (id: number, datos: Partial<Trabajo>) =>
-  axios.put(`http://localhost:3001/api/trabajos/${id}`, datos);
+  axios.put(`${API_URL}/${id}`, datos);
 
 export const addTrabajo = async (trabajo: {
   nombre: string;
