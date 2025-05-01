@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:3001/api/trabajos";
+const API_URL = "https://mi-app-finanzas-backend.onrender.com/api/trabajos";
 
 export interface Trabajo {
   id: number;
