@@ -19,6 +19,7 @@ import Clientes from "./components/Clientes/Clientes";
 import Evolucion from "./components/Evolucion/Evolucion";
 import GlobalStyles from "./styles/GlobalStyles";
 
+// Barra inferior de navegación
 function Navigation() {
   const location = useLocation();
 
@@ -60,7 +61,7 @@ function App() {
       <GlobalStyles />
       <div className="container" style={{ paddingBottom: "80px" }}>
         <Routes>
-          <Route path="/" element={<Evolucion />} /> {/* Página de inicio */}
+          <Route path="/" element={<Evolucion />} />
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/control" element={<Control />} />
