@@ -26,10 +26,13 @@ function Evolucion() {
     cargarEvolucion(año);
   }, [año]);
 
+  // 👇 CAMBIO HECHO AQUÍ
+  const API_URL = "https://mi-app-finanzas-backend.onrender.com/api/evolucion";
+
   const cargarEvolucion = async (añoElegido: number) => {
     try {
       const res = await axios.get<{ data: ResumenMensual[] }>(
-        `http://localhost:3001/api/evolucion?año=${añoElegido}`
+        `${API_URL}?año=${añoElegido}`
       );
       setDatos(res.data.data);
     } catch (error) {
