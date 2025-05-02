@@ -8,7 +8,8 @@ export interface ResumenMensual {
 }
 
 // URL completa al backend en Render
-const API_URL = "https://mi-app-finanzas-backend.onrender.com/api/evolucion";
+const API_BASE = import.meta.env.VITE_API_URL;
+const API_URL = `${API_BASE}/api/evolucion`;
 
 export const getEvolucion = async (): Promise<ResumenMensual[]> => {
   const res = await axios.get<{ data: ResumenMensual[] }>(API_URL);

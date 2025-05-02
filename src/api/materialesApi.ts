@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API_URL = "https://mi-app-finanzas-backend.onrender.com/api/materiales";
+const API_BASE = import.meta.env.VITE_API_URL;
+const API_URL = `${API_BASE}/api/materiales`;
 
 export interface Material {
   id: number;
