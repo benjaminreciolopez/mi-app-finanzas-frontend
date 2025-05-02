@@ -15,6 +15,9 @@ function Control() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
   const [deudas, setDeudas] = useState<DeudaCliente[]>([]);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     cargarDatos();
@@ -69,10 +72,12 @@ function Control() {
   return (
     <div className="container">
       <h2 className="title">Control de Deudas</h2>
+
       <div className="card">
         <h3 className="title" style={{ marginTop: "2rem" }}>
           Clientes con ingresos cobrados
         </h3>
+
         <div className="card">
           {clientes.map((cliente) => {
             const trabajosPagados = trabajos.filter(
@@ -103,14 +108,53 @@ function Control() {
             );
           })}
         </div>
+
+        <h3 className="title" style={{ marginTop: "2rem" }}>
+          Clientes con deudas
+        </h3>
+
         {deudas.length === 0 && <p>No hay deudas pendientes.</p>}
+
         {deudas.map((d, i) => (
-          <div key={i}>
-            <strong>{d.nombre}</strong>
-            <br />
+          <div key={i} style={{ marginBottom: "1rem" }}>
+            <div
+              onClick={() =>
+                setClienteSeleccionado(
+                  clienteSeleccionado === d.nombre ? null : d.nombre
+                )
+              }
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              {d.nombre}
+            </div>
             Horas pendientes: {d.horasPendientes}h<br />
             Materiales pendientes: {d.materialesPendientes}€<br />
             <strong>Total deuda: {d.totalDeuda}€</strong>
+            {clienteSeleccionado === d.nombre && (
+              <div style={{ marginTop: "0.5rem", paddingLeft: "1rem" }}>
+                <strong>🛠 Trabajos pendientes:</strong>
+                <ul>
+                  {trabajos
+                    .filter((t) => t.nombre === d.nombre && t.pagado === 0)
+                    .map((t) => (
+                      <li key={t.id}>
+                        📅 {t.fecha} - ⏱ {t.horas}h
+                      </li>
+                    ))}
+                </ul>
+
+                <strong>🧱 Materiales pendientes:</strong>
+                <ul>
+                  {materiales
+                    .filter((m) => m.nombre === d.nombre && m.pagado === 0)
+                    .map((m) => (
+                      <li key={m.id}>
+                        📅 {m.fecha} - {m.descripcion} - 💰 {m.coste}€
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            )}
             <hr />
           </div>
         ))}
