@@ -181,5 +181,15 @@ const GlobalStyles = createGlobalStyle`
   .react-calendar__month-view__days__day--weekend {
     color: #dc2626; /* rojo para fines de semana */
   }
+  /* Eliminar flechas del input tipo number */
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type="number"] {
+    -moz-appearance: textfield;
+  }
 `;
 export default GlobalStyles;

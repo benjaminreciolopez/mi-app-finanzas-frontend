@@ -34,7 +34,11 @@ function Calendario() {
     const parsedHoras = parseFloat(horas);
     if (!nombre || !fecha || isNaN(parsedHoras)) return;
 
-    const nuevaFecha = fecha.toISOString().split("T")[0];
+    const nuevaFecha = [
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, "0"),
+      String(fecha.getDate()).padStart(2, "0"),
+    ].join("-");
 
     const nuevoId = await addTrabajo({
       nombre,
