@@ -28,3 +28,8 @@ export const addTrabajo = async (trabajo: {
   const res = await axios.post<{ id: number }>(API_URL, trabajo);
   return res.data.id;
 };
+
+// ✅ Nueva función para eliminar trabajo
+export const deleteTrabajo = async (id: number) => {
+  await axios.delete(`${API_URL}/${id}`);
+};

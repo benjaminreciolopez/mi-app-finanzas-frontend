@@ -8,6 +8,7 @@ import {
   Trabajo,
 } from "../../api/trabajosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
+import { deleteTrabajo } from "../../api/trabajosApi";
 
 function Calendario() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -15,6 +16,7 @@ function Calendario() {
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
+  const [trabajoEditando, setTrabajoEditando] = useState<number | null>(null);
 
   useEffect(() => {
     cargarDatos();
@@ -40,22 +42,39 @@ function Calendario() {
       String(fecha.getDate()).padStart(2, "0"),
     ].join("-");
 
-    const nuevoId = await addTrabajo({
-      nombre,
-      fecha: nuevaFecha,
-      horas: parsedHoras,
-      pagado: 0,
-    });
+    if (trabajoEditando !== null) {
+      await updateTrabajo(trabajoEditando, {
+        nombre,
+        fecha: nuevaFecha,
+        horas: parsedHoras,
+      });
+      setTrabajos((prev) =>
+        prev.map((t) =>
+          t.id === trabajoEditando
+            ? { ...t, nombre, fecha: nuevaFecha, horas: parsedHoras }
+            : t
+        )
+      );
+      setTrabajoEditando(null);
+    } else {
+      const nuevoId = await addTrabajo({
+        nombre,
+        fecha: nuevaFecha,
+        horas: parsedHoras,
+        pagado: 0,
+      });
 
-    const nuevoTrabajo = {
-      id: nuevoId,
-      nombre,
-      fecha: nuevaFecha,
-      horas: parsedHoras,
-      pagado: 0,
-    };
+      const nuevoTrabajo = {
+        id: nuevoId,
+        nombre,
+        fecha: nuevaFecha,
+        horas: parsedHoras,
+        pagado: 0,
+      };
 
-    setTrabajos((prev) => [...prev, nuevoTrabajo]);
+      setTrabajos((prev) => [...prev, nuevoTrabajo]);
+    }
+
     setNombre("");
     setHoras("");
   };
@@ -69,6 +88,20 @@ function Calendario() {
     );
   };
 
+  const eliminarTrabajo = async (id: number) => {
+    const confirmacion = window.confirm("¿Eliminar este trabajo?");
+    if (!confirmacion) return;
+    await deleteTrabajo(id);
+    setTrabajos((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const editarTrabajo = (trabajo: Trabajo) => {
+    setNombre(trabajo.nombre);
+    setHoras(trabajo.horas.toString());
+    setFecha(new Date(trabajo.fecha));
+    setTrabajoEditando(trabajo.id);
+  };
+
   const trabajosPendientes = trabajos.filter((t) => t.pagado === 0);
 
   const trabajosPorFecha = trabajosPendientes.reduce((acc, trabajo) => {
@@ -80,7 +113,7 @@ function Calendario() {
   const resaltarDias = ({ date }: { date: Date }) => {
     const fechaStr = date.toISOString().split("T")[0];
     if (trabajosPorFecha[fechaStr]) {
-      return "highlight"; // Esta clase la defines tú en tu CSS
+      return "highlight";
     }
     return null;
   };
@@ -111,7 +144,9 @@ function Calendario() {
           value={horas}
           onChange={(e) => setHoras(e.target.value)}
         />
-        <button type="submit">Añadir Trabajo</button>
+        <button type="submit">
+          {trabajoEditando !== null ? "Actualizar Trabajo" : "Añadir Trabajo"}
+        </button>
       </form>
 
       <div className="card">
@@ -127,12 +162,24 @@ function Calendario() {
                 {trabajos.map((trabajo) => (
                   <li key={trabajo.id}>
                     Cliente: <strong>{trabajo.nombre}</strong> - {trabajo.horas}
-                    h - Pendiente
+                    h
+                    <button
+                      onClick={() => editarTrabajo(trabajo)}
+                      style={{ marginLeft: "6px" }}
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => eliminarTrabajo(trabajo.id)}
+                      style={{ marginLeft: "6px" }}
+                    >
+                      🗑️
+                    </button>
                     <button
                       onClick={() => marcarComoPagado(trabajo.id)}
-                      style={{ marginLeft: "10px" }}
+                      style={{ marginLeft: "6px" }}
                     >
-                      Marcar como pagado
+                      ✅
                     </button>
                   </li>
                 ))}
