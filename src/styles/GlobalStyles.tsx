@@ -41,6 +41,15 @@ const GlobalStyles = createGlobalStyle`
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
+  .boton-accion {
+    background-color: #4f46e5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin-left: 6px;
+    cursor: pointer;
+  }
 
   button:hover {
     background-color: #4338ca;

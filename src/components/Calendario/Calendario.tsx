@@ -144,7 +144,7 @@ function Calendario() {
           value={horas}
           onChange={(e) => setHoras(e.target.value)}
         />
-        <button type="submit">
+        <button type="submit" className="boton-accion">
           {trabajoEditando !== null ? "Actualizar Trabajo" : "Añadir Trabajo"}
         </button>
       </form>
@@ -160,27 +160,36 @@ function Calendario() {
               <strong>📅 {fecha}</strong>
               <ul style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}>
                 {trabajos.map((trabajo) => (
-                  <li key={trabajo.id}>
+                  <li key={trabajo.id} style={{ marginBottom: "12px" }}>
                     Cliente: <strong>{trabajo.nombre}</strong> - {trabajo.horas}
                     h
-                    <button
-                      onClick={() => editarTrabajo(trabajo)}
-                      style={{ marginLeft: "6px" }}
+                    <div
+                      style={{
+                        marginTop: "6px",
+                        display: "flex",
+                        gap: "8px",
+                        flexWrap: "wrap",
+                      }}
                     >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => eliminarTrabajo(trabajo.id)}
-                      style={{ marginLeft: "6px" }}
-                    >
-                      🗑️
-                    </button>
-                    <button
-                      onClick={() => marcarComoPagado(trabajo.id)}
-                      style={{ marginLeft: "6px" }}
-                    >
-                      ✅
-                    </button>
+                      <button
+                        className="boton-accion"
+                        onClick={() => editarTrabajo(trabajo)}
+                      >
+                        ✏️ Editar
+                      </button>
+                      <button
+                        className="boton-accion"
+                        onClick={() => eliminarTrabajo(trabajo.id)}
+                      >
+                        🗑️ Eliminar
+                      </button>
+                      <button
+                        className="boton-accion"
+                        onClick={() => marcarComoPagado(trabajo.id)}
+                      >
+                        ✅ Marcar como pagado
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
