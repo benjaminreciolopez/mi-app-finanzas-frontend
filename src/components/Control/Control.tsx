@@ -116,7 +116,7 @@ function Control() {
 
           return (
             <div key={d.nombre}>
-              <div
+              <p
                 onClick={() =>
                   setClienteSeleccionado(seleccionado ? null : d.nombre)
                 }
@@ -124,10 +124,11 @@ function Control() {
                   cursor: "pointer",
                   fontWeight: "bold",
                   marginBottom: "0.5rem",
+                  color: "#4f46e5",
                 }}
               >
-                {d.nombre}
-              </div>
+                ▶ {d.nombre}
+              </p>
               <div style={{ marginLeft: "1rem" }}>
                 Horas pendientes: {d.horasPendientes}h<br />
                 Materiales pendientes: {d.materialesPendientes}€<br />
