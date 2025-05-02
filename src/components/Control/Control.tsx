@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
-import { getClientes, Cliente } from "../../api/clientesApi";
+import {
+  getClientes,
+  Cliente,
+  actualizarOrdenClientes,
+} from "../../api/clientesApi";
 import { getTrabajos, Trabajo } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
-import { actualizarOrdenClientes } from "../../api/clientesApi";
 import { toast } from "react-toastify";
 
 function Control() {
@@ -25,11 +28,13 @@ function Control() {
       getMateriales(),
     ]);
 
-    const clientesConRegistros = clientesData.filter(
-      (c) =>
-        trabajosData.some((t) => t.nombre === c.nombre) ||
-        materialesData.some((m) => m.nombre === c.nombre)
-    );
+    const clientesConRegistros = clientesData
+      .filter(
+        (c) =>
+          trabajosData.some((t) => t.nombre === c.nombre) ||
+          materialesData.some((m) => m.nombre === c.nombre)
+      )
+      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
 
     setTrabajos(trabajosData);
     setMateriales(materialesData);

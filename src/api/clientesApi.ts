@@ -7,6 +7,7 @@ export interface Cliente {
   id: number;
   nombre: string;
   precioHora: number;
+  orden?: number;
 }
 
 export const getClientes = async (): Promise<Cliente[]> => {
