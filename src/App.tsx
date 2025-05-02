@@ -22,7 +22,7 @@ import GlobalStyles from "./styles/GlobalStyles";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Barra inferior de navegación
+// Barra superior de navegación
 function Navigation() {
   const location = useLocation();
 
@@ -43,7 +43,7 @@ function Navigation() {
   ];
 
   return (
-    <nav className="bottom-nav">
+    <nav className="top-nav">
       {navItems.map((item) => (
         <Link
           key={item.to}
@@ -62,7 +62,8 @@ function App() {
   return (
     <Router>
       <GlobalStyles />
-      <div className="container" style={{ paddingBottom: "80px" }}>
+      <Navigation />
+      <div className="container" style={{ paddingTop: "70px" }}>
         <Routes>
           <Route path="/" element={<Evolucion />} />
           <Route path="/clientes" element={<Clientes />} />
@@ -71,7 +72,6 @@ function App() {
           <Route path="/materiales" element={<Materiales />} />
         </Routes>
       </div>
-      <Navigation />
       <ToastContainer position="top-center" autoClose={2000} />
     </Router>
   );

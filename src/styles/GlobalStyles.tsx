@@ -125,6 +125,39 @@ const GlobalStyles = createGlobalStyle`
     margin-top: 2px;
     font-size: 0.7rem;
   }
+  .top-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* sombra suave */
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .top-nav a {
+    color: #666;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 12px;
+    transition: color 0.2s ease;
+  }
+
+  .top-nav a:hover {
+    color: #1e3a8a; /* cambia color al pasar el cursor */
+  }
+
+  .top-nav a.active {
+    color: #4f46e5;
+    font-weight: bold;
+  }
 
  /* Estilos personalizados para react-calendar */
   .react-calendar {
