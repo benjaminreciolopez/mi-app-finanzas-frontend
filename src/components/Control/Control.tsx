@@ -123,11 +123,14 @@ function Control() {
                 style={{
                   cursor: "pointer",
                   fontWeight: "bold",
-                  marginBottom: "0.5rem",
-                  color: "#4f46e5",
+                  color: seleccionado ? "#1e3a8a" : "#4f46e5",
+                  backgroundColor: seleccionado ? "#e0e7ff" : "transparent",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  userSelect: "none",
                 }}
               >
-                ▶ {d.nombre}
+                {seleccionado ? "▼" : "▶"} {d.nombre}
               </p>
               <div style={{ marginLeft: "1rem" }}>
                 Horas pendientes: {d.horasPendientes}h<br />
