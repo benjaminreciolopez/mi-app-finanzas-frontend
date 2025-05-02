@@ -62,10 +62,6 @@ function Control() {
     <div className="container">
       <h2 className="title">Control de Clientes</h2>
       <div className="card">
-        <p>
-          Pulsa sobre un cliente para ver detalles. Puedes reordenarlos
-          libremente.
-        </p>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="clientes">
             {(provided: any) => (
