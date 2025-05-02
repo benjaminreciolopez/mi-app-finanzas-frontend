@@ -69,14 +69,6 @@ function Control() {
     setDeudas(resumen.filter((d) => d.totalDeuda > 0));
   };
 
-  const trabajosDelCliente = trabajos.filter(
-    (t) => t.nombre === clienteSeleccionado && t.pagado === 0
-  );
-
-  const materialesDelCliente = materiales.filter(
-    (m) => m.nombre === clienteSeleccionado && m.pagado === 0
-  );
-
   return (
     <div className="container">
       <h2 className="title">Control de Deudas</h2>
@@ -119,53 +111,70 @@ function Control() {
           Clientes con deudas
         </h3>
         {deudas.length === 0 && <p>No hay deudas pendientes.</p>}
-        {deudas.map((d) => (
-          <div
-            key={d.nombre}
-            onClick={() => setClienteSeleccionado(d.nombre)}
-            style={{ cursor: "pointer" }}
-          >
-            <strong>{d.nombre}</strong>
-            <br />
-            Horas pendientes: {d.horasPendientes}h<br />
-            Materiales pendientes: {d.materialesPendientes}€<br />
-            <strong>Total deuda: {d.totalDeuda}€</strong>
-            <hr />
-          </div>
-        ))}
+        {deudas.map((d) => {
+          const seleccionado = clienteSeleccionado === d.nombre;
+
+          return (
+            <div key={d.nombre}>
+              <div
+                onClick={() =>
+                  setClienteSeleccionado(seleccionado ? null : d.nombre)
+                }
+                style={{
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {d.nombre}
+              </div>
+              <div style={{ marginLeft: "1rem" }}>
+                Horas pendientes: {d.horasPendientes}h<br />
+                Materiales pendientes: {d.materialesPendientes}€<br />
+                <strong>Total deuda: {d.totalDeuda}€</strong>
+              </div>
+              {seleccionado && (
+                <div className="card" style={{ marginTop: "0.5rem" }}>
+                  <h4>🛠️ Trabajos pendientes</h4>
+                  {trabajos.filter(
+                    (t) => t.nombre === d.nombre && t.pagado === 0
+                  ).length === 0 ? (
+                    <p>No hay trabajos pendientes.</p>
+                  ) : (
+                    <ul>
+                      {trabajos
+                        .filter((t) => t.nombre === d.nombre && t.pagado === 0)
+                        .map((t) => (
+                          <li key={t.id}>
+                            {t.fecha}: {t.horas}h
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+
+                  <h4>🧱 Materiales pendientes</h4>
+                  {materiales.filter(
+                    (m) => m.nombre === d.nombre && m.pagado === 0
+                  ).length === 0 ? (
+                    <p>No hay materiales pendientes.</p>
+                  ) : (
+                    <ul>
+                      {materiales
+                        .filter((m) => m.nombre === d.nombre && m.pagado === 0)
+                        .map((m) => (
+                          <li key={m.id}>
+                            {m.fecha}: {m.descripcion} - {m.coste.toFixed(2)}€
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+              <hr />
+            </div>
+          );
+        })}
       </div>
-
-      {clienteSeleccionado && (
-        <div className="card" style={{ marginTop: "1rem" }}>
-          <h3>Detalles de {clienteSeleccionado}</h3>
-
-          <h4>🛠️ Trabajos pendientes</h4>
-          {trabajosDelCliente.length === 0 ? (
-            <p>No hay trabajos pendientes.</p>
-          ) : (
-            <ul>
-              {trabajosDelCliente.map((t) => (
-                <li key={t.id}>
-                  {t.fecha}: {t.horas}h
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <h4>🧱 Materiales pendientes</h4>
-          {materialesDelCliente.length === 0 ? (
-            <p>No hay materiales pendientes.</p>
-          ) : (
-            <ul>
-              {materialesDelCliente.map((m) => (
-                <li key={m.id}>
-                  {m.fecha}: {m.descripcion} - {m.coste.toFixed(2)}€
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 }
