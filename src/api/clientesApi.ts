@@ -14,6 +14,12 @@ export const getClientes = async (): Promise<Cliente[]> => {
   return res.data.data;
 };
 
+export const actualizarOrdenClientes = async (
+  ordenes: { id: number; orden: number }[]
+) => {
+  await axios.put(`${API_URL}/orden`, { ordenes });
+};
+
 export const addCliente = async (cliente: {
   nombre: string;
   precioHora: number;
