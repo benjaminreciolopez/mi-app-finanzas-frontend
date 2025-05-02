@@ -3,7 +3,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { getTrabajos, Trabajo } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
-import axios from "axios";
+import { actualizarOrdenClientes } from "../../api/clientesApi";
+import { toast } from "react-toastify";
 
 function Control() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -43,18 +44,17 @@ function Control() {
     updated.splice(result.destination.index, 0, moved);
     setOrdenClientes(updated);
 
-    // Guardar orden en Supabase
-    const ordenes = updated.map((cliente, index) => ({
+    const ordenesActualizadas = updated.map((cliente, index) => ({
       id: cliente.id,
       orden: index,
     }));
 
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/api/clientes/orden`, {
-        ordenes,
-      });
+      await actualizarOrdenClientes(ordenesActualizadas);
+      toast.success("Orden guardado correctamente");
     } catch (error) {
-      console.error("Error actualizando orden:", error);
+      toast.error("Error al guardar el orden");
+      console.error("Error:", error);
     }
   };
 

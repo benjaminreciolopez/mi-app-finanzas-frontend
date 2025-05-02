@@ -19,6 +19,9 @@ import Clientes from "./components/Clientes/Clientes";
 import Evolucion from "./components/Evolucion/Evolucion";
 import GlobalStyles from "./styles/GlobalStyles";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 // Barra inferior de navegación
 function Navigation() {
   const location = useLocation();
@@ -69,6 +72,7 @@ function App() {
         </Routes>
       </div>
       <Navigation />
+      <ToastContainer position="top-center" autoClose={2000} />
     </Router>
   );
 }
