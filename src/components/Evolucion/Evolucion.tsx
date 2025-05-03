@@ -26,8 +26,7 @@ function Evolucion() {
     cargarEvolucion(año);
   }, [año]);
 
-  // 👇 CAMBIO HECHO AQUÍ
-  const API_URL = "https://mi-app-finanzas-backend.onrender.com/api/evolucion";
+  const API_URL = `${import.meta.env.VITE_API_URL}/api/evolucion`;
 
   const cargarEvolucion = async (añoElegido: number) => {
     try {
