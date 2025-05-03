@@ -8,7 +8,7 @@ import {
 } from "../../api/pagosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
-import { getTrabajos } from "../../api/trabajosApi";
+import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
 import { getMateriales } from "../../api/materialesApi";
 import { calcularDeudas } from "../../utils/calcularDeuda";
 
@@ -28,6 +28,20 @@ function Pagos() {
     cargarDatos();
   }, []);
 
+  const marcarTrabajosComoPagados = async (clienteIdStr: string) => {
+    const clienteId = parseInt(clienteIdStr);
+    const cliente = clientes.find((c) => c.id === clienteId);
+    if (!cliente) return;
+
+    const trabajosCliente = await getTrabajos();
+    const pendientes = trabajosCliente.filter(
+      (t) => t.nombre === cliente.nombre && t.pagado === 0
+    );
+
+    for (const trabajo of pendientes) {
+      await updateTrabajo(trabajo.id, { pagado: 1 });
+    }
+  };
   const cargarDatos = async () => {
     const [clientesData, pagosData, trabajosData, materialesData] =
       await Promise.all([
@@ -94,6 +108,7 @@ function Pagos() {
       setCantidad("");
       setFecha("");
       setObservaciones("");
+      await marcarTrabajosComoPagados(clienteId);
       await cargarDatos(); // 👈 este es el cambio importante
     } catch (error) {
       toast.error("Error al registrar el pago");
