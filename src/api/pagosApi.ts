@@ -23,6 +23,8 @@ export const addPago = async (pago: {
   fecha: string;
   observaciones?: string;
 }) => {
+  console.log("Enviando pago:", pago); // 👈 AÑADE ESTO TEMPORALMENTE
+  await axios.post(API_URL, pago);
   await axios.post(API_URL, pago);
 };
 
