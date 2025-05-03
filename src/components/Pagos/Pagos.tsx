@@ -48,18 +48,32 @@ function Pagos() {
     if (!clienteId || !cantidad || !fecha) return;
 
     try {
-      await addPago({
+      const id = await addPago({
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
         fecha: new Date(fecha).toISOString(),
         observaciones: observaciones.trim() || undefined,
       });
+
+      const cliente = clientes.find((c) => c.id === parseInt(clienteId));
+      const nombreCliente = cliente?.nombre || "Desconocido";
+
+      const nuevoPago: PagoConNombre = {
+        id,
+        clienteId: parseInt(clienteId),
+        cantidad: parseFloat(cantidad),
+        fecha: new Date(fecha).toISOString(),
+        observaciones: observaciones.trim() || undefined,
+        nombre: nombreCliente,
+      };
+
+      setPagosConNombre((prev) => [nuevoPago, ...prev]);
+
       toast.success("Pago registrado correctamente");
       setClienteId("");
       setCantidad("");
       setFecha("");
       setObservaciones("");
-      cargarDatos();
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);

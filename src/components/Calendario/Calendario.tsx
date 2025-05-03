@@ -5,10 +5,12 @@ import {
   getTrabajos,
   addTrabajo,
   updateTrabajo,
+  deleteTrabajo,
   Trabajo,
 } from "../../api/trabajosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
-import { deleteTrabajo } from "../../api/trabajosApi";
+import { getPagos } from "../../api/pagosApi";
+import { calcularDeudas } from "../../utils/calcularDeuda";
 
 function Calendario() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -17,18 +19,27 @@ function Calendario() {
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
   const [trabajoEditando, setTrabajoEditando] = useState<number | null>(null);
+  const [clientesSinDeuda, setClientesSinDeuda] = useState<string[]>([]);
 
   useEffect(() => {
     cargarDatos();
   }, []);
 
   const cargarDatos = async () => {
-    const [clientesData, trabajosData] = await Promise.all([
+    const [clientesData, trabajosData, pagosData] = await Promise.all([
       getClientes(),
       getTrabajos(),
+      getPagos(),
     ]);
+
     setClientes(clientesData);
     setTrabajos(trabajosData);
+
+    const deudas = calcularDeudas(clientesData, trabajosData, [], pagosData);
+    const sinDeuda = deudas
+      .filter((d) => d.totalDeuda <= 0)
+      .map((d) => d.nombre);
+    setClientesSinDeuda(sinDeuda);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,15 +75,16 @@ function Calendario() {
         pagado: 0,
       });
 
-      const nuevoTrabajo = {
-        id: nuevoId,
-        nombre,
-        fecha: nuevaFecha,
-        horas: parsedHoras,
-        pagado: 0,
-      };
-
-      setTrabajos((prev) => [...prev, nuevoTrabajo]);
+      setTrabajos((prev) => [
+        ...prev,
+        {
+          id: nuevoId,
+          nombre,
+          fecha: nuevaFecha,
+          horas: parsedHoras,
+          pagado: 0,
+        },
+      ]);
     }
 
     setNombre("");
@@ -102,7 +114,9 @@ function Calendario() {
     setTrabajoEditando(trabajo.id);
   };
 
-  const trabajosPendientes = trabajos.filter((t) => t.pagado === 0);
+  const trabajosPendientes = trabajos.filter(
+    (t) => t.pagado === 0 && !clientesSinDeuda.includes(t.nombre)
+  );
 
   const trabajosPorFecha = trabajosPendientes.reduce((acc, trabajo) => {
     if (!acc[trabajo.fecha]) acc[trabajo.fecha] = [];
@@ -112,10 +126,7 @@ function Calendario() {
 
   const resaltarDias = ({ date }: { date: Date }) => {
     const fechaStr = date.toISOString().split("T")[0];
-    if (trabajosPorFecha[fechaStr]) {
-      return "highlight";
-    }
-    return null;
+    return trabajosPorFecha[fechaStr] ? "highlight" : null;
   };
 
   return (
@@ -150,51 +161,52 @@ function Calendario() {
       </form>
 
       <div className="card">
-        {trabajosPendientes.length === 0 && (
+        {trabajosPendientes.length === 0 ? (
           <p>No hay trabajos pendientes actualmente.</p>
+        ) : (
+          Object.entries(trabajosPorFecha)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([fecha, trabajos]) => (
+              <div key={fecha} style={{ marginBottom: "1rem" }}>
+                <strong>📅 {fecha}</strong>
+                <ul style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}>
+                  {trabajos.map((trabajo) => (
+                    <li key={trabajo.id} style={{ marginBottom: "12px" }}>
+                      Cliente: <strong>{trabajo.nombre}</strong> -{" "}
+                      {trabajo.horas}h
+                      <div
+                        style={{
+                          marginTop: "6px",
+                          display: "flex",
+                          gap: "8px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <button
+                          className="boton-accion"
+                          onClick={() => editarTrabajo(trabajo)}
+                        >
+                          ✏️ Editar
+                        </button>
+                        <button
+                          className="boton-accion"
+                          onClick={() => eliminarTrabajo(trabajo.id)}
+                        >
+                          🗑️ Eliminar
+                        </button>
+                        <button
+                          className="boton-accion"
+                          onClick={() => marcarComoPagado(trabajo.id)}
+                        >
+                          ✅ Marcar como pagado
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
         )}
-        {Object.entries(trabajosPorFecha)
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([fecha, trabajos]) => (
-            <div key={fecha} style={{ marginBottom: "1rem" }}>
-              <strong>📅 {fecha}</strong>
-              <ul style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}>
-                {trabajos.map((trabajo) => (
-                  <li key={trabajo.id} style={{ marginBottom: "12px" }}>
-                    Cliente: <strong>{trabajo.nombre}</strong> - {trabajo.horas}
-                    h
-                    <div
-                      style={{
-                        marginTop: "6px",
-                        display: "flex",
-                        gap: "8px",
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      <button
-                        className="boton-accion"
-                        onClick={() => editarTrabajo(trabajo)}
-                      >
-                        ✏️ Editar
-                      </button>
-                      <button
-                        className="boton-accion"
-                        onClick={() => eliminarTrabajo(trabajo.id)}
-                      >
-                        🗑️ Eliminar
-                      </button>
-                      <button
-                        className="boton-accion"
-                        onClick={() => marcarComoPagado(trabajo.id)}
-                      >
-                        ✅ Marcar como pagado
-                      </button>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
       </div>
     </div>
   );
