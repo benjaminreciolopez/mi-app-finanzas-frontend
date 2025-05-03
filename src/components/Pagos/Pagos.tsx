@@ -8,6 +8,9 @@ import {
 } from "../../api/pagosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
+import { getTrabajos } from "../../api/trabajosApi";
+import { getMateriales } from "../../api/materialesApi";
+import { calcularDeudas } from "../../utils/calcularDeuda";
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -26,21 +29,38 @@ function Pagos() {
   }, []);
 
   const cargarDatos = async () => {
-    const [clientesData, pagosData] = await Promise.all([
-      getClientes(),
-      getPagos(),
-    ]);
+    const [clientesData, pagosData, trabajosData, materialesData] =
+      await Promise.all([
+        getClientes(),
+        getPagos(),
+        getTrabajos(),
+        getMateriales(),
+      ]);
+
     setClientes(clientesData);
 
-    const pagosExtendidos = pagosData.map((pago) => {
-      const cliente = clientesData.find((c) => c.id === pago.clienteId);
-      return {
-        ...pago,
-        nombre: cliente?.nombre || "Desconocido",
-      };
-    });
+    const deudas = calcularDeudas(
+      clientesData,
+      trabajosData,
+      materialesData,
+      pagosData
+    );
 
-    setPagosConNombre(pagosExtendidos);
+    const clientesConDeuda = new Set(
+      deudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
+    );
+
+    const pagosFiltrados = pagosData
+      .filter((p) => clientesConDeuda.has(p.clienteId))
+      .map((pago) => {
+        const cliente = clientesData.find((c) => c.id === pago.clienteId);
+        return {
+          ...pago,
+          nombre: cliente?.nombre || "Desconocido",
+        };
+      });
+
+    setPagosConNombre(pagosFiltrados);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +94,7 @@ function Pagos() {
       setCantidad("");
       setFecha("");
       setObservaciones("");
+      await cargarDatos(); // 👈 este es el cambio importante
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);
