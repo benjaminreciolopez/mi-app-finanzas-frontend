@@ -17,16 +17,26 @@ export const getPagos = async (): Promise<Pago[]> => {
   return res.data.data;
 };
 
-export const addPago = async (pago: {
+export async function addPago(pago: {
   clienteId: number;
   cantidad: number;
   fecha: string;
   observaciones?: string;
-}) => {
-  console.log("Enviando pago:", pago); // 👈 AÑADE ESTO TEMPORALMENTE
-  await axios.post(API_URL, pago);
-  await axios.post(API_URL, pago);
-};
+}): Promise<number> {
+  const res = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(pago),
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.error || "Error al añadir el pago");
+  }
+
+  const data = await res.json();
+  return data.id;
+}
 
 // Actualizar un pago existente
 export const updatePago = async (
