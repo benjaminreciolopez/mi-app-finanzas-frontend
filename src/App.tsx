@@ -18,9 +18,11 @@ import Materiales from "./components/Materiales/Materiales";
 import Clientes from "./components/Clientes/Clientes";
 import Evolucion from "./components/Evolucion/Evolucion";
 import GlobalStyles from "./styles/GlobalStyles";
+import Pagos from "./components/Pagos/Pagos";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AiOutlineDollar } from "react-icons/ai";
 
 // Barra superior de navegación
 function Navigation() {
@@ -39,6 +41,11 @@ function Navigation() {
       to: "/materiales",
       label: "Materiales",
       icon: <AiOutlineTool size={20} />,
+    },
+    {
+      to: "/pagos",
+      label: "Pagos",
+      icon: <AiOutlineDollar size={20} />,
     },
   ];
 
@@ -70,6 +77,7 @@ function App() {
           <Route path="/calendario" element={<Calendario />} />
           <Route path="/control" element={<Control />} />
           <Route path="/materiales" element={<Materiales />} />
+          <Route path="/pagos" element={<Pagos />} />
         </Routes>
       </div>
       <ToastContainer position="top-center" autoClose={2000} />

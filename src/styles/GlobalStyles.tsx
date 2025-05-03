@@ -130,10 +130,9 @@ const GlobalStyles = createGlobalStyle`
     top: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 56px;
     background-color: white;
-    border-bottom: 1px solid #ddd;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* sombra suave */
+    border-bottom: 1px solid #e5e7eb;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -141,22 +140,37 @@ const GlobalStyles = createGlobalStyle`
   }
 
   .top-nav a {
-    color: #666;
-    text-decoration: none;
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 12px;
+    font-size: 11px;
+    color: #6b7280;
+    padding: 4px 0;
     transition: color 0.2s ease;
   }
 
   .top-nav a:hover {
-    color: #1e3a8a; /* cambia color al pasar el cursor */
+    color: #1e3a8a;
   }
 
   .top-nav a.active {
     color: #4f46e5;
-    font-weight: bold;
+    font-weight: 600;
+  }
+
+  .top-nav a span {
+    font-size: 10px;
+    margin-top: 2px;
+  }
+
+  /* Ajuste de padding general por tener la barra arriba */
+  .container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 76px 16px 20px; /* antes era padding: 20px 16px */
+    background-color: #f9fafb;
   }
 
  /* Estilos personalizados para react-calendar */
