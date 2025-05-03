@@ -59,34 +59,17 @@ function Calendario() {
         fecha: nuevaFecha,
         horas: parsedHoras,
       });
-      setTrabajos((prev) =>
-        prev.map((t) =>
-          t.id === trabajoEditando
-            ? { ...t, nombre, fecha: nuevaFecha, horas: parsedHoras }
-            : t
-        )
-      );
       setTrabajoEditando(null);
     } else {
-      const nuevoId = await addTrabajo({
+      await addTrabajo({
         nombre,
         fecha: nuevaFecha,
         horas: parsedHoras,
         pagado: 0,
       });
-
-      setTrabajos((prev) => [
-        ...prev,
-        {
-          id: nuevoId,
-          nombre,
-          fecha: nuevaFecha,
-          horas: parsedHoras,
-          pagado: 0,
-        },
-      ]);
     }
 
+    await cargarDatos(); // 👈 recarga todo tras insertar o editar
     setNombre("");
     setHoras("");
   };
