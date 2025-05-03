@@ -8,8 +8,8 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "Mi App Finanzas",
-        short_name: "Finanzas",
+        name: "Gestión360",
+        short_name: "Gestión360",
         start_url: "/",
         display: "standalone",
         background_color: "#ffffff",
