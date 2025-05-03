@@ -17,7 +17,6 @@ export const getPagos = async (): Promise<Pago[]> => {
   return res.data.data;
 };
 
-// Añadir un nuevo pago
 export const addPago = async (pago: {
   clienteId: number;
   cantidad: number;
