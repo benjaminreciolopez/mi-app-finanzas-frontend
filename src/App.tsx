@@ -23,6 +23,7 @@ import Pagos from "./components/Pagos/Pagos";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AiOutlineDollar } from "react-icons/ai";
+import SwipeNavigator from "./components/SwipeNavigator"; // 👈 Añade esto
 
 // Barra superior de navegación
 function Navigation() {
@@ -70,19 +71,20 @@ function App() {
     <Router>
       <GlobalStyles />
       <Navigation />
-      <div className="container" style={{ paddingTop: "70px" }}>
-        <Routes>
-          <Route path="/" element={<Evolucion />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/calendario" element={<Calendario />} />
-          <Route path="/control" element={<Control />} />
-          <Route path="/materiales" element={<Materiales />} />
-          <Route path="/pagos" element={<Pagos />} />
-        </Routes>
-      </div>
+      <SwipeNavigator>
+        <div className="container" style={{ paddingTop: "70px" }}>
+          <Routes>
+            <Route path="/" element={<Evolucion />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/calendario" element={<Calendario />} />
+            <Route path="/control" element={<Control />} />
+            <Route path="/materiales" element={<Materiales />} />
+            <Route path="/pagos" element={<Pagos />} />
+          </Routes>
+        </div>
+      </SwipeNavigator>
       <ToastContainer position="top-center" autoClose={2000} />
     </Router>
   );
 }
-
 export default App;
