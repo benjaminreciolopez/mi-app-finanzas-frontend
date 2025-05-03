@@ -5,10 +5,10 @@ const API_URL = `${API_BASE}/api/pagos`;
 
 export interface Pago {
   id: number;
-  nombre: string;
+  clienteId: number;
   cantidad: number;
   fecha: string;
-  observaciones?: string; // ✅ nuevo campo opcional
+  observaciones?: string;
 }
 
 // Obtener todos los pagos
@@ -19,10 +19,23 @@ export const getPagos = async (): Promise<Pago[]> => {
 
 // Añadir un nuevo pago
 export const addPago = async (pago: {
-  nombre: string;
+  clienteId: number;
   cantidad: number;
   fecha: string;
-  observaciones?: string; // ✅ permitir enviar observaciones opcionales
+  observaciones?: string;
 }) => {
   await axios.post(API_URL, pago);
+};
+
+// Actualizar un pago existente
+export const updatePago = async (
+  id: number,
+  datos: Partial<Omit<Pago, "id">>
+) => {
+  await axios.put(`${API_URL}/${id}`, datos);
+};
+
+// Eliminar un pago por ID
+export const deletePago = async (id: number) => {
+  await axios.delete(`${API_URL}/${id}`);
 };

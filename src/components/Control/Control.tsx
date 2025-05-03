@@ -7,7 +7,9 @@ import {
 } from "../../api/clientesApi";
 import { getTrabajos, Trabajo } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
+import { getPagos } from "../../api/pagosApi";
 import { toast } from "react-toastify";
+import { calcularDeudas, DeudaCliente } from "../../utils/calcularDeuda";
 
 function Control() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -16,17 +18,20 @@ function Control() {
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
     null
   );
+  const [deudas, setDeudas] = useState<DeudaCliente[]>([]);
 
   useEffect(() => {
     cargarDatos();
   }, []);
 
   const cargarDatos = async () => {
-    const [clientesData, trabajosData, materialesData] = await Promise.all([
-      getClientes(),
-      getTrabajos(),
-      getMateriales(),
-    ]);
+    const [clientesData, trabajosData, materialesData, pagosData] =
+      await Promise.all([
+        getClientes(),
+        getTrabajos(),
+        getMateriales(),
+        getPagos(),
+      ]);
 
     const clientesConRegistros = clientesData
       .filter(
@@ -39,6 +44,14 @@ function Control() {
     setTrabajos(trabajosData);
     setMateriales(materialesData);
     setOrdenClientes(clientesConRegistros);
+
+    const resumenDeudas = calcularDeudas(
+      clientesConRegistros,
+      trabajosData,
+      materialesData,
+      pagosData
+    );
+    setDeudas(resumenDeudas);
   };
 
   const onDragEnd = async (result: any) => {
@@ -79,17 +92,7 @@ function Control() {
                   const materialesCliente = materiales.filter(
                     (m) => m.nombre === cliente.nombre
                   );
-                  const totalHoras = trabajosCliente.reduce(
-                    (acc, t) => acc + t.horas,
-                    0
-                  );
-                  const totalTrabajos = trabajosCliente
-                    .filter((t) => t.pagado === 1)
-                    .reduce((acc, t) => acc + t.horas * cliente.precioHora, 0);
-                  const totalMateriales = materialesCliente
-                    .filter((m) => m.pagado === 1)
-                    .reduce((acc, m) => acc + m.coste, 0);
-                  const totalPagado = totalTrabajos + totalMateriales;
+                  const deuda = deudas.find((d) => d.clienteId === cliente.id);
 
                   return (
                     <Draggable
@@ -131,8 +134,7 @@ function Control() {
                           </p>
 
                           <div style={{ marginLeft: "1rem" }}>
-                            Total horas: {totalHoras}h<br />
-                            Total cobrado: {totalPagado.toFixed(2)} €
+                            Total deuda: {deuda?.totalDeuda.toFixed(2)} €
                           </div>
 
                           {seleccionado && (
