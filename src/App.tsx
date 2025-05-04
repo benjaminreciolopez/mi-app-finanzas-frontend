@@ -23,7 +23,9 @@ import Pagos from "./components/Pagos/Pagos";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AiOutlineDollar } from "react-icons/ai";
-import SwipeNavigator from "./components/SwipeNavigator"; // 👈 Añade esto
+import SwipeNavigator from "./components/navigation/SwipeNavigator"; // 👈 Añade esto
+import { AnimatePresence } from "framer-motion";
+import PageWrapper from "./components/navigation/PageWrapper"; // 👈 nuevo import
 
 // Barra superior de navegación
 function Navigation() {
@@ -67,20 +69,66 @@ function Navigation() {
 }
 
 function App() {
+  const location = useLocation();
+
   return (
     <Router>
       <GlobalStyles />
       <Navigation />
       <SwipeNavigator>
         <div className="container" style={{ paddingTop: "70px" }}>
-          <Routes>
-            <Route path="/" element={<Evolucion />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/calendario" element={<Calendario />} />
-            <Route path="/control" element={<Control />} />
-            <Route path="/materiales" element={<Materiales />} />
-            <Route path="/pagos" element={<Pagos />} />
-          </Routes>
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route
+                path="/"
+                element={
+                  <PageWrapper>
+                    <Evolucion />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/clientes"
+                element={
+                  <PageWrapper>
+                    <Clientes />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/calendario"
+                element={
+                  <PageWrapper>
+                    <Calendario />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/control"
+                element={
+                  <PageWrapper>
+                    <Control />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/materiales"
+                element={
+                  <PageWrapper>
+                    <Materiales />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/pagos"
+                element={
+                  <PageWrapper>
+                    <Pagos />
+                  </PageWrapper>
+                }
+              />
+            </Routes>
+          </AnimatePresence>
         </div>
       </SwipeNavigator>
       <ToastContainer position="top-center" autoClose={2000} />
