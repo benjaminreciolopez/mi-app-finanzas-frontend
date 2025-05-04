@@ -2,16 +2,31 @@ import { motion } from "framer-motion";
 import { useNavigationDirection } from "../../NavigationDirectionContext";
 
 function PageWrapper({ children }: { children: React.ReactNode }) {
-  const { direction } = useNavigationDirection();
-  const isForward = direction === "forward";
+  const direction = useNavigationDirection();
+
+  const variants = {
+    initial: {
+      x: direction === "left" ? "100%" : direction === "right" ? "-100%" : 0,
+      opacity: 0,
+    },
+    animate: {
+      x: 0,
+      opacity: 1,
+    },
+    exit: {
+      x: direction === "left" ? "-100%" : direction === "right" ? "100%" : 0,
+      opacity: 0,
+    },
+  };
 
   return (
     <motion.div
-      key={location.pathname}
-      initial={{ opacity: 0, x: isForward ? 100 : -100 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: isForward ? -100 : 100 }}
-      transition={{ duration: 0.3 }}
+      className="page-transition" // 👈 importante para ocupar el espacio y permitir transición
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={{ duration: 0.25 }}
     >
       {children}
     </motion.div>
