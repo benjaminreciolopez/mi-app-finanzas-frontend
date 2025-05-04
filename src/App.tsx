@@ -11,6 +11,7 @@ import {
   AiOutlineControl,
   AiOutlineTool,
   AiOutlineLineChart,
+  AiOutlineDollar,
 } from "react-icons/ai";
 import Calendario from "./components/Calendario/Calendario";
 import Control from "./components/Control/Control";
@@ -19,15 +20,12 @@ import Clientes from "./components/Clientes/Clientes";
 import Evolucion from "./components/Evolucion/Evolucion";
 import GlobalStyles from "./styles/GlobalStyles";
 import Pagos from "./components/Pagos/Pagos";
-
+import SwipeNavigator from "./components/navigation/SwipeNavigator";
+import PageWrapper from "./components/navigation/PageWrapper";
+import { AnimatePresence } from "framer-motion";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AiOutlineDollar } from "react-icons/ai";
-import SwipeNavigator from "./components/navigation/SwipeNavigator"; // 👈 Añade esto
-import { AnimatePresence } from "framer-motion";
-import PageWrapper from "./components/navigation/PageWrapper"; // 👈 nuevo import
 
-// Barra superior de navegación
 function Navigation() {
   const location = useLocation();
 
@@ -45,11 +43,7 @@ function Navigation() {
       label: "Materiales",
       icon: <AiOutlineTool size={20} />,
     },
-    {
-      to: "/pagos",
-      label: "Pagos",
-      icon: <AiOutlineDollar size={20} />,
-    },
+    { to: "/pagos", label: "Pagos", icon: <AiOutlineDollar size={20} /> },
   ];
 
   return (
@@ -68,11 +62,11 @@ function Navigation() {
   );
 }
 
-function App() {
+function AppContent() {
   const location = useLocation();
 
   return (
-    <Router>
+    <>
       <GlobalStyles />
       <Navigation />
       <SwipeNavigator>
@@ -132,7 +126,16 @@ function App() {
         </div>
       </SwipeNavigator>
       <ToastContainer position="top-center" autoClose={2000} />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
+
 export default App;
