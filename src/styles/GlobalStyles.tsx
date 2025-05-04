@@ -6,6 +6,10 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html, body {
+    overflow-x: hidden;
+  }
+
   body {
     margin: 0;
     padding: 0;
@@ -41,6 +45,7 @@ const GlobalStyles = createGlobalStyle`
     cursor: pointer;
     transition: background-color 0.3s ease;
   }
+
   .boton-accion {
     background-color: #4f46e5;
     color: white;
@@ -71,9 +76,9 @@ const GlobalStyles = createGlobalStyle`
 
   .container {
     width: 100%;
-    max-width: 420px; /* tamaño típico de pantalla móvil */
+    max-width: 420px;
     margin: 0 auto;
-    padding: 20px 16px;
+    padding: 76px 16px 20px;
     background-color: #f9fafb;
   }
 
@@ -90,6 +95,7 @@ const GlobalStyles = createGlobalStyle`
     font-weight: bold;
     margin-bottom: 16px;
   }
+
   .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -125,6 +131,7 @@ const GlobalStyles = createGlobalStyle`
     margin-top: 2px;
     font-size: 0.7rem;
   }
+
   .top-nav {
     position: fixed;
     top: 0;
@@ -164,16 +171,7 @@ const GlobalStyles = createGlobalStyle`
     margin-top: 2px;
   }
 
-  /* Ajuste de padding general por tener la barra arriba */
-  .container {
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 76px 16px 20px; /* antes era padding: 20px 16px */
-    background-color: #f9fafb;
-  }
-
- /* Estilos personalizados para react-calendar */
+  /* Estilos personalizados para react-calendar */
   .react-calendar {
     background: white;
     border-radius: 12px;
@@ -205,7 +203,7 @@ const GlobalStyles = createGlobalStyle`
     background: #c7d2fe;
     border-radius: 50%;
   }
- 
+
   .react-calendar__tile.tiene-trabajo {
     background-color: #fce7d6 !important;
     color: #b45309 !important;
@@ -235,8 +233,9 @@ const GlobalStyles = createGlobalStyle`
   }
 
   .react-calendar__month-view__days__day--weekend {
-    color: #dc2626; /* rojo para fines de semana */
+    color: #dc2626;
   }
+
   /* Eliminar flechas del input tipo number */
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button {
@@ -247,5 +246,16 @@ const GlobalStyles = createGlobalStyle`
   input[type="number"] {
     -moz-appearance: textfield;
   }
+
+  /* Animación suave para cambio de pestañas */
+  .page-transition {
+    position: absolute;
+    width: 100%;
+    top: 56px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
 `;
+
 export default GlobalStyles;
