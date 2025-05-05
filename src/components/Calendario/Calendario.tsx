@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import {
@@ -11,6 +11,7 @@ import {
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { getPagos } from "../../api/pagosApi";
 import { calcularDeudas } from "../../utils/calcularDeuda";
+import { useLocation } from "react-router-dom";
 
 function Calendario() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -20,9 +21,44 @@ function Calendario() {
   const [horas, setHoras] = useState("");
   const [trabajoEditando, setTrabajoEditando] = useState<number | null>(null);
   const [clientesSinDeuda, setClientesSinDeuda] = useState<string[]>([]);
+  const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
+    null
+  );
+  const listaRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
 
   useEffect(() => {
     cargarDatos();
+  }, []);
+
+  useEffect(() => {
+    setTrabajoSeleccionado(null);
+  }, [location.pathname]);
+
+  // ✅ Limpia formulario y selección al cambiar de pestaña
+  useEffect(() => {
+    setTrabajoSeleccionado(null);
+    setNombre("");
+    setHoras("");
+    setTrabajoEditando(null);
+    setFecha(new Date());
+  }, [location.pathname]);
+
+  // ✅ Detecta clic fuera del listado para ocultar botones
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        listaRef.current &&
+        !listaRef.current.contains(event.target as Node)
+      ) {
+        setTrabajoSeleccionado(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const cargarDatos = async () => {
@@ -125,7 +161,15 @@ function Calendario() {
             </option>
           ))}
         </select>
-
+        <div className="flex justify-end mb-2">
+          <button
+            type="button"
+            className="boton-accion"
+            onClick={() => setFecha(new Date())}
+          >
+            📅 Hoy
+          </button>
+        </div>
         <Calendar
           value={fecha}
           onChange={(val) => setFecha(val as Date)}
@@ -143,7 +187,7 @@ function Calendario() {
         </button>
       </form>
 
-      <div className="card">
+      <div className="card" ref={listaRef}>
         {trabajosPendientes.length === 0 ? (
           <p>No hay trabajos pendientes actualmente.</p>
         ) : (
@@ -154,36 +198,68 @@ function Calendario() {
                 <strong>📅 {fecha}</strong>
                 <ul style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}>
                   {trabajos.map((trabajo) => (
-                    <li key={trabajo.id} style={{ marginBottom: "12px" }}>
+                    <li
+                      key={trabajo.id}
+                      style={{
+                        marginBottom: "12px",
+                        cursor: "pointer",
+                        border:
+                          trabajoSeleccionado === trabajo.id
+                            ? "1px solid #ccc"
+                            : "none",
+                        borderRadius: "8px",
+                        padding: "8px",
+                        backgroundColor:
+                          trabajoSeleccionado === trabajo.id
+                            ? "#f9f9f9"
+                            : "transparent",
+                      }}
+                      onClick={() =>
+                        setTrabajoSeleccionado(
+                          trabajoSeleccionado === trabajo.id ? null : trabajo.id
+                        )
+                      }
+                    >
                       Cliente: <strong>{trabajo.nombre}</strong> -{" "}
                       {trabajo.horas}h
-                      <div
-                        style={{
-                          marginTop: "6px",
-                          display: "flex",
-                          gap: "8px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <button
-                          className="boton-accion"
-                          onClick={() => editarTrabajo(trabajo)}
+                      {trabajoSeleccionado === trabajo.id && (
+                        <div
+                          style={{
+                            marginTop: "6px",
+                            display: "flex",
+                            gap: "8px",
+                            flexWrap: "wrap",
+                          }}
                         >
-                          ✏️ Editar
-                        </button>
-                        <button
-                          className="boton-accion"
-                          onClick={() => eliminarTrabajo(trabajo.id)}
-                        >
-                          🗑️ Eliminar
-                        </button>
-                        <button
-                          className="boton-accion"
-                          onClick={() => marcarComoPagado(trabajo.id)}
-                        >
-                          ✅ Marcar como pagado
-                        </button>
-                      </div>
+                          <button
+                            className="boton-accion"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              editarTrabajo(trabajo);
+                            }}
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button
+                            className="boton-accion"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              eliminarTrabajo(trabajo.id);
+                            }}
+                          >
+                            🗑️ Eliminar
+                          </button>
+                          <button
+                            className="boton-accion"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              marcarComoPagado(trabajo.id);
+                            }}
+                          >
+                            ✅ Marcar como pagado
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
