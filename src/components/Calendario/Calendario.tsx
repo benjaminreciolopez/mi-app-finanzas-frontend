@@ -26,6 +26,7 @@ function Calendario() {
   );
   const listaRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const [calendarKey, setCalendarKey] = useState(0);
 
   useEffect(() => {
     cargarDatos();
@@ -60,6 +61,15 @@ function Calendario() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const esHoy = (fecha: Date) => {
+    const hoy = new Date();
+    return (
+      fecha.getDate() === hoy.getDate() &&
+      fecha.getMonth() === hoy.getMonth() &&
+      fecha.getFullYear() === hoy.getFullYear()
+    );
+  };
 
   const cargarDatos = async () => {
     const [clientesData, trabajosData, pagosData] = await Promise.all([
@@ -161,16 +171,24 @@ function Calendario() {
             </option>
           ))}
         </select>
-        <div className="flex justify-end mb-2">
-          <button
-            type="button"
-            className="boton-accion"
-            onClick={() => setFecha(new Date())}
-          >
-            📅 Hoy
-          </button>
-        </div>
+
+        {!esHoy(fecha) && (
+          <div className="flex justify-end mb-2">
+            <button
+              type="button"
+              className="boton-accion"
+              onClick={() => {
+                setFecha(new Date());
+                setCalendarKey((prev) => prev + 1);
+              }}
+            >
+              📅 Hoy
+            </button>
+          </div>
+        )}
+
         <Calendar
+          key={calendarKey}
           value={fecha}
           onChange={(val) => setFecha(val as Date)}
           tileClassName={resaltarDias}
