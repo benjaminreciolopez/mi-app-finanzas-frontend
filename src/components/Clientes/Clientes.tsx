@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   getClientes,
   addCliente,
   updateCliente,
   deleteCliente,
 } from "../../api/clientesApi";
+import { useLocation } from "react-router-dom";
 
 interface Cliente {
   id: number;
@@ -19,10 +20,17 @@ function Clientes() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<Cliente | null>(null);
+  const location = useLocation();
+  const nombreInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     cargarClientes();
   }, []);
+
+  useEffect(() => {
+    resetFormulario();
+    nombreInputRef.current?.focus();
+  }, [location.pathname]);
 
   const cargarClientes = async () => {
     try {
@@ -49,10 +57,6 @@ function Clientes() {
 
     resetFormulario();
     cargarClientes();
-  };
-
-  const handleSeleccionar = (cliente: Cliente) => {
-    setClienteSeleccionado(cliente);
   };
 
   const handleEditar = () => {
@@ -84,6 +88,7 @@ function Clientes() {
 
       <form onSubmit={handleSubmit}>
         <input
+          ref={nombreInputRef}
           type="text"
           placeholder="Nombre"
           value={nombre}
@@ -117,7 +122,11 @@ function Clientes() {
         {clientes.map((cliente) => (
           <div
             key={cliente.id}
-            onClick={() => handleSeleccionar(cliente)}
+            onClick={() =>
+              setClienteSeleccionado((prev) =>
+                prev?.id === cliente.id ? null : cliente
+              )
+            }
             style={{
               padding: "12px",
               border:
