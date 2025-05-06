@@ -95,7 +95,7 @@ function Materiales() {
           onChange={(e) => setCoste(e.target.value)}
         />
         <select value={nombre} onChange={(e) => setNombre(e.target.value)}>
-          <option value="">Asignar a cliente (opcional)</option>
+          <option value="">Asignar a cliente</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.nombre}>
               {c.nombre}
