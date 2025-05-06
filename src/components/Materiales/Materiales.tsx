@@ -69,7 +69,13 @@ function Materiales() {
   };
 
   const materialesPendientes = materiales.filter((m) => m.pagado === 0);
-  const mostrarBoton = descripcion || coste || nombre || fecha;
+
+  const mostrarBotones = !!(
+    descripcion.trim() ||
+    coste.trim() ||
+    nombre.trim() ||
+    fecha.trim()
+  );
 
   return (
     <div className="container">
@@ -101,7 +107,7 @@ function Materiales() {
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
         />
-        <button type="submit">Añadir Material</button>
+        {mostrarBotones && <button type="submit">Añadir Material</button>}
       </form>
 
       <div className="card">
@@ -129,7 +135,7 @@ function Materiales() {
                 className="boton-accion"
                 onClick={() => marcarComoPagado(material.id)}
                 style={{
-                  display: mostrarBoton ? "inline-block" : "none",
+                  display: mostrarBotones ? "inline-block" : "none",
                   marginLeft: "10px",
                 }}
               >
