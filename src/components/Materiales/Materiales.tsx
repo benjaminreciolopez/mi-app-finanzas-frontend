@@ -6,6 +6,8 @@ import {
   Material,
 } from "../../api/materialesApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
+import { toast } from "react-toastify";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Materiales() {
   const [materiales, setMateriales] = useState<Material[]>([]);
@@ -41,8 +43,8 @@ function Materiales() {
       pagado: 0,
     });
 
-    setMateriales([
-      ...materiales,
+    setMateriales((prev) => [
+      ...prev,
       {
         id: nuevoId,
         descripcion,
@@ -57,14 +59,17 @@ function Materiales() {
     setCoste("");
     setNombre("");
     setFecha("");
+    toast.success("Material añadido");
   };
 
   const marcarComoPagado = async (id: number) => {
     await updateMaterial(id, { pagado: 1 });
-    setMateriales((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, pagado: 1 } : m))
-    );
+    setMateriales((prev) => prev.filter((m) => m.id !== id));
+    toast.success("Material marcado como pagado");
   };
+
+  const materialesPendientes = materiales.filter((m) => m.pagado === 0);
+  const mostrarBoton = descripcion || coste || nombre || fecha;
 
   return (
     <div className="container">
@@ -100,27 +105,39 @@ function Materiales() {
       </form>
 
       <div className="card">
-        {materiales.map((material) => (
-          <div key={material.id}>
-            {material.fecha} - {material.descripcion} ({material.coste}€)
-            {material.nombre && (
-              <>
-                {" "}
-                - Cliente: <strong>{material.nombre}</strong>
-              </>
-            )}
-            {" - "}
-            {material.pagado ? "Pagado" : "Pendiente"}
-            {!material.pagado && (
+        <AnimatePresence>
+          {materialesPendientes.length === 0 && (
+            <p>No hay materiales pendientes.</p>
+          )}
+          {materialesPendientes.map((material) => (
+            <motion.div
+              key={material.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              style={{ marginBottom: "12px" }}
+            >
+              {material.fecha} - {material.descripcion} ({material.coste}€)
+              {material.nombre && (
+                <>
+                  {" "}
+                  - Cliente: <strong>{material.nombre}</strong>
+                </>
+              )}
               <button
+                className="boton-accion"
                 onClick={() => marcarComoPagado(material.id)}
-                style={{ marginLeft: "10px" }}
+                style={{
+                  display: mostrarBoton ? "inline-block" : "none",
+                  marginLeft: "10px",
+                }}
               >
                 Marcar como pagado
               </button>
-            )}
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );
