@@ -1,3 +1,4 @@
+// src/components/Control/Control.tsx
 import { useEffect, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import {
@@ -5,7 +6,12 @@ import {
   Cliente,
   actualizarOrdenClientes,
 } from "../../api/clientesApi";
-import { getTrabajos, Trabajo } from "../../api/trabajosApi";
+import {
+  getTrabajos,
+  updateTrabajo,
+  deleteTrabajo,
+  Trabajo,
+} from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
 import { getPagos } from "../../api/pagosApi";
 import { toast } from "react-toastify";
@@ -72,7 +78,20 @@ function Control() {
       toast.success("Orden guardado correctamente");
     } catch (error) {
       toast.error("Error al guardar el orden");
-      console.error("Error:", error);
+    }
+  };
+
+  const marcarComoPagado = async (id: number) => {
+    await updateTrabajo(id, { pagado: 1 });
+    toast.success("Trabajo marcado como pagado");
+    cargarDatos();
+  };
+
+  const eliminarTrabajo = async (id: number) => {
+    if (window.confirm("¿Eliminar este trabajo?")) {
+      await deleteTrabajo(id);
+      toast.success("Trabajo eliminado");
+      cargarDatos();
     }
   };
 
@@ -82,7 +101,7 @@ function Control() {
       <div className="card">
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="clientes">
-            {(provided: any) => (
+            {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 {ordenClientes.map((cliente, index) => {
                   const seleccionado = clienteSeleccionado === cliente.nombre;
@@ -93,6 +112,10 @@ function Control() {
                     (m) => m.nombre === cliente.nombre
                   );
                   const deuda = deudas.find((d) => d.clienteId === cliente.id);
+                  const totalHoras = trabajosCliente.reduce(
+                    (acc, t) => acc + t.horas,
+                    0
+                  );
 
                   return (
                     <Draggable
@@ -100,7 +123,7 @@ function Control() {
                       draggableId={cliente.id.toString()}
                       index={index}
                     >
-                      {(provided: any) => (
+                      {(provided) => (
                         <div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
@@ -108,8 +131,6 @@ function Control() {
                           style={{
                             ...provided.draggableProps.style,
                             marginBottom: "1rem",
-                            borderBottom: "1px solid #ddd",
-                            paddingBottom: "0.5rem",
                           }}
                         >
                           <p
@@ -146,14 +167,40 @@ function Control() {
                               {trabajosCliente.length === 0 ? (
                                 <p>No hay trabajos.</p>
                               ) : (
-                                <ul>
-                                  {trabajosCliente.map((t) => (
-                                    <li key={t.id}>
-                                      {t.fecha}: {t.horas}h{" "}
-                                      {t.pagado ? "(Pagado)" : "(Pendiente)"}
-                                    </li>
-                                  ))}
-                                </ul>
+                                <>
+                                  <ul>
+                                    {trabajosCliente.map((t) => (
+                                      <li key={t.id}>
+                                        {t.fecha}: {t.horas}h{" "}
+                                        {t.pagado ? "(Pagado)" : "(Pendiente)"}{" "}
+                                        {!t.pagado && (
+                                          <>
+                                            <button
+                                              className="boton-accion"
+                                              onClick={() =>
+                                                marcarComoPagado(t.id)
+                                              }
+                                            >
+                                              ✅ Marcar pagado
+                                            </button>
+                                            <button
+                                              className="boton-accion"
+                                              onClick={() =>
+                                                eliminarTrabajo(t.id)
+                                              }
+                                            >
+                                              🗑️ Eliminar
+                                            </button>
+                                          </>
+                                        )}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  <p>
+                                    <strong>Total horas trabajadas:</strong>{" "}
+                                    {totalHoras}h
+                                  </p>
+                                </>
                               )}
 
                               <h4>🧱 Materiales</h4>

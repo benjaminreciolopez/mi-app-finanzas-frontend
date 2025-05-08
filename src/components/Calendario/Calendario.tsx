@@ -1,92 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
+import { addTrabajo } from "../../api/trabajosApi";
+import { getClientes, Cliente } from "../../api/clientesApi";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import {
-  getTrabajos,
-  addTrabajo,
-  updateTrabajo,
-  deleteTrabajo,
-  Trabajo,
-} from "../../api/trabajosApi";
-import { getClientes, Cliente } from "../../api/clientesApi";
-import { getPagos } from "../../api/pagosApi";
-import { calcularDeudas } from "../../utils/calcularDeuda";
-import { useLocation } from "react-router-dom";
+import { toast } from "react-toastify";
 
 function Calendario() {
-  const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
-  const [trabajoEditando, setTrabajoEditando] = useState<number | null>(null);
-  const [clientesSinDeuda, setClientesSinDeuda] = useState<string[]>([]);
-  const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
-    null
-  );
-  const listaRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
-  const [calendarKey, setCalendarKey] = useState(0);
 
   useEffect(() => {
-    cargarDatos();
+    getClientes().then(setClientes);
   }, []);
-
-  useEffect(() => {
-    setTrabajoSeleccionado(null);
-  }, [location.pathname]);
-
-  // ✅ Limpia formulario y selección al cambiar de pestaña
-  useEffect(() => {
-    setTrabajoSeleccionado(null);
-    setNombre("");
-    setHoras("");
-    setTrabajoEditando(null);
-    setFecha(new Date());
-  }, [location.pathname]);
-
-  // ✅ Detecta clic fuera del listado para ocultar botones
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        listaRef.current &&
-        !listaRef.current.contains(event.target as Node)
-      ) {
-        setTrabajoSeleccionado(null);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
-  const esHoy = (fecha: Date) => {
-    const hoy = new Date();
-    return (
-      fecha.getDate() === hoy.getDate() &&
-      fecha.getMonth() === hoy.getMonth() &&
-      fecha.getFullYear() === hoy.getFullYear()
-    );
-  };
-
-  const cargarDatos = async () => {
-    const [clientesData, trabajosData, pagosData] = await Promise.all([
-      getClientes(),
-      getTrabajos(),
-      getPagos(),
-    ]);
-
-    setClientes(clientesData);
-    setTrabajos(trabajosData);
-
-    const deudas = calcularDeudas(clientesData, trabajosData, [], pagosData);
-    const sinDeuda = deudas
-      .filter((d) => d.totalDeuda <= 0)
-      .map((d) => d.nombre);
-    setClientesSinDeuda(sinDeuda);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,71 +26,28 @@ function Calendario() {
       String(fecha.getDate()).padStart(2, "0"),
     ].join("-");
 
-    if (trabajoEditando !== null) {
-      await updateTrabajo(trabajoEditando, {
-        nombre,
-        fecha: nuevaFecha,
-        horas: parsedHoras,
-      });
-      setTrabajoEditando(null);
-    } else {
-      await addTrabajo({
-        nombre,
-        fecha: nuevaFecha,
-        horas: parsedHoras,
-        pagado: 0,
-      });
-    }
+    await addTrabajo({
+      nombre,
+      fecha: nuevaFecha,
+      horas: parsedHoras,
+      pagado: 0,
+    });
 
-    await cargarDatos(); // 👈 recarga todo tras insertar o editar
+    toast.success("✅ Trabajo añadido correctamente");
     setNombre("");
     setHoras("");
   };
 
-  const marcarComoPagado = async (id: number) => {
-    await updateTrabajo(id, { pagado: 1 });
-    setTrabajos((prev) =>
-      prev.map((trabajo) =>
-        trabajo.id === id ? { ...trabajo, pagado: 1 } : trabajo
-      )
-    );
-  };
-
-  const eliminarTrabajo = async (id: number) => {
-    const confirmacion = window.confirm("¿Eliminar este trabajo?");
-    if (!confirmacion) return;
-    await deleteTrabajo(id);
-    setTrabajos((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const editarTrabajo = (trabajo: Trabajo) => {
-    setNombre(trabajo.nombre);
-    setHoras(trabajo.horas.toString());
-    setFecha(new Date(trabajo.fecha));
-    setTrabajoEditando(trabajo.id);
-  };
-
-  const trabajosPendientes = trabajos.filter(
-    (t) => t.pagado === 0 && !clientesSinDeuda.includes(t.nombre)
-  );
-
-  const trabajosPorFecha = trabajosPendientes.reduce((acc, trabajo) => {
-    if (!acc[trabajo.fecha]) acc[trabajo.fecha] = [];
-    acc[trabajo.fecha].push(trabajo);
-    return acc;
-  }, {} as Record<string, Trabajo[]>);
-
-  const resaltarDias = ({ date }: { date: Date }) => {
-    const fechaStr = date.toISOString().split("T")[0];
-    return trabajosPorFecha[fechaStr] ? "highlight" : null;
-  };
-
   return (
     <div className="container">
-      <h2 className="title">Calendario de Trabajos</h2>
-
-      <form onSubmit={handleSubmit}>
-        <select value={nombre} onChange={(e) => setNombre(e.target.value)}>
+      <h2 className="title">Añadir Trabajo</h2>
+      <form onSubmit={handleSubmit} className="card">
+        <label>Cliente:</label>
+        <select
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          required
+        >
           <option value="">Seleccionar cliente</option>
           {clientes.map((c) => (
             <option key={c.id} value={c.nombre}>
@@ -172,119 +56,26 @@ function Calendario() {
           ))}
         </select>
 
-        {!esHoy(fecha) && (
-          <div className="flex justify-end mb-2">
-            <button
-              type="button"
-              className="boton-accion"
-              onClick={() => {
-                setFecha(new Date());
-                setCalendarKey((prev) => prev + 1);
-              }}
-            >
-              📅 Hoy
-            </button>
-          </div>
-        )}
+        <label>Fecha:</label>
+        <Calendar value={fecha} onChange={(val) => setFecha(val as Date)} />
 
-        <Calendar
-          key={calendarKey}
-          value={fecha}
-          onChange={(val) => setFecha(val as Date)}
-          tileClassName={resaltarDias}
-        />
-
+        <label>Horas trabajadas:</label>
         <input
           type="number"
-          placeholder="Horas trabajadas"
+          placeholder="Ej: 4.5"
           value={horas}
           onChange={(e) => setHoras(e.target.value)}
+          required
         />
-        <button type="submit" className="boton-accion">
-          {trabajoEditando !== null ? "Actualizar Trabajo" : "Añadir Trabajo"}
+
+        <button
+          type="submit"
+          className="boton-accion"
+          style={{ marginTop: "10px" }}
+        >
+          ➕ Añadir Trabajo
         </button>
       </form>
-
-      <div className="card" ref={listaRef}>
-        {trabajosPendientes.length === 0 ? (
-          <p>No hay trabajos pendientes actualmente.</p>
-        ) : (
-          Object.entries(trabajosPorFecha)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([fecha, trabajos]) => (
-              <div key={fecha} style={{ marginBottom: "1rem" }}>
-                <strong>📅 {fecha}</strong>
-                <ul style={{ paddingLeft: "1rem", marginTop: "0.5rem" }}>
-                  {trabajos.map((trabajo) => (
-                    <li
-                      key={trabajo.id}
-                      style={{
-                        marginBottom: "12px",
-                        cursor: "pointer",
-                        border:
-                          trabajoSeleccionado === trabajo.id
-                            ? "1px solid #ccc"
-                            : "none",
-                        borderRadius: "8px",
-                        padding: "8px",
-                        backgroundColor:
-                          trabajoSeleccionado === trabajo.id
-                            ? "#f9f9f9"
-                            : "transparent",
-                      }}
-                      onClick={() =>
-                        setTrabajoSeleccionado(
-                          trabajoSeleccionado === trabajo.id ? null : trabajo.id
-                        )
-                      }
-                    >
-                      Cliente: <strong>{trabajo.nombre}</strong> -{" "}
-                      {trabajo.horas}h
-                      {trabajoSeleccionado === trabajo.id && (
-                        <div
-                          style={{
-                            marginTop: "6px",
-                            display: "flex",
-                            gap: "8px",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <button
-                            className="boton-accion"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              editarTrabajo(trabajo);
-                            }}
-                          >
-                            ✏️ Editar
-                          </button>
-                          <button
-                            className="boton-accion"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              eliminarTrabajo(trabajo.id);
-                            }}
-                          >
-                            🗑️ Eliminar
-                          </button>
-                          <button
-                            className="boton-accion"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              marcarComoPagado(trabajo.id);
-                            }}
-                          >
-                            ✅ Marcar como pagado
-                          </button>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))
-        )}
-      </div>
     </div>
   );
 }
