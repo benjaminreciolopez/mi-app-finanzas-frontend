@@ -62,7 +62,7 @@ function Calendario() {
         <label>Horas trabajadas:</label>
         <input
           type="number"
-          placeholder="Ej: 4.5"
+          placeholder="Horas"
           value={horas}
           onChange={(e) => setHoras(e.target.value)}
           required
