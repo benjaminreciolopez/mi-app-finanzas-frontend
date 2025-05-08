@@ -10,10 +10,31 @@ function Calendario() {
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
+  const [mostrarBotonHoy, setMostrarBotonHoy] = useState(false);
+  const [resumen, setResumen] = useState<string | null>(null);
 
   useEffect(() => {
     getClientes().then(setClientes);
   }, []);
+
+  useEffect(() => {
+    const hoy = new Date();
+    setMostrarBotonHoy(
+      fecha.getFullYear() !== hoy.getFullYear() ||
+        fecha.getMonth() !== hoy.getMonth() ||
+        fecha.getDate() !== hoy.getDate()
+    );
+  }, [fecha]);
+
+  const handleChangeFecha = (value: Date) => {
+    setFecha(value);
+  };
+
+  const volverAHoy = () => {
+    const hoy = new Date();
+    setFecha(hoy);
+    setMostrarBotonHoy(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +55,13 @@ function Calendario() {
     });
 
     toast.success("✅ Trabajo añadido correctamente");
+    setResumen(
+      `Trabajo añadido: ${parsedHoras}h para ${nombre} en ${nuevaFecha}`
+    );
+
+    setTimeout(() => {
+      setResumen(null);
+    }, 3000); // 👈 3 segundos de visibilidad
     setNombre("");
     setHoras("");
   };
@@ -57,7 +85,17 @@ function Calendario() {
         </select>
 
         <label>Fecha:</label>
-        <Calendar value={fecha} onChange={(val) => setFecha(val as Date)} />
+        {mostrarBotonHoy && (
+          <div className="flex justify-end mb-2">
+            <button type="button" className="boton-accion" onClick={volverAHoy}>
+              📅 Hoy
+            </button>
+          </div>
+        )}
+        <Calendar
+          value={fecha}
+          onChange={(value) => handleChangeFecha(value as Date)}
+        />
 
         <label>Horas trabajadas:</label>
         <input
@@ -76,6 +114,22 @@ function Calendario() {
           ➕ Añadir Trabajo
         </button>
       </form>
+      {resumen && (
+        <div
+          style={{
+            marginTop: "1rem",
+            backgroundColor: "#ecfdf5",
+            border: "1px solid #10b981",
+            padding: "12px",
+            borderRadius: "8px",
+            color: "#065f46",
+            fontWeight: "500",
+            textAlign: "center",
+          }}
+        >
+          ✅ {resumen}
+        </div>
+      )}
     </div>
   );
 }
