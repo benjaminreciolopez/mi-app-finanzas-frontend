@@ -12,6 +12,7 @@ function Calendario() {
   const [horas, setHoras] = useState("");
   const [mostrarBotonHoy, setMostrarBotonHoy] = useState(false);
   const [resumen, setResumen] = useState<string | null>(null);
+  const [calendarKey, setCalendarKey] = useState(0); // 👈 esto fuerza el re-render
 
   useEffect(() => {
     getClientes().then(setClientes);
@@ -33,6 +34,7 @@ function Calendario() {
   const volverAHoy = () => {
     const hoy = new Date();
     setFecha(hoy);
+    setCalendarKey((prev) => prev + 1); // 👈 reinicia el Calendar para mostrar el mes actual
     setMostrarBotonHoy(false);
   };
 
@@ -93,6 +95,7 @@ function Calendario() {
           </div>
         )}
         <Calendar
+          key={calendarKey}
           value={fecha}
           onChange={(value) => handleChangeFecha(value as Date)}
         />
