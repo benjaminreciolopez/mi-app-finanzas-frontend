@@ -14,6 +14,30 @@ export default defineConfig({
         display: "standalone",
         background_color: "#ffffff",
         theme_color: "#4f46e5",
+        shortcuts: [
+          {
+            name: "Agregar trabajo",
+            short_name: "Nuevo trabajo",
+            description: "Registrar un nuevo trabajo",
+            url: "/trabajos",
+            icons: [{ src: "/icon_128x128.png", sizes: "128x128" }],
+          },
+          {
+            name: "Añadir material",
+            short_name: "Material",
+            description: "Registrar materiales",
+            url: "/materiales",
+            icons: [{ src: "/icon_128x128.png", sizes: "128x128" }],
+          },
+          {
+            name: "Control de pagos",
+            short_name: "Pagos",
+            description: "Ver control de pagos",
+            url: "/control",
+            icons: [{ src: "/icon_128x128.png", sizes: "128x128" }],
+          },
+        ],
+
         icons: [
           {
             src: "/icon_16x16.png",

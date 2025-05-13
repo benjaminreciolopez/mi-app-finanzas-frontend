@@ -1,0 +1,48 @@
+{
+  "name": "Gestión360",
+  "short_name": "Gestión360",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "icons": [
+    {
+      "src": "/icon_128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon_512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agregar trabajo",
+      "short_name": "Nuevo trabajo",
+      "description": "Registrar un nuevo trabajo",
+      "url": "/trabajos",
+      "icons": [{ "src": "/icon_128x128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "Añadir material",
+      "short_name": "Material",
+      "description": "Registrar materiales",
+      "url": "/materiales",
+      "icons": [{ "src": "/icon_128x128.png", "sizes": "128x128" }]
+    },
+    {
+      "name": "Control de pagos",
+      "short_name": "Pagos",
+      "description": "Ver control de pagos",
+      "url": "/control",
+      "icons": [{ "src": "/icon_128x128.png", "sizes": "128x128" }]
+    }
+  ]
+}
