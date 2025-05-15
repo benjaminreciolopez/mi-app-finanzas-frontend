@@ -105,9 +105,13 @@ function Control() {
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 {ordenClientes.map((cliente, index) => {
                   const seleccionado = clienteSeleccionado === cliente.nombre;
-                  const trabajosCliente = trabajos.filter(
-                    (t) => t.nombre === cliente.nombre
-                  );
+                  const trabajosCliente = trabajos
+                    .filter((t) => t.nombre === cliente.nombre)
+                    .sort(
+                      (a, b) =>
+                        new Date(a.fecha).getTime() -
+                        new Date(b.fecha).getTime()
+                    );
                   const materialesCliente = materiales.filter(
                     (m) => m.nombre === cliente.nombre
                   );
