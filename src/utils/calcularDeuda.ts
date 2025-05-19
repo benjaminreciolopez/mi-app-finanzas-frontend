@@ -46,6 +46,14 @@ export function calcularDeudas(
 
     const total = totalHoras * Number(cliente.precioHora) + totalMateriales;
     const deudaFinal = Math.max(0, parseFloat((total - totalPagos).toFixed(2)));
+    console.log("Cliente:", cliente.nombre, cliente.id, {
+      trabajosPendientes,
+      totalHoras,
+      totalMateriales,
+      totalPagos,
+      total,
+      deudaFinal,
+    });
 
     return {
       clienteId: Number(cliente.id),

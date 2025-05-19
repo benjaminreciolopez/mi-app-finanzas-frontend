@@ -38,6 +38,10 @@ function Control() {
         getMateriales(),
         getPagos(),
       ]);
+    console.log("ClientesData", clientesData);
+    console.log("TrabajosData", trabajosData);
+    console.log("PagosData", pagosData);
+    console.log("MaterialesData", materialesData);
 
     const clientesConRegistros = clientesData
       .filter(
@@ -57,6 +61,8 @@ function Control() {
       materialesData,
       pagosData
     );
+    console.log("Resumen de deudas calculadas:", resumenDeudas);
+
     setDeudas(resumenDeudas);
   };
 
