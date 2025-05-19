@@ -34,9 +34,18 @@ function Pagos() {
   ) => {
     const clienteId = parseInt(clienteIdStr);
     const trabajosCliente = await getTrabajos();
+    console.log("clienteId buscado:", clienteId, typeof clienteId);
+    console.log(
+      "trabajosCliente ejemplo:",
+      trabajosCliente.map((t) => [t.clienteId, typeof t.clienteId, t.pagado])
+    );
+
     // Ordena los trabajos pendientes por fecha
     const pendientes = trabajosCliente
-      .filter((t) => t.clienteId === clienteId && t.pagado === 0)
+      .filter(
+        (t) =>
+          Number(t.clienteId) === Number(clienteId) && Number(t.pagado) === 0
+      )
       .sort(
         (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
       );
