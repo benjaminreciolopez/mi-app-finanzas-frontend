@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
 import { getMateriales } from "../../api/materialesApi";
 import { calcularDeudas } from "../../utils/calcularDeuda";
+console.log("Pagos.tsx se está ejecutando");
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -198,6 +199,7 @@ function Pagos() {
       toast.error("Error al eliminar el pago");
     }
   };
+  console.log("Componente Pagos montado");
 
   return (
     <div className="container">
