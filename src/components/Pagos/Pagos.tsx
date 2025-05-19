@@ -157,7 +157,13 @@ function Pagos() {
       setCantidad("");
       setFecha("");
       setObservaciones("");
+      console.log(
+        "Voy a marcar trabajos como pagados para",
+        clienteId,
+        cantidad
+      );
       await marcarTrabajosComoPagados(clienteId, parseFloat(cantidad));
+      console.log("He llamado a marcarTrabajosComoPagados");
       await cargarDatos(); // 👈 este es el cambio importante
     } catch (error) {
       toast.error("Error al registrar el pago");
