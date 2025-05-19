@@ -22,7 +22,7 @@ export function calcularDeudas(
       (t) => t.clienteId === cliente.id && t.pagado === 0
     );
     const materialesPendientes = materiales.filter(
-      (m) => m.nombre === cliente.nombre && m.pagado === 0
+      (m) => m.clienteId === cliente.id && m.pagado === 0
     );
     const pagosDelCliente = pagos.filter((p) => p.clienteId === cliente.id);
 
