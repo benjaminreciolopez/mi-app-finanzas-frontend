@@ -34,13 +34,21 @@ function Pagos() {
   ) => {
     const clienteId = parseInt(clienteIdStr);
     const trabajosCliente = await getTrabajos();
-    console.log("clienteId buscado:", clienteId, typeof clienteId);
+
+    // Depuración: muestra todos los trabajos y sus clienteId
+    console.log("clienteId recibido:", clienteId, typeof clienteId);
     console.log(
-      "trabajosCliente ejemplo:",
-      trabajosCliente.map((t) => [t.clienteId, typeof t.clienteId, t.pagado])
+      "Trabajos recuperados:",
+      trabajosCliente.map((t) => ({
+        id: t.id,
+        clienteId: t.clienteId,
+        pagado: t.pagado,
+        fecha: t.fecha,
+        horas: t.horas,
+      }))
     );
 
-    // Ordena los trabajos pendientes por fecha
+    // Filtro robusto por id y pagado
     const pendientes = trabajosCliente
       .filter(
         (t) =>
@@ -50,21 +58,38 @@ function Pagos() {
         (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
       );
 
-    // ¡Necesitas el precio/hora del cliente!
-    const cliente = clientes.find((c) => c.id === clienteId);
-    if (!cliente) return;
+    // Depuración: ¿qué trabajos se van a revisar?
+    console.log("Trabajos pendientes de pago encontrados:", pendientes);
+
+    // Obtén el precio/hora del cliente (usando id para mayor seguridad)
+    const cliente = clientes.find((c) => Number(c.id) === Number(clienteId));
+    if (!cliente) {
+      console.log("No se encontró el cliente para el id:", clienteId);
+      return;
+    }
+    console.log("Cliente encontrado:", cliente);
 
     let restante = pago;
 
     for (const trabajo of pendientes) {
-      const costeTrabajo = trabajo.horas * cliente.precioHora;
+      const costeTrabajo = Number(trabajo.horas) * Number(cliente.precioHora);
+      console.log(
+        `Revisando trabajo ${trabajo.id} (${trabajo.fecha}) | Horas: ${trabajo.horas} | Coste: ${costeTrabajo} | Restante: ${restante}`
+      );
       if (restante >= costeTrabajo) {
         await updateTrabajo(trabajo.id, { pagado: 1 });
         restante -= costeTrabajo;
+        console.log(
+          `✅ Marcado como pagado trabajo ${trabajo.id}. Nuevo restante: ${restante}`
+        );
       } else {
+        console.log(
+          `⛔ No hay suficiente pago para marcar trabajo ${trabajo.id} como pagado.`
+        );
         break;
       }
     }
+    console.log("Finalizó proceso de marcado de trabajos. Restante:", restante);
   };
   const cargarDatos = async () => {
     const [clientesData, pagosData, trabajosData, materialesData] =
