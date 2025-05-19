@@ -28,18 +28,33 @@ function Pagos() {
     cargarDatos();
   }, []);
 
-  const marcarTrabajosComoPagados = async (clienteIdStr: string) => {
+  const marcarTrabajosComoPagados = async (
+    clienteIdStr: string,
+    pago: number
+  ) => {
     const clienteId = parseInt(clienteIdStr);
+    const trabajosCliente = await getTrabajos();
+    // Ordena los trabajos pendientes por fecha
+    const pendientes = trabajosCliente
+      .filter((t) => t.clienteId === clienteId && t.pagado === 0)
+      .sort(
+        (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+      );
+
+    // ¡Necesitas el precio/hora del cliente!
     const cliente = clientes.find((c) => c.id === clienteId);
     if (!cliente) return;
 
-    const trabajosCliente = await getTrabajos();
-    const pendientes = trabajosCliente.filter(
-      (t) => t.nombre === cliente.nombre && t.pagado === 0
-    );
+    let restante = pago;
 
     for (const trabajo of pendientes) {
-      await updateTrabajo(trabajo.id, { pagado: 1 });
+      const costeTrabajo = trabajo.horas * cliente.precioHora;
+      if (restante >= costeTrabajo) {
+        await updateTrabajo(trabajo.id, { pagado: 1 });
+        restante -= costeTrabajo;
+      } else {
+        break;
+      }
     }
   };
   const cargarDatos = async () => {
@@ -108,7 +123,7 @@ function Pagos() {
       setCantidad("");
       setFecha("");
       setObservaciones("");
-      await marcarTrabajosComoPagados(clienteId);
+      await marcarTrabajosComoPagados(clienteId, parseFloat(cantidad));
       await cargarDatos(); // 👈 este es el cambio importante
     } catch (error) {
       toast.error("Error al registrar el pago");
