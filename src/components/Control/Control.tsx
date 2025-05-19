@@ -58,8 +58,7 @@ function Control() {
     const resumenDeudas = calcularDeudas(
       clientesConRegistros,
       trabajosData,
-      materialesData,
-      pagosData
+      materialesData
     );
     console.log("Resumen de deudas calculadas:", resumenDeudas);
 

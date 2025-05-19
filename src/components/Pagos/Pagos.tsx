@@ -11,7 +11,6 @@ import { toast } from "react-toastify";
 import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
 import { getMateriales } from "../../api/materialesApi";
 import { calcularDeudas } from "../../utils/calcularDeuda";
-console.log("Pagos.tsx se está ejecutando");
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -29,6 +28,7 @@ function Pagos() {
     cargarDatos();
   }, []);
 
+  // Marca como pagados tantos trabajos como cubra el pago (FIFO)
   const marcarTrabajosComoPagados = async (
     clienteIdStr: string,
     pago: number
@@ -36,62 +36,32 @@ function Pagos() {
     const clienteId = parseInt(clienteIdStr);
     const trabajosCliente = await getTrabajos();
 
-    // Depuración: muestra todos los trabajos y sus clienteId
-    console.log("clienteId recibido:", clienteId, typeof clienteId);
-    console.log(
-      "Trabajos recuperados:",
-      trabajosCliente.map((t) => ({
-        id: t.id,
-        clienteId: t.clienteId,
-        pagado: t.pagado,
-        fecha: t.fecha,
-        horas: t.horas,
-      }))
-    );
-
-    // Filtro robusto por id y pagado
+    // Filtra trabajos pendientes del cliente (FIFO)
     const pendientes = trabajosCliente
       .filter(
-        (t) =>
-          Number(t.clienteId) === Number(clienteId) && Number(t.pagado) === 0
+        (t) => Number(t.clienteId) === clienteId && Number(t.pagado) === 0
       )
       .sort(
         (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
       );
 
-    // Depuración: ¿qué trabajos se van a revisar?
-    console.log("Trabajos pendientes de pago encontrados:", pendientes);
-
-    // Obtén el precio/hora del cliente (usando id para mayor seguridad)
-    const cliente = clientes.find((c) => Number(c.id) === Number(clienteId));
-    if (!cliente) {
-      console.log("No se encontró el cliente para el id:", clienteId);
-      return;
-    }
-    console.log("Cliente encontrado:", cliente);
+    const cliente = clientes.find((c) => Number(c.id) === clienteId);
+    if (!cliente) return;
 
     let restante = pago;
 
     for (const trabajo of pendientes) {
       const costeTrabajo = Number(trabajo.horas) * Number(cliente.precioHora);
-      console.log(
-        `Revisando trabajo ${trabajo.id} (${trabajo.fecha}) | Horas: ${trabajo.horas} | Coste: ${costeTrabajo} | Restante: ${restante}`
-      );
       if (restante >= costeTrabajo) {
         await updateTrabajo(trabajo.id, { pagado: 1 });
         restante -= costeTrabajo;
-        console.log(
-          `✅ Marcado como pagado trabajo ${trabajo.id}. Nuevo restante: ${restante}`
-        );
       } else {
-        console.log(
-          `⛔ No hay suficiente pago para marcar trabajo ${trabajo.id} como pagado.`
-        );
         break;
       }
     }
-    console.log("Finalizó proceso de marcado de trabajos. Restante:", restante);
   };
+
+  // Cargar todos los datos iniciales
   const cargarDatos = async () => {
     const [clientesData, pagosData, trabajosData, materialesData] =
       await Promise.all([
@@ -103,6 +73,7 @@ function Pagos() {
 
     setClientes(clientesData);
 
+    // Solo pasamos los tres primeros, pagos ya no es necesario
     const deudas = calcularDeudas(clientesData, trabajosData, materialesData);
 
     const clientesConDeuda = new Set(
@@ -122,6 +93,7 @@ function Pagos() {
     setPagosConNombre(pagosFiltrados);
   };
 
+  // Registrar un nuevo pago
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clienteId || !cantidad || !fecha) return;
@@ -153,20 +125,15 @@ function Pagos() {
       setCantidad("");
       setFecha("");
       setObservaciones("");
-      console.log(
-        "Voy a marcar trabajos como pagados para",
-        clienteId,
-        cantidad
-      );
       await marcarTrabajosComoPagados(clienteId, parseFloat(cantidad));
-      console.log("He llamado a marcarTrabajosComoPagados");
-      await cargarDatos(); // 👈 este es el cambio importante
+      await cargarDatos();
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);
     }
   };
 
+  // Editar pago
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;
@@ -185,6 +152,7 @@ function Pagos() {
     }
   };
 
+  // Eliminar pago
   const handleDelete = async (id: number) => {
     try {
       await deletePago(id);
@@ -194,7 +162,6 @@ function Pagos() {
       toast.error("Error al eliminar el pago");
     }
   };
-  console.log("Componente Pagos montado");
 
   return (
     <div className="container">

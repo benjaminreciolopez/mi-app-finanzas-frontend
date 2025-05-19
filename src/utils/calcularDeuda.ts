@@ -1,7 +1,6 @@
 import { Cliente } from "../api/clientesApi";
 import { Trabajo } from "../api/trabajosApi";
 import { Material } from "../api/materialesApi";
-import { Pago } from "../api/pagosApi";
 
 export interface DeudaCliente {
   clienteId: number;
@@ -14,8 +13,7 @@ export interface DeudaCliente {
 export function calcularDeudas(
   clientes: Cliente[],
   trabajos: Trabajo[],
-  materiales: Material[],
-  pagos: Pago[] // <-- Los pagos ya no se usan aquí, pero lo dejamos por compatibilidad
+  materiales: Material[]
 ): DeudaCliente[] {
   return clientes.map((cliente) => {
     // Trabajos pendientes: pagado = 0
