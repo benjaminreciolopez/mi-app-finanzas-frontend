@@ -103,12 +103,7 @@ function Pagos() {
 
     setClientes(clientesData);
 
-    const deudas = calcularDeudas(
-      clientesData,
-      trabajosData,
-      materialesData,
-      pagosData
-    );
+    const deudas = calcularDeudas(clientesData, trabajosData, materialesData);
 
     const clientesConDeuda = new Set(
       deudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
