@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 function Calendario() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clienteId, setClienteId] = useState<number | "">("");
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
@@ -50,7 +51,8 @@ function Calendario() {
     ].join("-");
 
     await addTrabajo({
-      nombre,
+      clienteId: Number(clienteId),
+      nombre, // puedes quitarlo más adelante, ahora ayuda para migrar
       fecha: nuevaFecha,
       horas: parsedHoras,
       pagado: 0,
@@ -74,13 +76,19 @@ function Calendario() {
       <form onSubmit={handleSubmit} className="card">
         <label>Cliente:</label>
         <select
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
+          value={clienteId}
+          onChange={(e) => {
+            setClienteId(Number(e.target.value));
+            const cliente = clientes.find(
+              (c) => c.id === Number(e.target.value)
+            );
+            setNombre(cliente ? cliente.nombre : "");
+          }}
           required
         >
           <option value="">Seleccionar cliente</option>
           {clientes.map((c) => (
-            <option key={c.id} value={c.nombre}>
+            <option key={c.id} value={c.id}>
               {c.nombre}
             </option>
           ))}

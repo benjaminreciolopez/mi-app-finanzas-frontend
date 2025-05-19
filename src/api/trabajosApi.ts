@@ -5,6 +5,7 @@ const API_URL = `${API_BASE}/api/trabajos`;
 
 export interface Trabajo {
   id: number;
+  clienteId: number;
   nombre: string;
   fecha: string;
   horas: number;
@@ -20,6 +21,7 @@ export const updateTrabajo = (id: number, datos: Partial<Trabajo>) =>
   axios.put(`${API_URL}/${id}`, datos);
 
 export const addTrabajo = async (trabajo: {
+  clienteId: number;
   nombre: string;
   fecha: string;
   horas: number;

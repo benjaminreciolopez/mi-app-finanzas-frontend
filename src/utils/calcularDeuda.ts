@@ -19,7 +19,7 @@ export function calcularDeudas(
 ): DeudaCliente[] {
   return clientes.map((cliente) => {
     const trabajosPendientes = trabajos.filter(
-      (t) => t.nombre === cliente.nombre && t.pagado === 0
+      (t) => t.clienteId === cliente.id && t.pagado === 0
     );
     const materialesPendientes = materiales.filter(
       (m) => m.nombre === cliente.nombre && m.pagado === 0
