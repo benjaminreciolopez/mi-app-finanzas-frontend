@@ -18,26 +18,37 @@ export function calcularDeudas(
   pagos: Pago[]
 ): DeudaCliente[] {
   return clientes.map((cliente) => {
+    // Siempre convierte ambos valores a número para evitar fallos de tipo
     const trabajosPendientes = trabajos.filter(
-      (t) => t.clienteId === cliente.id && t.pagado === 0
+      (t) =>
+        Number(t.clienteId) === Number(cliente.id) && Number(t.pagado) === 0
     );
     const materialesPendientes = materiales.filter(
-      (m) => m.clienteId === cliente.id && m.pagado === 0
+      (m) =>
+        Number(m.clienteId) === Number(cliente.id) && Number(m.pagado) === 0
     );
-    const pagosDelCliente = pagos.filter((p) => p.clienteId === cliente.id);
+    const pagosDelCliente = pagos.filter(
+      (p) => Number(p.clienteId) === Number(cliente.id)
+    );
 
-    const totalHoras = trabajosPendientes.reduce((acc, t) => acc + t.horas, 0);
-    const totalMateriales = materialesPendientes.reduce(
-      (acc, m) => acc + m.coste,
+    const totalHoras = trabajosPendientes.reduce(
+      (acc, t) => acc + Number(t.horas),
       0
     );
-    const totalPagos = pagosDelCliente.reduce((acc, p) => acc + p.cantidad, 0);
+    const totalMateriales = materialesPendientes.reduce(
+      (acc, m) => acc + Number(m.coste),
+      0
+    );
+    const totalPagos = pagosDelCliente.reduce(
+      (acc, p) => acc + Number(p.cantidad),
+      0
+    );
 
-    const total = totalHoras * cliente.precioHora + totalMateriales;
+    const total = totalHoras * Number(cliente.precioHora) + totalMateriales;
     const deudaFinal = Math.max(0, parseFloat((total - totalPagos).toFixed(2)));
 
     return {
-      clienteId: cliente.id,
+      clienteId: Number(cliente.id),
       nombre: cliente.nombre,
       horasPendientes: totalHoras,
       materialesPendientes: totalMateriales,
