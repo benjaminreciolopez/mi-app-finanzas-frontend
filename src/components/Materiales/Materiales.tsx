@@ -16,6 +16,8 @@ function Materiales() {
   const [coste, setCoste] = useState("");
   const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState("");
+  const [clienteSeleccionado, setClienteSeleccionado] =
+    useState<Cliente | null>(null);
 
   useEffect(() => {
     cargarDatos();
@@ -33,14 +35,16 @@ function Materiales() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedCoste = parseFloat(coste);
-    if (!descripcion || isNaN(parsedCoste) || !fecha) return;
+    if (!descripcion || isNaN(parsedCoste) || !fecha || !clienteSeleccionado)
+      return;
 
     const nuevoId = await addMaterial({
       descripcion,
       coste: parsedCoste,
-      nombre,
+      nombre: clienteSeleccionado.nombre, // Para mostrar
       fecha,
       pagado: 0,
+      clienteId: clienteSeleccionado.id, // 👈 ESTE ES EL IMPORTANTE
     });
 
     setMateriales((prev) => [
@@ -49,9 +53,10 @@ function Materiales() {
         id: nuevoId,
         descripcion,
         coste: parsedCoste,
-        nombre,
+        nombre: clienteSeleccionado.nombre,
         fecha,
         pagado: 0,
+        clienteId: clienteSeleccionado.id,
       },
     ]);
 
@@ -59,6 +64,7 @@ function Materiales() {
     setCoste("");
     setNombre("");
     setFecha("");
+    setClienteSeleccionado(null);
     toast.success("Material añadido");
   };
 
@@ -94,10 +100,18 @@ function Materiales() {
           value={coste}
           onChange={(e) => setCoste(e.target.value)}
         />
-        <select value={nombre} onChange={(e) => setNombre(e.target.value)}>
+        <select
+          value={clienteSeleccionado ? clienteSeleccionado.id : ""}
+          onChange={(e) => {
+            const cli = clientes.find((c) => c.id === Number(e.target.value));
+            setClienteSeleccionado(cli || null);
+            setNombre(cli?.nombre || "");
+          }}
+          required
+        >
           <option value="">Asignar a cliente</option>
           {clientes.map((c) => (
-            <option key={c.id} value={c.nombre}>
+            <option key={c.id} value={c.id}>
               {c.nombre}
             </option>
           ))}

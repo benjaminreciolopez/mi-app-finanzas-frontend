@@ -10,6 +10,7 @@ export interface Material {
   nombre: string;
   fecha: string;
   pagado: number;
+  clienteId: number;
 }
 
 export const getMateriales = async (): Promise<Material[]> => {
@@ -23,6 +24,7 @@ export const addMaterial = async (material: {
   nombre: string;
   fecha: string;
   pagado: number;
+  clienteId: number;
 }): Promise<number> => {
   const res = await axios.post<{ id: number }>(API_URL, material);
   return res.data.id;
