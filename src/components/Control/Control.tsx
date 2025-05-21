@@ -203,6 +203,10 @@ function Control() {
                                     <strong>Total horas trabajadas:</strong>{" "}
                                     {totalHoras}h
                                   </p>
+                                  <p>
+                                    <strong>Total cobrado:</strong>{" "}
+                                    {totalCobrado.toFixed(2)} €
+                                  </p>
                                   <ul>
                                     {trabajosCliente.map((t) => (
                                       <li
@@ -278,15 +282,6 @@ function Control() {
                                       </li>
                                     ))}
                                   </ul>
-
-                                  <p>
-                                    <strong>Total horas trabajadas:</strong>{" "}
-                                    {totalHoras}h
-                                  </p>
-                                  <p>
-                                    <strong>Total cobrado:</strong>{" "}
-                                    {totalCobrado.toFixed(2)} €
-                                  </p>
                                 </>
                               )}
 
