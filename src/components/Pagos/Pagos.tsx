@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
 import { getMateriales } from "../../api/materialesApi";
 import { calcularDeudas } from "../../utils/calcularDeuda";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -23,10 +24,16 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
+    null
+  );
+  const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
 
   useEffect(() => {
     cargarDatos();
   }, []);
+
+  // ...marca trabajos pagados, cargarDatos, handleSubmit, handleUpdate, handleDelete igual que tienes...
 
   // Marca como pagados tantos trabajos como cubra el pago (FIFO)
   const marcarTrabajosComoPagados = async (
@@ -61,7 +68,6 @@ function Pagos() {
     }
   };
 
-  // Cargar todos los datos iniciales
   const cargarDatos = async () => {
     const [clientesData, pagosData, trabajosData, materialesData] =
       await Promise.all([
@@ -93,7 +99,6 @@ function Pagos() {
     setPagosConNombre(pagosFiltrados);
   };
 
-  // Registrar un nuevo pago
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clienteId || !cantidad || !fecha) return;
@@ -133,7 +138,6 @@ function Pagos() {
     }
   };
 
-  // Editar pago
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;
@@ -147,21 +151,29 @@ function Pagos() {
       });
       toast.success("Pago actualizado");
       cargarDatos();
+      setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al actualizar");
     }
   };
 
-  // Eliminar pago
   const handleDelete = async (id: number) => {
     try {
       await deletePago(id);
       toast.success("Pago eliminado");
       cargarDatos();
+      setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al eliminar el pago");
     }
   };
+
+  // Agrupa pagos por cliente
+  const pagosPorCliente: { [cliente: string]: PagoConNombre[] } = {};
+  pagosConNombre.forEach((pago) => {
+    if (!pagosPorCliente[pago.nombre]) pagosPorCliente[pago.nombre] = [];
+    pagosPorCliente[pago.nombre].push(pago);
+  });
 
   return (
     <div className="container">
@@ -207,45 +219,138 @@ function Pagos() {
 
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3>Historial de Pagos</h3>
-        {pagosConNombre.length === 0 ? (
+        {Object.keys(pagosPorCliente).length === 0 ? (
           <p>No hay pagos registrados.</p>
         ) : (
-          <ul>
-            {pagosConNombre.map((pago) => (
-              <li key={pago.id} style={{ marginBottom: "12px" }}>
-                <strong>{pago.nombre}</strong>
-                <br />
-                <input
-                  type="number"
-                  value={pago.cantidad}
-                  onChange={(e) =>
-                    handleUpdate(pago.id, "cantidad", e.target.value)
-                  }
-                />
-                <input
-                  type="date"
-                  value={pago.fecha.slice(0, 10)}
-                  onChange={(e) =>
-                    handleUpdate(pago.id, "fecha", e.target.value)
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Observaciones"
-                  value={pago.observaciones || ""}
-                  onChange={(e) =>
-                    handleUpdate(pago.id, "observaciones", e.target.value)
-                  }
-                />
-                <button
-                  onClick={() => handleDelete(pago.id)}
-                  className="boton-accion"
-                >
-                  Eliminar
-                </button>
-              </li>
-            ))}
-          </ul>
+          Object.entries(pagosPorCliente).map(([nombre, pagos]) => (
+            <div key={nombre}>
+              <p
+                style={{
+                  fontWeight: "bold",
+                  color: clienteSeleccionado === nombre ? "#1e3a8a" : "#4f46e5",
+                  cursor: "pointer",
+                  background:
+                    clienteSeleccionado === nombre ? "#e0e7ff" : "transparent",
+                  borderRadius: "6px",
+                  padding: "6px 10px",
+                  marginBottom: 6,
+                  userSelect: "none",
+                }}
+                onClick={() =>
+                  setClienteSeleccionado(
+                    clienteSeleccionado === nombre ? null : nombre
+                  )
+                }
+              >
+                {clienteSeleccionado === nombre ? "▼" : "▶"} {nombre}
+              </p>
+              <AnimatePresence>
+                {clienteSeleccionado === nombre && (
+                  <motion.ul
+                    initial={{ opacity: 0, y: -15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -15 }}
+                    transition={{ duration: 0.22 }}
+                  >
+                    {pagos.map((pago) => (
+                      <li
+                        key={pago.id}
+                        style={{
+                          background:
+                            pagoSeleccionado === pago.id
+                              ? "#eef6fb"
+                              : "transparent",
+                          cursor: "pointer",
+                          borderRadius: "6px",
+                          padding: "4px 6px",
+                          marginBottom: "6px",
+                        }}
+                        onClick={() =>
+                          setPagoSeleccionado(
+                            pagoSeleccionado === pago.id ? null : pago.id
+                          )
+                        }
+                      >
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <div style={{ flex: 1 }}>
+                            <input
+                              type="number"
+                              value={pago.cantidad}
+                              disabled={pagoSeleccionado !== pago.id}
+                              onChange={(e) =>
+                                handleUpdate(
+                                  pago.id,
+                                  "cantidad",
+                                  e.target.value
+                                )
+                              }
+                            />
+                            <input
+                              type="date"
+                              value={pago.fecha.slice(0, 10)}
+                              disabled={pagoSeleccionado !== pago.id}
+                              onChange={(e) =>
+                                handleUpdate(pago.id, "fecha", e.target.value)
+                              }
+                            />
+                            <input
+                              type="text"
+                              placeholder="Observaciones"
+                              disabled={pagoSeleccionado !== pago.id}
+                              value={pago.observaciones || ""}
+                              onChange={(e) =>
+                                handleUpdate(
+                                  pago.id,
+                                  "observaciones",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </div>
+                          <AnimatePresence>
+                            {pagoSeleccionado === pago.id && (
+                              <motion.div
+                                key="botones"
+                                initial={{ opacity: 0, x: 15 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 15 }}
+                                transition={{ duration: 0.18 }}
+                                style={{ display: "flex", marginLeft: 8 }}
+                              >
+                                <button
+                                  className="boton-accion"
+                                  style={{ marginRight: 4 }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleUpdate(
+                                      pago.id,
+                                      "cantidad",
+                                      pago.cantidad.toString()
+                                    );
+                                  }}
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  className="boton-accion"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDelete(pago.id);
+                                  }}
+                                >
+                                  Eliminar
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </div>
+          ))
         )}
       </div>
     </div>

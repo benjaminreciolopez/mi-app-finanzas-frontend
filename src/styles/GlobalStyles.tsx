@@ -70,9 +70,10 @@ const GlobalStyles = createGlobalStyle`
     margin-bottom: 12px;
   }
 
-  input:focus, select:focus, textarea:focus {
-    border-color: #4f46e5;
-  }
+input:focus, select:focus, textarea:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px #c7d2fe;
+}
 
   .container {
     width: 100%;
