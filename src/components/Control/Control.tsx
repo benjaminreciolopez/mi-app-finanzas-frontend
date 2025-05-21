@@ -16,6 +16,7 @@ import { getMateriales, Material } from "../../api/materialesApi";
 import { getPagos } from "../../api/pagosApi";
 import { toast } from "react-toastify";
 import { calcularDeudas, DeudaCliente } from "../../utils/calcularDeuda";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Control() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
@@ -25,6 +26,12 @@ function Control() {
     null
   );
   const [deudas, setDeudas] = useState<DeudaCliente[]>([]);
+  const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
+    null
+  );
+  useEffect(() => {
+    setTrabajoSeleccionado(null);
+  }, [clienteSeleccionado]);
 
   useEffect(() => {
     cargarDatos();
@@ -125,6 +132,13 @@ function Control() {
                     (acc, t) => acc + t.horas,
                     0
                   );
+                  // Calcula total de horas de trabajos pagados
+                  const totalHorasPagadas = trabajosCliente
+                    .filter((t) => t.pagado)
+                    .reduce((acc, t) => acc + t.horas, 0);
+
+                  // Calcula el total cobrado (horas pagadas x precio/hora del cliente)
+                  const totalCobrado = totalHorasPagadas * cliente.precioHora;
 
                   return (
                     <Draggable
@@ -177,37 +191,101 @@ function Control() {
                                 <p>No hay trabajos.</p>
                               ) : (
                                 <>
-                                  <ul>
-                                    {trabajosCliente.map((t) => (
-                                      <li key={t.id}>
-                                        {t.fecha}: {t.horas}h{" "}
-                                        {t.pagado ? "(Pagado)" : "(Pendiente)"}{" "}
-                                        {!t.pagado && (
-                                          <>
-                                            <button
-                                              className="boton-accion"
-                                              onClick={() =>
-                                                marcarComoPagado(t.id)
-                                              }
-                                            >
-                                              ✅ Marcar pagado
-                                            </button>
-                                            <button
-                                              className="boton-accion"
-                                              onClick={() =>
-                                                eliminarTrabajo(t.id)
-                                              }
-                                            >
-                                              🗑️ Eliminar
-                                            </button>
-                                          </>
-                                        )}
-                                      </li>
-                                    ))}
-                                  </ul>
+                                  <p>
+                                    <strong>Trabajos pendientes:</strong>{" "}
+                                    {
+                                      trabajosCliente.filter((t) => !t.pagado)
+                                        .length
+                                    }{" "}
+                                    de {trabajosCliente.length}
+                                  </p>
                                   <p>
                                     <strong>Total horas trabajadas:</strong>{" "}
                                     {totalHoras}h
+                                  </p>
+                                  <ul>
+                                    {trabajosCliente.map((t) => (
+                                      <li
+                                        key={t.id}
+                                        style={{
+                                          background:
+                                            !t.pagado &&
+                                            trabajoSeleccionado === t.id
+                                              ? "#eef6fb"
+                                              : "transparent",
+                                          cursor: !t.pagado
+                                            ? "pointer"
+                                            : "default",
+                                          borderRadius: "6px",
+                                          padding: "2px 4px",
+                                          marginBottom: "2px",
+                                          position: "relative",
+                                        }}
+                                        onClick={() => {
+                                          if (!t.pagado) {
+                                            setTrabajoSeleccionado(
+                                              trabajoSeleccionado === t.id
+                                                ? null
+                                                : t.id
+                                            );
+                                          }
+                                        }}
+                                      >
+                                        {t.fecha}: {t.horas}h{" "}
+                                        {t.pagado ? "(Pagado)" : "(Pendiente)"}
+                                        <AnimatePresence>
+                                          {!t.pagado &&
+                                            trabajoSeleccionado === t.id && (
+                                              <motion.div
+                                                key="botones"
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: 20 }}
+                                                transition={{ duration: 0.18 }}
+                                                style={{
+                                                  display: "inline-block",
+                                                  marginLeft: 12,
+                                                }}
+                                              >
+                                                <button
+                                                  className="boton-accion"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    marcarComoPagado(t.id);
+                                                    setTrabajoSeleccionado(
+                                                      null
+                                                    );
+                                                  }}
+                                                  style={{ marginRight: 4 }}
+                                                >
+                                                  ✅ Marcar pagado
+                                                </button>
+                                                <button
+                                                  className="boton-accion"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    eliminarTrabajo(t.id);
+                                                    setTrabajoSeleccionado(
+                                                      null
+                                                    );
+                                                  }}
+                                                >
+                                                  🗑️ Eliminar
+                                                </button>
+                                              </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                      </li>
+                                    ))}
+                                  </ul>
+
+                                  <p>
+                                    <strong>Total horas trabajadas:</strong>{" "}
+                                    {totalHoras}h
+                                  </p>
+                                  <p>
+                                    <strong>Total cobrado:</strong>{" "}
+                                    {totalCobrado.toFixed(2)} €
                                   </p>
                                 </>
                               )}
