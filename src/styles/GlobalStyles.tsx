@@ -248,14 +248,21 @@ const GlobalStyles = createGlobalStyle`
   }
 
   /* Animación suave para cambio de pestañas */
-  .page-transition {
-    position: absolute;
-    width: 100%;
-    top: 56px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
+.page-container {
+  position: relative;
+  min-height: calc(100vh - 56px);
+  overflow: hidden;
+}
+.page-transition {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: #fff;
+  z-index: 2;
+  will-change: transform, opacity;
+}
 `;
 
 export default GlobalStyles;

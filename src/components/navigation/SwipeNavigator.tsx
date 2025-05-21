@@ -2,6 +2,7 @@ import { useSwipeable } from "react-swipeable";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNavigationDirectionUpdate } from "../../NavigationDirectionContext";
 import { useSwipeDirectionUpdate } from "./SwipeDirectionContext";
+import { useRef } from "react";
 
 const rutas = [
   "/",
@@ -17,15 +18,19 @@ function SwipeNavigator({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const setDirection = useNavigationDirectionUpdate();
   const setSwipe = useSwipeDirectionUpdate();
+  const swiping = useRef(false);
 
   const currentIndex = rutas.indexOf(location.pathname);
 
   const handlers = useSwipeable({
     onSwiped: () => {
-      // Resetear dirección después de swipe para evitar conflictos
-      setSwipe(null);
+      // Evita swipes dobles y restablece dirección tras animar
+      setTimeout(() => setSwipe("none"), 340);
+      swiping.current = false;
     },
     onSwipedLeft: () => {
+      if (swiping.current) return;
+      swiping.current = true;
       if (currentIndex < rutas.length - 1) {
         setDirection("left");
         setSwipe("left");
@@ -33,6 +38,8 @@ function SwipeNavigator({ children }: { children: React.ReactNode }) {
       }
     },
     onSwipedRight: () => {
+      if (swiping.current) return;
+      swiping.current = true;
       if (currentIndex > 0) {
         setDirection("right");
         setSwipe("right");
@@ -42,11 +49,22 @@ function SwipeNavigator({ children }: { children: React.ReactNode }) {
     delta: 50,
     preventScrollOnSwipe: true,
     trackTouch: true,
-    trackMouse: false, // evita navegación involuntaria con mouse
+    trackMouse: false,
   });
 
+  // El style asegura altura y oculta desbordes, ideal para móviles
   return (
-    <div {...handlers} style={{ height: "100%", overflow: "hidden" }}>
+    <div
+      {...handlers}
+      className="page-container"
+      style={{
+        minHeight: "calc(100vh - 56px)",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+        touchAction: "pan-y",
+      }}
+    >
       {children}
     </div>
   );
