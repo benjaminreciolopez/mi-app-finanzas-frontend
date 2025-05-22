@@ -111,206 +111,217 @@ function Control() {
     <div className="container">
       <h2 className="title">Control de Clientes</h2>
       <div className="card">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="clientes">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                {ordenClientes.map((cliente, index) => {
-                  const seleccionado = clienteSeleccionado === cliente.nombre;
-                  const trabajosCliente = trabajos
-                    .filter((t) => t.nombre === cliente.nombre)
-                    .sort(
-                      (a, b) =>
-                        new Date(a.fecha).getTime() -
-                        new Date(b.fecha).getTime()
+        <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="clientes">
+              {(provided) => (
+                <div {...provided.droppableProps} ref={provided.innerRef}>
+                  {ordenClientes.map((cliente, index) => {
+                    const seleccionado = clienteSeleccionado === cliente.nombre;
+                    const trabajosCliente = trabajos
+                      .filter((t) => t.nombre === cliente.nombre)
+                      .sort(
+                        (a, b) =>
+                          new Date(a.fecha).getTime() -
+                          new Date(b.fecha).getTime()
+                      );
+                    const materialesCliente = materiales.filter(
+                      (m) => m.nombre === cliente.nombre
                     );
-                  const materialesCliente = materiales.filter(
-                    (m) => m.nombre === cliente.nombre
-                  );
-                  const deuda = deudas.find((d) => d.clienteId === cliente.id);
-                  const totalHoras = trabajosCliente.reduce(
-                    (acc, t) => acc + t.horas,
-                    0
-                  );
-                  // Calcula total de horas de trabajos pagados
-                  const totalHorasPagadas = trabajosCliente
-                    .filter((t) => t.pagado)
-                    .reduce((acc, t) => acc + t.horas, 0);
+                    const deuda = deudas.find(
+                      (d) => d.clienteId === cliente.id
+                    );
+                    const totalHoras = trabajosCliente.reduce(
+                      (acc, t) => acc + t.horas,
+                      0
+                    );
+                    // Calcula total de horas de trabajos pagados
+                    const totalHorasPagadas = trabajosCliente
+                      .filter((t) => t.pagado)
+                      .reduce((acc, t) => acc + t.horas, 0);
 
-                  // Calcula el total cobrado (horas pagadas x precio/hora del cliente)
-                  const totalCobrado = totalHorasPagadas * cliente.precioHora;
+                    // Calcula el total cobrado (horas pagadas x precio/hora del cliente)
+                    const totalCobrado = totalHorasPagadas * cliente.precioHora;
 
-                  return (
-                    <Draggable
-                      key={cliente.id}
-                      draggableId={cliente.id.toString()}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          style={{
-                            ...provided.draggableProps.style,
-                            marginBottom: "1rem",
-                          }}
-                        >
-                          <p
-                            onClick={() =>
-                              setClienteSeleccionado(
-                                seleccionado ? null : cliente.nombre
-                              )
-                            }
+                    return (
+                      <Draggable
+                        key={cliente.id}
+                        draggableId={cliente.id.toString()}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
                             style={{
-                              cursor: "pointer",
-                              fontWeight: "bold",
-                              color: seleccionado ? "#1e3a8a" : "#4f46e5",
-                              backgroundColor: seleccionado
-                                ? "#e0e7ff"
-                                : "transparent",
-                              padding: "6px 10px",
-                              borderRadius: "6px",
-                              userSelect: "none",
+                              ...provided.draggableProps.style,
+                              marginBottom: "1rem",
                             }}
                           >
-                            {seleccionado ? "▼" : "▶"} {cliente.nombre}
-                          </p>
-
-                          <div style={{ marginLeft: "1rem" }}>
-                            Total deuda: {deuda?.totalDeuda.toFixed(2)} €
-                          </div>
-
-                          {seleccionado && (
-                            <div
-                              className="card"
-                              style={{ marginTop: "0.5rem" }}
+                            <p
+                              onClick={() =>
+                                setClienteSeleccionado(
+                                  seleccionado ? null : cliente.nombre
+                                )
+                              }
+                              style={{
+                                cursor: "pointer",
+                                fontWeight: "bold",
+                                color: seleccionado ? "#1e3a8a" : "#4f46e5",
+                                backgroundColor: seleccionado
+                                  ? "#e0e7ff"
+                                  : "transparent",
+                                padding: "6px 10px",
+                                borderRadius: "6px",
+                                userSelect: "none",
+                              }}
                             >
-                              <h4>🛠️ Trabajos</h4>
-                              {trabajosCliente.length === 0 ? (
-                                <p>No hay trabajos.</p>
-                              ) : (
-                                <>
-                                  <p>
-                                    <strong>Trabajos pendientes:</strong>{" "}
-                                    {
-                                      trabajosCliente.filter((t) => !t.pagado)
-                                        .length
-                                    }{" "}
-                                    de {trabajosCliente.length}
-                                  </p>
-                                  <p>
-                                    <strong>Total horas trabajadas:</strong>{" "}
-                                    {totalHoras}h
-                                  </p>
-                                  <p>
-                                    <strong>Total cobrado:</strong>{" "}
-                                    {totalCobrado.toFixed(2)} €
-                                  </p>
-                                  <ul>
-                                    {trabajosCliente.map((t) => (
-                                      <li
-                                        key={t.id}
-                                        style={{
-                                          background:
-                                            !t.pagado &&
-                                            trabajoSeleccionado === t.id
-                                              ? "#eef6fb"
-                                              : "transparent",
-                                          cursor: !t.pagado
-                                            ? "pointer"
-                                            : "default",
-                                          borderRadius: "6px",
-                                          padding: "2px 4px",
-                                          marginBottom: "2px",
-                                          position: "relative",
-                                        }}
-                                        onClick={() => {
-                                          if (!t.pagado) {
-                                            setTrabajoSeleccionado(
+                              {seleccionado ? "▼" : "▶"} {cliente.nombre}
+                            </p>
+
+                            <div style={{ marginLeft: "1rem" }}>
+                              Total deuda: {deuda?.totalDeuda.toFixed(2)} €
+                            </div>
+
+                            {seleccionado && (
+                              <div
+                                className="card"
+                                style={{ marginTop: "0.5rem" }}
+                              >
+                                <h4>🛠️ Trabajos</h4>
+                                {trabajosCliente.length === 0 ? (
+                                  <p>No hay trabajos.</p>
+                                ) : (
+                                  <>
+                                    <p>
+                                      <strong>Trabajos pendientes:</strong>{" "}
+                                      {
+                                        trabajosCliente.filter((t) => !t.pagado)
+                                          .length
+                                      }{" "}
+                                      de {trabajosCliente.length}
+                                    </p>
+                                    <p>
+                                      <strong>Total horas trabajadas:</strong>{" "}
+                                      {totalHoras}h
+                                    </p>
+                                    <p>
+                                      <strong>Total cobrado:</strong>{" "}
+                                      {totalCobrado.toFixed(2)} €
+                                    </p>
+                                    <ul>
+                                      {trabajosCliente.map((t) => (
+                                        <li
+                                          key={t.id}
+                                          style={{
+                                            background:
+                                              !t.pagado &&
                                               trabajoSeleccionado === t.id
-                                                ? null
-                                                : t.id
-                                            );
-                                          }
-                                        }}
-                                      >
-                                        {t.fecha}: {t.horas}h{" "}
-                                        {t.pagado ? "(Pagado)" : "(Pendiente)"}
-                                        <AnimatePresence>
-                                          {!t.pagado &&
-                                            trabajoSeleccionado === t.id && (
-                                              <motion.div
-                                                key="botones"
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: 20 }}
-                                                transition={{ duration: 0.18 }}
-                                                style={{
-                                                  display: "inline-block",
-                                                  marginLeft: 12,
-                                                }}
-                                              >
-                                                <button
-                                                  className="boton-accion"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    marcarComoPagado(t.id);
-                                                    setTrabajoSeleccionado(
-                                                      null
-                                                    );
+                                                ? "#eef6fb"
+                                                : "transparent",
+                                            cursor: !t.pagado
+                                              ? "pointer"
+                                              : "default",
+                                            borderRadius: "6px",
+                                            padding: "2px 4px",
+                                            marginBottom: "2px",
+                                            position: "relative",
+                                          }}
+                                          onClick={() => {
+                                            if (!t.pagado) {
+                                              setTrabajoSeleccionado(
+                                                trabajoSeleccionado === t.id
+                                                  ? null
+                                                  : t.id
+                                              );
+                                            }
+                                          }}
+                                        >
+                                          {t.fecha}: {t.horas}h{" "}
+                                          {t.pagado
+                                            ? "(Pagado)"
+                                            : "(Pendiente)"}
+                                          <AnimatePresence>
+                                            {!t.pagado &&
+                                              trabajoSeleccionado === t.id && (
+                                                <motion.div
+                                                  key="botones"
+                                                  initial={{
+                                                    opacity: 0,
+                                                    x: 20,
                                                   }}
-                                                  style={{ marginRight: 4 }}
-                                                >
-                                                  ✅ Marcar pagado
-                                                </button>
-                                                <button
-                                                  className="boton-accion"
-                                                  onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    eliminarTrabajo(t.id);
-                                                    setTrabajoSeleccionado(
-                                                      null
-                                                    );
+                                                  animate={{ opacity: 1, x: 0 }}
+                                                  exit={{ opacity: 0, x: 20 }}
+                                                  transition={{
+                                                    duration: 0.18,
+                                                  }}
+                                                  style={{
+                                                    display: "inline-block",
+                                                    marginLeft: 12,
                                                   }}
                                                 >
-                                                  🗑️ Eliminar
-                                                </button>
-                                              </motion.div>
-                                            )}
-                                        </AnimatePresence>
+                                                  <button
+                                                    className="boton-accion"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      marcarComoPagado(t.id);
+                                                      setTrabajoSeleccionado(
+                                                        null
+                                                      );
+                                                    }}
+                                                    style={{ marginRight: 4 }}
+                                                  >
+                                                    ✅ Marcar pagado
+                                                  </button>
+                                                  <button
+                                                    className="boton-accion"
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      eliminarTrabajo(t.id);
+                                                      setTrabajoSeleccionado(
+                                                        null
+                                                      );
+                                                    }}
+                                                  >
+                                                    🗑️ Eliminar
+                                                  </button>
+                                                </motion.div>
+                                              )}
+                                          </AnimatePresence>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </>
+                                )}
+
+                                <h4>🧱 Materiales</h4>
+                                {materialesCliente.length === 0 ? (
+                                  <p>No hay materiales.</p>
+                                ) : (
+                                  <ul>
+                                    {materialesCliente.map((m) => (
+                                      <li key={m.id}>
+                                        {m.fecha}: {m.descripcion} -{" "}
+                                        {m.coste.toFixed(2)}€{" "}
+                                        {m.pagado ? "(Pagado)" : "(Pendiente)"}
                                       </li>
                                     ))}
                                   </ul>
-                                </>
-                              )}
-
-                              <h4>🧱 Materiales</h4>
-                              {materialesCliente.length === 0 ? (
-                                <p>No hay materiales.</p>
-                              ) : (
-                                <ul>
-                                  {materialesCliente.map((m) => (
-                                    <li key={m.id}>
-                                      {m.fecha}: {m.descripcion} -{" "}
-                                      {m.coste.toFixed(2)}€{" "}
-                                      {m.pagado ? "(Pagado)" : "(Pendiente)"}
-                                    </li>
-                                  ))}
-                                </ul>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Draggable>
+                    );
+                  })}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        </div>
       </div>
     </div>
   );
