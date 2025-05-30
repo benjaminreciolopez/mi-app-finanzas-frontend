@@ -32,8 +32,6 @@ function Pagos() {
     cargarDatos();
   }, []);
 
-  // ...marca trabajos pagados, cargarDatos, handleSubmit, handleUpdate, handleDelete igual que tienes...
-
   // Marca como pagados tantos trabajos como cubra el pago (FIFO)
   const marcarTrabajosComoPagados = async (
     clienteIdStr: string,
