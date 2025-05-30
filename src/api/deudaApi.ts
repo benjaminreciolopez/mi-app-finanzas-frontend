@@ -3,6 +3,13 @@
 const API_BASE = import.meta.env.VITE_API_URL;
 const API_URL = `${API_BASE}/api/deuda-real`;
 
+export interface PagoUsado {
+  id: number;
+  fecha: string;
+  cantidad: number;
+  usado: number;
+}
+
 export interface ResumenDeuda {
   clienteId: number;
   nombre: string;
@@ -10,6 +17,7 @@ export interface ResumenDeuda {
   totalMaterialesPendientes: number;
   totalPagado: number;
   totalDeuda: number;
+  pagosUsados: PagoUsado[];
 }
 
 export async function getDeudaReal(): Promise<ResumenDeuda[]> {

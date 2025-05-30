@@ -15,6 +15,12 @@ import { getDeudaReal } from "../../api/deudaApi";
 interface PagoConNombre extends Pago {
   nombre: string;
 }
+interface PagoUsado {
+  id: number;
+  usado: number;
+}
+
+type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
 
 function Pagos() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -27,6 +33,8 @@ function Pagos() {
     null
   );
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
+  const [usoPagosPorCliente, setUsoPagosPorCliente] =
+    useState<UsoPagosPorCliente>({});
 
   useEffect(() => {
     cargarDatos();
@@ -66,29 +74,30 @@ function Pagos() {
   };
 
   const cargarDatos = async () => {
-    const [clientesData, pagosData] = await Promise.all([
+    const [clientesData, pagosData, resumenDeudas] = await Promise.all([
       getClientes(),
       getPagos(),
+      getDeudaReal(),
     ]);
 
     setClientes(clientesData);
 
-    const resumenDeudas = await getDeudaReal();
-    const clientesConDeuda = new Set(
-      resumenDeudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
-    );
+    // Mapear pagos usados por cliente
+    const uso: UsoPagosPorCliente = {};
+    resumenDeudas.forEach((d) => {
+      uso[d.clienteId] = d.pagosUsados ?? [];
+    });
+    setUsoPagosPorCliente(uso);
 
-    const pagosFiltrados = pagosData
-      .filter((p) => clientesConDeuda.has(p.clienteId))
-      .map((pago) => {
-        const cliente = clientesData.find((c) => c.id === pago.clienteId);
-        return {
-          ...pago,
-          nombre: cliente?.nombre || "Desconocido",
-        };
-      });
+    const pagosConNombres = pagosData.map((pago) => {
+      const cliente = clientesData.find((c) => c.id === pago.clienteId);
+      return {
+        ...pago,
+        nombre: cliente?.nombre || "Desconocido",
+      };
+    });
 
-    setPagosConNombre(pagosFiltrados);
+    setPagosConNombre(pagosConNombres);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -298,6 +307,26 @@ function Pagos() {
                                 )
                               }
                             />
+                            {/* Mostrar cuánto se ha usado de este pago */}
+                            {usoPagosPorCliente[pago.clienteId]?.some(
+                              (p) => p.id === pago.id
+                            ) && (
+                              <div
+                                style={{
+                                  fontSize: "0.85rem",
+                                  color: "#444",
+                                  marginTop: "4px",
+                                }}
+                              >
+                                Usado:{" "}
+                                {
+                                  usoPagosPorCliente[pago.clienteId].find(
+                                    (p) => p.id === pago.id
+                                  )?.usado
+                                }
+                                € de {pago.cantidad}€
+                              </div>
+                            )}
                           </div>
                           <AnimatePresence>
                             {pagoSeleccionado === pago.id && (
