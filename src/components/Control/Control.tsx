@@ -175,17 +175,22 @@ function Control() {
                             </p>
 
                             <div style={{ marginLeft: "1rem" }}>
-                              Total deuda: {deuda?.totalDeuda.toFixed(2)} €
+                              Total deuda:{" "}
+                              {deuda ? deuda.totalDeuda.toFixed(2) : "0.00"} €
                             </div>
                             <div style={{ marginLeft: "1rem" }}>
-                              Total pagado: {deuda?.totalPagado.toFixed(2)} €
+                              Total pagado:{" "}
+                              {deuda ? deuda.totalPagado.toFixed(2) : "0.00"} €
                             </div>
                             <div style={{ marginLeft: "1rem" }}>
-                              Horas pendientes: {deuda?.totalHorasPendientes}h
+                              Horas pendientes: {deuda ? deuda.totalHoras : 0}h
                             </div>
                             <div style={{ marginLeft: "1rem" }}>
                               Materiales pendientes:{" "}
-                              {deuda?.totalMaterialesPendientes.toFixed(2)} €
+                              {deuda
+                                ? deuda.totalMateriales.toFixed(2)
+                                : "0.00"}{" "}
+                              €
                             </div>
 
                             {seleccionado && (
