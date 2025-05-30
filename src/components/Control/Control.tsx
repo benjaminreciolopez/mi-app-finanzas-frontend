@@ -13,9 +13,8 @@ import {
   Trabajo,
 } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
-import { getPagos, Pago } from "../../api/pagosApi";
 import { toast } from "react-toastify";
-import { calcularDeudas, DeudaCliente } from "../../utils/calcularDeuda";
+import { getDeudaReal, ResumenDeuda } from "../../api/deudaApi";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Control() {
@@ -25,11 +24,10 @@ function Control() {
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
     null
   );
-  const [deudas, setDeudas] = useState<DeudaCliente[]>([]);
+  const [deudas, setDeudas] = useState<ResumenDeuda[]>([]);
   const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
     null
   );
-  const [pagos, setPagos] = useState<Pago[]>([]);
 
   useEffect(() => {
     setTrabajoSeleccionado(null);
@@ -40,16 +38,13 @@ function Control() {
   }, []);
 
   const cargarDatos = async () => {
-    const [clientesData, trabajosData, materialesData, pagosData] =
-      await Promise.all([
-        getClientes(),
-        getTrabajos(),
-        getMateriales(),
-        getPagos(),
-      ]);
+    const [clientesData, trabajosData, materialesData] = await Promise.all([
+      getClientes(),
+      getTrabajos(),
+      getMateriales(),
+    ]);
     console.log("ClientesData", clientesData);
     console.log("TrabajosData", trabajosData);
-    console.log("PagosData", pagosData);
     console.log("MaterialesData", materialesData);
 
     const clientesConRegistros = clientesData
@@ -63,14 +58,8 @@ function Control() {
     setTrabajos(trabajosData);
     setMateriales(materialesData);
     setOrdenClientes(clientesConRegistros);
-    setPagos(pagosData); // ✅ guarda los pagos en estado
 
-    const resumenDeudas = calcularDeudas(
-      clientesConRegistros,
-      trabajosData,
-      materialesData,
-      pagosData // ✅ ahora también le pasas los pagos
-    );
+    const resumenDeudas = await getDeudaReal();
     console.log("Resumen de deudas calculadas:", resumenDeudas);
 
     setDeudas(resumenDeudas);
@@ -135,9 +124,6 @@ function Control() {
                     const deuda = deudas.find(
                       (d) => d.clienteId === cliente.id
                     );
-                    const totalPagado = pagos
-                      .filter((p: Pago) => p.clienteId === cliente.id)
-                      .reduce((acc, p) => acc + Number(p.cantidad), 0);
 
                     const totalHoras = trabajosCliente.reduce(
                       (acc, t) => acc + t.horas,
@@ -192,7 +178,7 @@ function Control() {
                               Total deuda: {deuda?.totalDeuda.toFixed(2)} €
                             </div>
                             <div style={{ marginLeft: "1rem" }}>
-                              Total pagado: {totalPagado.toFixed(2)} €
+                              Total pagado: {deuda?.totalPagado.toFixed(2)} €
                             </div>
 
                             {seleccionado && (

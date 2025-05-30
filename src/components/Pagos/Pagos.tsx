@@ -9,9 +9,8 @@ import {
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
 import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
-import { getMateriales } from "../../api/materialesApi";
-import { calcularDeudas } from "../../utils/calcularDeuda";
 import { AnimatePresence, motion } from "framer-motion";
+import { getDeudaReal } from "../../api/deudaApi";
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -69,26 +68,16 @@ function Pagos() {
   };
 
   const cargarDatos = async () => {
-    const [clientesData, pagosData, trabajosData, materialesData] =
-      await Promise.all([
-        getClientes(),
-        getPagos(),
-        getTrabajos(),
-        getMateriales(),
-      ]);
+    const [clientesData, pagosData] = await Promise.all([
+      getClientes(),
+      getPagos(),
+    ]);
 
     setClientes(clientesData);
 
-    // Solo pasamos los tres primeros, pagos ya no es necesario
-    const deudas = calcularDeudas(
-      clientesData,
-      trabajosData,
-      materialesData,
-      pagosData // <- NUEVO argumento
-    );
-
+    const resumenDeudas = await getDeudaReal();
     const clientesConDeuda = new Set(
-      deudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
+      resumenDeudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
     );
 
     const pagosFiltrados = pagosData
