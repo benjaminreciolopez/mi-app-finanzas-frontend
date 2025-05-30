@@ -1,6 +1,7 @@
 import { Cliente } from "../api/clientesApi";
 import { Trabajo } from "../api/trabajosApi";
 import { Material } from "../api/materialesApi";
+import { Pago } from "../api/pagosApi";
 
 export interface DeudaCliente {
   clienteId: number;
@@ -13,38 +14,47 @@ export interface DeudaCliente {
 export function calcularDeudas(
   clientes: Cliente[],
   trabajos: Trabajo[],
-  materiales: Material[]
+  materiales: Material[],
+  pagos: Pago[]
 ): DeudaCliente[] {
   return clientes.map((cliente) => {
-    // Trabajos pendientes: pagado = 0
-    const trabajosPendientes = trabajos.filter(
-      (t) =>
-        Number(t.clienteId) === Number(cliente.id) && Number(t.pagado) === 0
+    const trabajosCliente = trabajos.filter(
+      (t) => Number(t.clienteId) === Number(cliente.id)
     );
-    // Materiales pendientes: pagado = 0
-    const materialesPendientes = materiales.filter(
-      (m) =>
-        Number(m.clienteId) === Number(cliente.id) && Number(m.pagado) === 0
+    const materialesCliente = materiales.filter(
+      (m) => Number(m.clienteId) === Number(cliente.id)
+    );
+    const pagosCliente = pagos.filter(
+      (p) => Number(p.clienteId) === Number(cliente.id)
     );
 
-    const totalHoras = trabajosPendientes.reduce(
+    const totalHoras = trabajosCliente.reduce(
       (acc, t) => acc + Number(t.horas),
       0
     );
-    const totalMateriales = materialesPendientes.reduce(
+
+    const totalMateriales = materialesCliente.reduce(
       (acc, m) => acc + Number(m.coste),
       0
     );
 
-    // Deuda = trabajos pendientes + materiales pendientes
-    const total = totalHoras * Number(cliente.precioHora) + totalMateriales;
+    const totalPagado = pagosCliente.reduce(
+      (acc, p) => acc + Number(p.cantidad),
+      0
+    );
+
+    const costeTotalTrabajos = totalHoras * Number(cliente.precioHora);
+    const deudaReal = Math.max(
+      0,
+      costeTotalTrabajos + totalMateriales - totalPagado
+    );
 
     // LOG de depuración
     console.log("Cliente:", cliente.nombre, cliente.id, {
-      trabajosPendientes,
       totalHoras,
       totalMateriales,
-      total,
+      totalPagado,
+      deudaReal,
     });
 
     return {
@@ -52,7 +62,7 @@ export function calcularDeudas(
       nombre: cliente.nombre,
       horasPendientes: totalHoras,
       materialesPendientes: totalMateriales,
-      totalDeuda: total,
+      totalDeuda: deudaReal,
     };
   });
 }

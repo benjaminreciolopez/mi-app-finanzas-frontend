@@ -13,7 +13,7 @@ import {
   Trabajo,
 } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
-import { getPagos } from "../../api/pagosApi";
+import { getPagos, Pago } from "../../api/pagosApi";
 import { toast } from "react-toastify";
 import { calcularDeudas, DeudaCliente } from "../../utils/calcularDeuda";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,6 +29,8 @@ function Control() {
   const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
     null
   );
+  const [pagos, setPagos] = useState<Pago[]>([]);
+
   useEffect(() => {
     setTrabajoSeleccionado(null);
   }, [clienteSeleccionado]);
@@ -61,11 +63,13 @@ function Control() {
     setTrabajos(trabajosData);
     setMateriales(materialesData);
     setOrdenClientes(clientesConRegistros);
+    setPagos(pagosData); // ✅ guarda los pagos en estado
 
     const resumenDeudas = calcularDeudas(
       clientesConRegistros,
       trabajosData,
-      materialesData
+      materialesData,
+      pagosData // ✅ ahora también le pasas los pagos
     );
     console.log("Resumen de deudas calculadas:", resumenDeudas);
 
@@ -131,6 +135,10 @@ function Control() {
                     const deuda = deudas.find(
                       (d) => d.clienteId === cliente.id
                     );
+                    const totalPagado = pagos
+                      .filter((p: Pago) => p.clienteId === cliente.id)
+                      .reduce((acc, p) => acc + Number(p.cantidad), 0);
+
                     const totalHoras = trabajosCliente.reduce(
                       (acc, t) => acc + t.horas,
                       0
@@ -182,6 +190,9 @@ function Control() {
 
                             <div style={{ marginLeft: "1rem" }}>
                               Total deuda: {deuda?.totalDeuda.toFixed(2)} €
+                            </div>
+                            <div style={{ marginLeft: "1rem" }}>
+                              Total pagado: {totalPagado.toFixed(2)} €
                             </div>
 
                             {seleccionado && (

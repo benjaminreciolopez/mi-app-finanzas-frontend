@@ -80,7 +80,12 @@ function Pagos() {
     setClientes(clientesData);
 
     // Solo pasamos los tres primeros, pagos ya no es necesario
-    const deudas = calcularDeudas(clientesData, trabajosData, materialesData);
+    const deudas = calcularDeudas(
+      clientesData,
+      trabajosData,
+      materialesData,
+      pagosData // <- NUEVO argumento
+    );
 
     const clientesConDeuda = new Set(
       deudas.filter((d) => d.totalDeuda > 0).map((d) => d.clienteId)
