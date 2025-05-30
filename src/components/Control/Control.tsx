@@ -179,10 +179,6 @@ function Control() {
                               {deuda ? deuda.totalDeuda.toFixed(2) : "0.00"} €
                             </div>
                             <div style={{ marginLeft: "1rem" }}>
-                              Total pagado:{" "}
-                              {deuda ? deuda.totalPagado.toFixed(2) : "0.00"} €
-                            </div>
-                            <div style={{ marginLeft: "1rem" }}>
                               Horas pendientes:{" "}
                               {deuda ? deuda.totalHorasPendientes : 0}h
                             </div>
