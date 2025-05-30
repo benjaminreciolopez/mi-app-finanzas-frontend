@@ -13,5 +13,6 @@ export interface ResumenDeuda {
 export async function getDeudaReal(): Promise<ResumenDeuda[]> {
   const res = await fetch(API_URL);
   if (!res.ok) throw new Error("Error al obtener la deuda real");
+
   return await res.json();
 }
