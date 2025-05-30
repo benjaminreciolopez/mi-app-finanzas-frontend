@@ -180,6 +180,13 @@ function Control() {
                             <div style={{ marginLeft: "1rem" }}>
                               Total pagado: {deuda?.totalPagado.toFixed(2)} €
                             </div>
+                            <div style={{ marginLeft: "1rem" }}>
+                              Horas pendientes: {deuda?.totalHorasPendientes}h
+                            </div>
+                            <div style={{ marginLeft: "1rem" }}>
+                              Materiales pendientes:{" "}
+                              {deuda?.totalMaterialesPendientes.toFixed(2)} €
+                            </div>
 
                             {seleccionado && (
                               <div
