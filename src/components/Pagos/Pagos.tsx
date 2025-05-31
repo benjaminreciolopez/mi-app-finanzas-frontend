@@ -234,13 +234,50 @@ function Pagos() {
           onChange={(e) => setCantidad(e.target.value)}
           required
         />
+        <label
+          style={{
+            marginBottom: "2px",
+            display: "block",
+            fontSize: "0.98em",
+            color: "#444",
+          }}
+        >
+          Fecha
+        </label>
 
-        <input
-          type="date"
-          value={fecha}
-          onChange={(e) => setFecha(e.target.value)}
-          required
-        />
+        <div style={{ position: "relative", marginBottom: "12px" }}>
+          {!fecha && (
+            <span
+              style={{
+                position: "absolute",
+                left: "16px",
+                top: "13px",
+                color: "#aaa",
+                fontSize: "1em",
+                pointerEvents: "none",
+                zIndex: 1,
+              }}
+            >
+              Seleccione fecha
+            </span>
+          )}
+          <input
+            type="date"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+            required
+            style={{
+              width: "100%",
+              border: "1px solid #ccc",
+              borderRadius: "6px",
+              padding: "8px",
+              fontSize: "1em",
+              background: "transparent",
+              minHeight: "40px",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
 
         <textarea
           placeholder="Observaciones (opcional)"
@@ -326,10 +363,9 @@ function Pagos() {
                           <div
                             style={{
                               position: "relative",
-                              marginBottom: "6px",
+                              marginBottom: "12px",
                             }}
                           >
-                            {/* Placeholder visual solo si no hay fecha */}
                             {!pago.fecha && (
                               <span
                                 style={{
@@ -359,7 +395,7 @@ function Pagos() {
                                 padding: "8px",
                                 fontSize: "1em",
                                 background: "transparent",
-                                minHeight: "40px", // igual altura que los otros campos
+                                minHeight: "40px",
                                 boxSizing: "border-box",
                               }}
                             />
