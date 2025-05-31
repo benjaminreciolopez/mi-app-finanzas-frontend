@@ -33,9 +33,7 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
-    null
-  );
+  const [clienteSeleccionado] = useState<string | null>(null);
   const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
   const pagosListRef = useRef<HTMLUListElement>(null);
 
@@ -249,219 +247,174 @@ function Pagos() {
 
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3>Historial de Pagos</h3>
-        {clientes.length === 0 ? (
-          <p>No hay pagos registrados.</p>
+        {!clienteId ? (
+          <p>Selecciona un cliente para ver sus pagos.</p>
         ) : (
-          <>
-            {/* Listado de clientes para seleccionar */}
-            {clientes.map((cliente) => (
-              <div key={cliente.nombre}>
-                <p
-                  style={{
-                    fontWeight: "bold",
-                    color:
-                      clienteSeleccionado === cliente.nombre
-                        ? "#1e3a8a"
-                        : "#4f46e5",
-                    cursor: "pointer",
-                    background:
-                      clienteSeleccionado === cliente.nombre
-                        ? "#e0e7ff"
-                        : "transparent",
-                    borderRadius: "6px",
-                    padding: "6px 10px",
-                    marginBottom: 6,
-                    userSelect: "none",
-                  }}
-                  onClick={() =>
-                    setClienteSeleccionado(
-                      clienteSeleccionado === cliente.nombre
-                        ? null
-                        : cliente.nombre
-                    )
-                  }
-                >
-                  {clienteSeleccionado === cliente.nombre ? "▼" : "▶"}{" "}
-                  {cliente.nombre}
-                </p>
+          (() => {
+            // Busca el cliente y los pagos de ese cliente
+            const cliente = clientes.find((c) => c.id === parseInt(clienteId));
+            const pagosCliente = pagosConNombre.filter(
+              (p) => p.clienteId === parseInt(clienteId)
+            );
 
-                <AnimatePresence>
-                  {clienteSeleccionado === cliente.nombre && (
-                    <>
-                      <motion.ul
-                        className="historial-pagos"
-                        ref={pagosListRef}
-                        initial={{ opacity: 0, y: -15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -15 }}
-                        transition={{ duration: 0.22 }}
-                      >
-                        {pagosConNombre
-                          .filter((p) => p.nombre === cliente.nombre)
-                          .map((pago) => (
-                            <li
-                              key={pago.id}
+            if (!cliente || pagosCliente.length === 0) {
+              return <p>No hay pagos registrados para este cliente.</p>;
+            }
+
+            return (
+              <>
+                <motion.ul
+                  className="historial-pagos"
+                  ref={pagosListRef}
+                  initial={{ opacity: 0, y: -15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.22 }}
+                >
+                  {pagosCliente.map((pago) => (
+                    <li
+                      key={pago.id}
+                      style={{
+                        background:
+                          pagoSeleccionado === pago.id
+                            ? "#eef6fb"
+                            : "transparent",
+                        cursor: "pointer",
+                        borderRadius: "6px",
+                        padding: "4px 6px",
+                        marginBottom: "6px",
+                      }}
+                      onClick={() =>
+                        setPagoSeleccionado(
+                          pagoSeleccionado === pago.id ? null : pago.id
+                        )
+                      }
+                    >
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <div style={{ flex: 1 }}>
+                          <input
+                            type="number"
+                            value={pago.cantidad}
+                            disabled={pagoSeleccionado !== pago.id}
+                            onChange={(e) =>
+                              handleUpdate(pago.id, "cantidad", e.target.value)
+                            }
+                          />
+                          <input
+                            type="date"
+                            value={pago.fecha.slice(0, 10)}
+                            disabled={pagoSeleccionado !== pago.id}
+                            onChange={(e) =>
+                              handleUpdate(pago.id, "fecha", e.target.value)
+                            }
+                          />
+                          <input
+                            type="text"
+                            placeholder="Observaciones"
+                            disabled={pagoSeleccionado !== pago.id}
+                            value={pago.observaciones || ""}
+                            onChange={(e) =>
+                              handleUpdate(
+                                pago.id,
+                                "observaciones",
+                                e.target.value
+                              )
+                            }
+                          />
+                          {/* Mostrar cuánto se ha usado de este pago */}
+                          {usoPagosPorCliente[pago.clienteId]?.some(
+                            (p) => p.id === pago.id
+                          ) && (
+                            <div
                               style={{
-                                background:
-                                  pagoSeleccionado === pago.id
-                                    ? "#eef6fb"
-                                    : "transparent",
-                                cursor: "pointer",
-                                borderRadius: "6px",
-                                padding: "4px 6px",
-                                marginBottom: "6px",
+                                fontSize: "0.85rem",
+                                color: "#444",
+                                marginTop: "4px",
                               }}
-                              onClick={() =>
-                                setPagoSeleccionado(
-                                  pagoSeleccionado === pago.id ? null : pago.id
-                                )
-                              }
                             >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
+                              Usado:{" "}
+                              {
+                                usoPagosPorCliente[pago.clienteId].find(
+                                  (p) => p.id === pago.id
+                                )?.usado
+                              }
+                              € de {pago.cantidad}€
+                            </div>
+                          )}
+                        </div>
+                        <AnimatePresence>
+                          {pagoSeleccionado === pago.id && (
+                            <motion.div
+                              key="botones"
+                              initial={{ opacity: 0, x: 15 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              exit={{ opacity: 0, x: 15 }}
+                              transition={{ duration: 0.18 }}
+                              style={{ display: "flex", marginLeft: 8 }}
+                            >
+                              <button
+                                className="boton-accion"
+                                style={{ marginRight: 4 }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUpdate(
+                                    pago.id,
+                                    "cantidad",
+                                    pago.cantidad.toString()
+                                  );
                                 }}
                               >
-                                <div style={{ flex: 1 }}>
-                                  <input
-                                    type="number"
-                                    value={pago.cantidad}
-                                    disabled={pagoSeleccionado !== pago.id}
-                                    onChange={(e) =>
-                                      handleUpdate(
-                                        pago.id,
-                                        "cantidad",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                  <input
-                                    type="date"
-                                    value={pago.fecha.slice(0, 10)}
-                                    disabled={pagoSeleccionado !== pago.id}
-                                    onChange={(e) =>
-                                      handleUpdate(
-                                        pago.id,
-                                        "fecha",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                  <input
-                                    type="text"
-                                    placeholder="Observaciones"
-                                    disabled={pagoSeleccionado !== pago.id}
-                                    value={pago.observaciones || ""}
-                                    onChange={(e) =>
-                                      handleUpdate(
-                                        pago.id,
-                                        "observaciones",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                  {/* Mostrar cuánto se ha usado de este pago */}
-                                  {usoPagosPorCliente[pago.clienteId]?.some(
-                                    (p) => p.id === pago.id
-                                  ) && (
-                                    <div
-                                      style={{
-                                        fontSize: "0.85rem",
-                                        color: "#444",
-                                        marginTop: "4px",
-                                      }}
-                                    >
-                                      Usado:{" "}
-                                      {
-                                        usoPagosPorCliente[pago.clienteId].find(
-                                          (p) => p.id === pago.id
-                                        )?.usado
-                                      }
-                                      € de {pago.cantidad}€
-                                    </div>
-                                  )}
-                                </div>
-                                <AnimatePresence>
-                                  {pagoSeleccionado === pago.id && (
-                                    <motion.div
-                                      key="botones"
-                                      initial={{ opacity: 0, x: 15 }}
-                                      animate={{ opacity: 1, x: 0 }}
-                                      exit={{ opacity: 0, x: 15 }}
-                                      transition={{ duration: 0.18 }}
-                                      style={{ display: "flex", marginLeft: 8 }}
-                                    >
-                                      <button
-                                        className="boton-accion"
-                                        style={{ marginRight: 4 }}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleUpdate(
-                                            pago.id,
-                                            "cantidad",
-                                            pago.cantidad.toString()
-                                          );
-                                        }}
-                                      >
-                                        Guardar
-                                      </button>
-                                      <button
-                                        className="boton-accion"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDelete(pago.id);
-                                        }}
-                                      >
-                                        Eliminar
-                                      </button>
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            </li>
-                          ))}
-                      </motion.ul>
-
-                      {/* --- Detalle de uso de pagos (SOLO UNA VEZ por cliente) --- */}
-                      <div className="card" style={{ marginTop: 16 }}>
-                        <h4>🧾 Detalle de uso de pagos</h4>
-                        {asignaciones.length === 0 ? (
-                          <p>No hay pagos asignados para este cliente.</p>
-                        ) : (
-                          <table style={{ width: "100%", fontSize: "0.97em" }}>
-                            <thead>
-                              <tr>
-                                <th>Fecha pago</th>
-                                <th>Tipo</th>
-                                <th>Fecha tarea</th>
-                                <th>Monto aplicado (€)</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {asignaciones.map((a) => (
-                                <tr key={a.id}>
-                                  <td>{a.fecha_pago?.slice(0, 10)}</td>
-                                  <td>
-                                    {a.tipo === "trabajo"
-                                      ? "Trabajo"
-                                      : "Material"}
-                                  </td>
-                                  <td>{a.fecha_tarea?.slice(0, 10)}</td>
-                                  <td>{a.usado.toFixed(2)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
+                                Guardar
+                              </button>
+                              <button
+                                className="boton-accion"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDelete(pago.id);
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-                      {/* ---------------------------------------------- */}
-                    </>
+                    </li>
+                  ))}
+                </motion.ul>
+                {/* --- Detalle de uso de pagos para este cliente --- */}
+                <div className="card" style={{ marginTop: 16 }}>
+                  <h4>🧾 Detalle de uso de pagos</h4>
+                  {asignaciones.length === 0 ? (
+                    <p>No hay pagos asignados para este cliente.</p>
+                  ) : (
+                    <table style={{ width: "100%", fontSize: "0.97em" }}>
+                      <thead>
+                        <tr>
+                          <th>Fecha pago</th>
+                          <th>Tipo</th>
+                          <th>Fecha tarea</th>
+                          <th>Monto aplicado (€)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {asignaciones.map((a) => (
+                          <tr key={a.id}>
+                            <td>{a.fecha_pago?.slice(0, 10)}</td>
+                            <td>
+                              {a.tipo === "trabajo" ? "Trabajo" : "Material"}
+                            </td>
+                            <td>{a.fecha_tarea?.slice(0, 10)}</td>
+                            <td>{a.usado.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </>
+                </div>
+              </>
+            );
+          })()
         )}
       </div>
     </div>
