@@ -264,12 +264,22 @@ input:focus, select:focus, textarea:focus {
   z-index: 2;
   will-change: transform, opacity;
 }
- .historial-pagos {
-    max-height: 300px;   /* Cambia el valor según necesites */
-    overflow-y: auto;
-    padding-right: 8px;  /* Opcional para que el scroll no tape contenido */
-    margin-bottom: 10px; /* Opcional para separar del resto */
-  }
+.historial-pagos {
+  max-height: 230px;    /* Ajusta según tu gusto/pantalla */
+  overflow-y: auto;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #a5b4fc #f3f4f6;
+}
+.historial-pagos::-webkit-scrollbar {
+  width: 6px;
+  background: #f3f4f6;
+}
+.historial-pagos::-webkit-scrollbar-thumb {
+  background: #a5b4fc;
+  border-radius: 6px;
+}
 
 `;
 
