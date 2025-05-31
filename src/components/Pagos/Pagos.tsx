@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   getPagos,
   addPago,
@@ -33,7 +33,9 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [clienteSeleccionado] = useState<string | null>(null);
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
+    null
+  );
   const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
   const pagosListRef = useRef<HTMLUListElement>(null);
 
@@ -186,31 +188,31 @@ function Pagos() {
     }
   };
 
-  // Agrupa pagos por cliente
-  const pagosPorCliente = useMemo(() => {
-    const agrupados: { [cliente: string]: PagoConNombre[] } = {};
-    pagosConNombre.forEach((pago) => {
-      if (!agrupados[pago.nombre]) agrupados[pago.nombre] = [];
-      agrupados[pago.nombre].push(pago);
-    });
-    return agrupados;
-  }, [pagosConNombre]);
-
   useEffect(() => {
-    if (!pagosListRef.current) return;
-    if (clienteSeleccionado && pagosPorCliente[clienteSeleccionado]?.length) {
-      pagosListRef.current.scrollTop = pagosListRef.current.scrollHeight;
+    if (pagosListRef.current && clienteId) {
+      // Solo hace scroll si hay pagos en la lista del cliente seleccionado
+      const pagosCliente = pagosConNombre.filter(
+        (p) => p.clienteId === parseInt(clienteId)
+      );
+      if (pagosCliente.length > 0) {
+        pagosListRef.current.scrollTop = pagosListRef.current.scrollHeight;
+      }
     }
-  }, [pagosPorCliente, clienteSeleccionado]);
+  }, [clienteId, pagosConNombre]);
 
   return (
     <div className="container">
       <h2 className="title">Registro de Pagos</h2>
-
       <form onSubmit={handleSubmit} className="card">
         <select
           value={clienteId}
-          onChange={(e) => setClienteId(e.target.value)}
+          onChange={(e) => {
+            setClienteId(e.target.value);
+            const cliente = clientes.find(
+              (c) => c.id === parseInt(e.target.value)
+            );
+            setClienteSeleccionado(cliente ? cliente.nombre : null);
+          }}
           required
         >
           <option value="">Seleccionar cliente</option>
@@ -244,14 +246,12 @@ function Pagos() {
 
         <button type="submit">Registrar Pago</button>
       </form>
-
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3>Historial de Pagos</h3>
         {!clienteId ? (
           <p>Selecciona un cliente para ver sus pagos.</p>
         ) : (
           (() => {
-            // Busca el cliente y los pagos de ese cliente
             const cliente = clientes.find((c) => c.id === parseInt(clienteId));
             const pagosCliente = pagosConNombre.filter(
               (p) => p.clienteId === parseInt(clienteId)
@@ -266,10 +266,17 @@ function Pagos() {
                 <motion.ul
                   className="historial-pagos"
                   ref={pagosListRef}
-                  initial={{ opacity: 0, y: -15 }}
+                  initial={false}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -15 }}
                   transition={{ duration: 0.22 }}
+                  style={{
+                    maxHeight: "230px",
+                    overflowY: "auto",
+                    marginBottom: "12px",
+                    paddingRight: "4px",
+                    scrollbarWidth: "thin",
+                    scrollbarColor: "#a5b4fc #f3f4f6",
+                  }}
                 >
                   {pagosCliente.map((pago) => (
                     <li
@@ -290,6 +297,7 @@ function Pagos() {
                         )
                       }
                     >
+                      {" "}
                       <div style={{ display: "flex", alignItems: "center" }}>
                         <div style={{ flex: 1 }}>
                           <input
