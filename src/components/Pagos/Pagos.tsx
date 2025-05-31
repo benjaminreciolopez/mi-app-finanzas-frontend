@@ -313,15 +313,53 @@ function Pagos() {
                             onChange={(e) =>
                               handleUpdate(pago.id, "cantidad", e.target.value)
                             }
+                            style={{
+                              width: "100%",
+                              border: "1px solid #ccc",
+                              borderRadius: "6px",
+                              padding: "8px",
+                              marginBottom: "6px",
+                              fontSize: "1em",
+                            }}
                           />
-                          <input
-                            type="date"
-                            value={pago.fecha.slice(0, 10)}
-                            disabled={pagoSeleccionado !== pago.id}
-                            onChange={(e) =>
-                              handleUpdate(pago.id, "fecha", e.target.value)
-                            }
-                          />
+                          {/* Fecha con "placeholder" visual */}
+                          <div
+                            style={{
+                              position: "relative",
+                              marginBottom: "6px",
+                            }}
+                          >
+                            {!pago.fecha && (
+                              <span
+                                style={{
+                                  position: "absolute",
+                                  left: "12px",
+                                  top: "9px",
+                                  color: "#aaa",
+                                  fontSize: "0.98em",
+                                  pointerEvents: "none",
+                                  zIndex: 1,
+                                }}
+                              >
+                                Seleccione fecha
+                              </span>
+                            )}
+                            <input
+                              type="date"
+                              value={pago.fecha ? pago.fecha.slice(0, 10) : ""}
+                              disabled={pagoSeleccionado !== pago.id}
+                              onChange={(e) =>
+                                handleUpdate(pago.id, "fecha", e.target.value)
+                              }
+                              style={{
+                                width: "100%",
+                                border: "1px solid #ccc",
+                                borderRadius: "6px",
+                                padding: "8px",
+                                fontSize: "1em",
+                              }}
+                            />
+                          </div>
                           <input
                             type="text"
                             placeholder="Observaciones"
@@ -334,6 +372,14 @@ function Pagos() {
                                 e.target.value
                               )
                             }
+                            style={{
+                              width: "100%",
+                              border: "1px solid #ccc",
+                              borderRadius: "6px",
+                              padding: "8px",
+                              fontSize: "1em",
+                              marginBottom: "6px",
+                            }}
                           />
                           {/* Mostrar cuánto se ha usado de este pago */}
                           {usoPagosPorCliente[pago.clienteId]?.some(
