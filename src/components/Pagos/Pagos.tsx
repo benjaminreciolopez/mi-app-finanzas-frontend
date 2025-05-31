@@ -329,12 +329,13 @@ function Pagos() {
                               marginBottom: "6px",
                             }}
                           >
+                            {/* Placeholder visual solo si no hay fecha */}
                             {!pago.fecha && (
                               <span
                                 style={{
                                   position: "absolute",
                                   left: "16px",
-                                  top: "12px",
+                                  top: "13px",
                                   color: "#aaa",
                                   fontSize: "1em",
                                   pointerEvents: "none",
@@ -358,10 +359,11 @@ function Pagos() {
                                 padding: "8px",
                                 fontSize: "1em",
                                 background: "transparent",
+                                minHeight: "40px", // igual altura que los otros campos
+                                boxSizing: "border-box",
                               }}
                             />
                           </div>
-
                           <input
                             type="text"
                             placeholder="Observaciones"
