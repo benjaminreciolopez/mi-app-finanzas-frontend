@@ -303,7 +303,6 @@ function Pagos() {
                         )
                       }
                     >
-                      {" "}
                       <div style={{ display: "flex", alignItems: "center" }}>
                         <div style={{ flex: 1 }}>
                           <input
@@ -322,7 +321,8 @@ function Pagos() {
                               fontSize: "1em",
                             }}
                           />
-                          {/* Fecha con "placeholder" visual */}
+
+                          {/* Campo de fecha alineado con placeholder visual */}
                           <div
                             style={{
                               position: "relative",
@@ -333,10 +333,10 @@ function Pagos() {
                               <span
                                 style={{
                                   position: "absolute",
-                                  left: "12px",
-                                  top: "9px",
+                                  left: "16px",
+                                  top: "12px",
                                   color: "#aaa",
-                                  fontSize: "0.98em",
+                                  fontSize: "1em",
                                   pointerEvents: "none",
                                   zIndex: 1,
                                 }}
@@ -357,9 +357,11 @@ function Pagos() {
                                 borderRadius: "6px",
                                 padding: "8px",
                                 fontSize: "1em",
+                                background: "transparent",
                               }}
                             />
                           </div>
+
                           <input
                             type="text"
                             placeholder="Observaciones"
