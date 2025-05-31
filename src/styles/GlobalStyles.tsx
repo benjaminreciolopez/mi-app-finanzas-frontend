@@ -264,6 +264,13 @@ input:focus, select:focus, textarea:focus {
   z-index: 2;
   will-change: transform, opacity;
 }
+ .historial-pagos {
+    max-height: 300px;   /* Cambia el valor según necesites */
+    overflow-y: auto;
+    padding-right: 8px;  /* Opcional para que el scroll no tape contenido */
+    margin-bottom: 10px; /* Opcional para separar del resto */
+  }
+
 `;
 
 export default GlobalStyles;
