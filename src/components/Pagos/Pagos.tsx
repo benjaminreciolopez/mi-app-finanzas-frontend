@@ -38,7 +38,7 @@ function Pagos() {
   );
   const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
   const pagosListRef = useRef<HTMLUListElement>(null);
-
+  const [loadingPago, setLoadingPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
   const [usoPagosPorCliente, setUsoPagosPorCliente] =
     useState<UsoPagosPorCliente>({});
@@ -123,6 +123,8 @@ function Pagos() {
     e.preventDefault();
     if (!clienteId || !cantidad || !fecha) return;
 
+    setLoadingPago(true); // <--- Aquí activa el estado de carga
+
     try {
       const id = await addPago({
         clienteId: parseInt(clienteId),
@@ -155,6 +157,8 @@ function Pagos() {
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);
+    } finally {
+      setLoadingPago(false); // <--- Aquí desactiva el loading pase lo que pase
     }
   };
 
@@ -244,7 +248,9 @@ function Pagos() {
           onChange={(e) => setObservaciones(e.target.value)}
         />
 
-        <button type="submit">Registrar Pago</button>
+        <button type="submit" disabled={loadingPago}>
+          {loadingPago ? "Guardando..." : "Registrar Pago"}
+        </button>
       </form>
       <div className="card" style={{ marginTop: "1rem" }}>
         <h3>Historial de Pagos</h3>
