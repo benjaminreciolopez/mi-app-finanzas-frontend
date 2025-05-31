@@ -250,12 +250,15 @@ function Pagos() {
             <span
               style={{
                 position: "absolute",
-                left: "16px",
+                left: "50%",
                 top: "13px",
+                transform: "translateX(-50%)",
                 color: "#aaa",
                 fontSize: "1em",
                 pointerEvents: "none",
                 zIndex: 1,
+                width: "max-content",
+                whiteSpace: "nowrap",
               }}
             >
               Seleccione fecha
