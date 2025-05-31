@@ -265,13 +265,15 @@ input:focus, select:focus, textarea:focus {
   will-change: transform, opacity;
 }
 .historial-pagos {
-  max-height: 230px;    /* Ajusta según tu gusto/pantalla */
+  max-height: 55vh;      /* Cambia 55vh por el % de pantalla que prefieras */
   overflow-y: auto;
   margin-bottom: 12px;
   padding-right: 4px;
   scrollbar-width: thin;
   scrollbar-color: #a5b4fc #f3f4f6;
+  transition: max-height 0.2s;
 }
+
 .historial-pagos::-webkit-scrollbar {
   width: 6px;
   background: #f3f4f6;

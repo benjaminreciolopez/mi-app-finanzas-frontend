@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   getPagos,
   addPago,
@@ -37,6 +37,7 @@ function Pagos() {
     null
   );
   const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
+  const pagosListRef = useRef<HTMLUListElement>(null);
 
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
   const [usoPagosPorCliente, setUsoPagosPorCliente] =
@@ -188,11 +189,21 @@ function Pagos() {
   };
 
   // Agrupa pagos por cliente
-  const pagosPorCliente: { [cliente: string]: PagoConNombre[] } = {};
-  pagosConNombre.forEach((pago) => {
-    if (!pagosPorCliente[pago.nombre]) pagosPorCliente[pago.nombre] = [];
-    pagosPorCliente[pago.nombre].push(pago);
-  });
+  const pagosPorCliente = useMemo(() => {
+    const agrupados: { [cliente: string]: PagoConNombre[] } = {};
+    pagosConNombre.forEach((pago) => {
+      if (!agrupados[pago.nombre]) agrupados[pago.nombre] = [];
+      agrupados[pago.nombre].push(pago);
+    });
+    return agrupados;
+  }, [pagosConNombre]);
+
+  useEffect(() => {
+    if (!pagosListRef.current) return;
+    if (clienteSeleccionado && pagosPorCliente[clienteSeleccionado]?.length) {
+      pagosListRef.current.scrollTop = pagosListRef.current.scrollHeight;
+    }
+  }, [pagosPorCliente, clienteSeleccionado]);
 
   return (
     <div className="container">
@@ -268,6 +279,7 @@ function Pagos() {
                   <>
                     <motion.ul
                       className="historial-pagos"
+                      ref={pagosListRef}
                       initial={{ opacity: 0, y: -15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -15 }}
