@@ -11,7 +11,7 @@ export interface Pago {
   observaciones?: string;
 }
 
-// Obtener todos los pagos
+// ✅ Ahora devuelven el objeto completo
 export const getPagos = async (): Promise<Pago[]> => {
   const res = await axios.get<{ data: Pago[] }>(API_URL);
   return res.data.data;
@@ -22,7 +22,7 @@ export async function addPago(pago: {
   cantidad: number;
   fecha: string;
   observaciones?: string;
-}): Promise<number> {
+}): Promise<any> {
   const res = await fetch(API_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -34,19 +34,19 @@ export async function addPago(pago: {
     throw new Error(errorData.error || "Error al añadir el pago");
   }
 
-  const data = await res.json();
-  return data.id;
+  // Devuelve el objeto { id, message, resumen }
+  return await res.json();
 }
 
-// Actualizar un pago existente
 export const updatePago = async (
   id: number,
   datos: Partial<Omit<Pago, "id">>
-) => {
-  await axios.put(`${API_URL}/${id}`, datos);
+): Promise<any> => {
+  const res = await axios.put(`${API_URL}/${id}`, datos);
+  return res.data; // Devuelve { message, resumen }
 };
 
-// Eliminar un pago por ID
-export const deletePago = async (id: number) => {
-  await axios.delete(`${API_URL}/${id}`);
+export const deletePago = async (id: number): Promise<any> => {
+  const res = await axios.delete(`${API_URL}/${id}`);
+  return res.data; // Devuelve { message, resumen }
 };

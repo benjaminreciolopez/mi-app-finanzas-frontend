@@ -8,7 +8,6 @@ import {
 } from "../../api/pagosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
-import { getTrabajos, updateTrabajo } from "../../api/trabajosApi";
 import { AnimatePresence, motion } from "framer-motion";
 import { getDeudaReal } from "../../api/deudaApi";
 import {
@@ -22,6 +21,7 @@ interface PagoConNombre extends Pago {
 interface PagoUsado {
   id: number;
   usado: number;
+  fecha?: string; // <- sin el ?
 }
 
 type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
@@ -59,39 +59,6 @@ function Pagos() {
     cargarDatos();
   }, []);
 
-  // Marca como pagados tantos trabajos como cubra el pago (FIFO)
-  const marcarTrabajosComoPagados = async (
-    clienteIdStr: string,
-    pago: number
-  ) => {
-    const clienteId = parseInt(clienteIdStr);
-    const trabajosCliente = await getTrabajos();
-
-    // Filtra trabajos pendientes del cliente (FIFO)
-    const pendientes = trabajosCliente
-      .filter(
-        (t) => Number(t.clienteId) === clienteId && Number(t.pagado) === 0
-      )
-      .sort(
-        (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
-      );
-
-    const cliente = clientes.find((c) => Number(c.id) === clienteId);
-    if (!cliente) return;
-
-    let restante = pago;
-
-    for (const trabajo of pendientes) {
-      const costeTrabajo = Number(trabajo.horas) * Number(cliente.precioHora);
-      if (restante >= costeTrabajo) {
-        await updateTrabajo(trabajo.id, { pagado: 1 });
-        restante -= costeTrabajo;
-      } else {
-        break;
-      }
-    }
-  };
-
   const cargarDatos = async () => {
     const [clientesData, pagosData, resumenDeudas] = await Promise.all([
       getClientes(),
@@ -108,7 +75,7 @@ function Pagos() {
     });
     setUsoPagosPorCliente(uso);
 
-    const pagosConNombres = pagosData.map((pago) => {
+    const pagosConNombres = pagosData.map((pago: Pago) => {
       const cliente = clientesData.find((c) => c.id === pago.clienteId);
       return {
         ...pago,
@@ -119,46 +86,61 @@ function Pagos() {
     setPagosConNombre(pagosConNombres);
   };
 
+  // ... imports y hooks como antes ...
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clienteId || !cantidad || !fecha) return;
 
-    setLoadingPago(true); // <--- Aquí activa el estado de carga
+    setLoadingPago(true);
 
     try {
-      const id = await addPago({
+      // Nuevo: recibe { id, message, resumen }
+      const respuesta = await addPago({
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
         fecha: new Date(fecha).toISOString(),
         observaciones: observaciones.trim() || undefined,
       });
 
-      const cliente = clientes.find((c) => c.id === parseInt(clienteId));
-      const nombreCliente = cliente?.nombre || "Desconocido";
-
-      const nuevoPago: PagoConNombre = {
-        id,
-        clienteId: parseInt(clienteId),
-        cantidad: parseFloat(cantidad),
-        fecha: new Date(fecha).toISOString(),
-        observaciones: observaciones.trim() || undefined,
-        nombre: nombreCliente,
-      };
-
-      setPagosConNombre((prev) => [nuevoPago, ...prev]);
-
       toast.success("Pago registrado correctamente");
       setClienteId("");
       setCantidad("");
       setFecha("");
       setObservaciones("");
-      await marcarTrabajosComoPagados(clienteId, parseFloat(cantidad));
-      await cargarDatos();
+
+      // Actualiza pagos y uso de pagos con el resumen devuelto
+      if (respuesta.resumen) {
+        // Si quieres refrescar toda la tabla:
+        setUsoPagosPorCliente((prev) => ({
+          ...prev,
+          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+        }));
+        setPagosConNombre((prev) => {
+          // Reemplaza todos los pagos del cliente con los del resumen actualizado
+          const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
+            (p: PagoUsado) => ({
+              id: parseInt(p.id as any), // Ojo, según el backend, puede que p.id ya sea number, ajusta si hace falta
+              clienteId: respuesta.resumen.clienteId,
+              cantidad: p.usado,
+              fecha: p.fecha || fecha, // o actualizado.fecha, según el contexto
+              observaciones: "",
+              nombre: respuesta.resumen.nombre,
+            })
+          );
+          return [
+            ...prev.filter((p) => p.clienteId !== respuesta.resumen.clienteId),
+            ...nuevosPagosCliente,
+          ];
+        });
+      } else {
+        await cargarDatos(); // fallback si no hay resumen
+      }
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);
     } finally {
-      setLoadingPago(false); // <--- Aquí desactiva el loading pase lo que pase
+      setLoadingPago(false);
     }
   };
 
@@ -168,13 +150,39 @@ function Pagos() {
     const actualizado = { ...pago, [campo]: valor };
 
     try {
-      await updatePago(id, {
+      // Nuevo: recibe { message, resumen }
+      const respuesta = await updatePago(id, {
         cantidad: parseFloat(actualizado.cantidad.toString()),
         fecha: new Date(actualizado.fecha).toISOString(),
         observaciones: actualizado.observaciones,
       });
       toast.success("Pago actualizado");
-      cargarDatos();
+
+      if (respuesta.resumen) {
+        setUsoPagosPorCliente((prev) => ({
+          ...prev,
+          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+        }));
+        setPagosConNombre((prev) => {
+          // Reemplaza todos los pagos del cliente con los del resumen actualizado
+          const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
+            (p: PagoUsado) => ({
+              id: parseInt(p.id as any),
+              clienteId: respuesta.resumen.clienteId,
+              cantidad: p.usado,
+              fecha: p.fecha || actualizado.fecha,
+              observaciones: actualizado.observaciones,
+              nombre: respuesta.resumen.nombre,
+            })
+          );
+          return [
+            ...prev.filter((p) => p.clienteId !== respuesta.resumen.clienteId),
+            ...nuevosPagosCliente,
+          ];
+        });
+      } else {
+        cargarDatos();
+      }
       setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al actualizar");
@@ -183,9 +191,19 @@ function Pagos() {
 
   const handleDelete = async (id: number) => {
     try {
-      await deletePago(id);
+      // Nuevo: recibe { message, resumen }
+      const respuesta = await deletePago(id);
       toast.success("Pago eliminado");
-      cargarDatos();
+
+      if (respuesta.resumen) {
+        setUsoPagosPorCliente((prev) => ({
+          ...prev,
+          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+        }));
+        setPagosConNombre((prev) => prev.filter((p) => p.id !== id));
+      } else {
+        cargarDatos();
+      }
       setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al eliminar el pago");
@@ -424,21 +442,14 @@ function Pagos() {
                               marginBottom: "6px",
                             }}
                           />
-                          {/* Mostrar cuánto se ha usado de este pago */}
                           {usoPagosPorCliente[pago.clienteId]?.some(
-                            (p) => p.id === pago.id
+                            (p: PagoUsado) => p.id === pago.id
                           ) && (
-                            <div
-                              style={{
-                                fontSize: "0.85rem",
-                                color: "#444",
-                                marginTop: "4px",
-                              }}
-                            >
+                            <div>
                               Usado:{" "}
                               {
                                 usoPagosPorCliente[pago.clienteId].find(
-                                  (p) => p.id === pago.id
+                                  (p: PagoUsado) => p.id === pago.id
                                 )?.usado
                               }
                               € de {pago.cantidad}€

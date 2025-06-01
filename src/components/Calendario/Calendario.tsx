@@ -8,12 +8,11 @@ import { toast } from "react-toastify";
 function Calendario() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [clienteId, setClienteId] = useState<number | "">("");
-  const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
   const [mostrarBotonHoy, setMostrarBotonHoy] = useState(false);
   const [resumen, setResumen] = useState<string | null>(null);
-  const [calendarKey, setCalendarKey] = useState(0); // 👈 esto fuerza el re-render
+  const [calendarKey, setCalendarKey] = useState(0);
 
   useEffect(() => {
     getClientes().then(setClientes);
@@ -35,14 +34,14 @@ function Calendario() {
   const volverAHoy = () => {
     const hoy = new Date();
     setFecha(hoy);
-    setCalendarKey((prev) => prev + 1); // 👈 reinicia el Calendar para mostrar el mes actual
+    setCalendarKey((prev) => prev + 1);
     setMostrarBotonHoy(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedHoras = parseFloat(horas);
-    if (!nombre || !fecha || isNaN(parsedHoras)) return;
+    if (!clienteId || !fecha || isNaN(parsedHoras)) return;
 
     const nuevaFecha = [
       fecha.getFullYear(),
@@ -50,9 +49,13 @@ function Calendario() {
       String(fecha.getDate()).padStart(2, "0"),
     ].join("-");
 
+    // Obtén el nombre solo cuando lo necesites (opcional, puedes quitar si el backend ya no lo pide)
+    const cliente = clientes.find((c) => c.id === Number(clienteId));
+    const clienteNombre = cliente ? cliente.nombre : "";
+
     await addTrabajo({
       clienteId: Number(clienteId),
-      nombre, // puedes quitarlo más adelante, ahora ayuda para migrar
+      nombre: clienteNombre, // elimina esta línea si el backend ya no lo requiere
       fecha: nuevaFecha,
       horas: parsedHoras,
       pagado: 0,
@@ -60,13 +63,12 @@ function Calendario() {
 
     toast.success("✅ Trabajo añadido correctamente");
     setResumen(
-      `Trabajo añadido: ${parsedHoras}h para ${nombre} en ${nuevaFecha}`
+      `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`
     );
 
     setTimeout(() => {
       setResumen(null);
-    }, 3000); // 👈 3 segundos de visibilidad
-    setNombre("");
+    }, 3000);
     setHoras("");
   };
 
@@ -77,13 +79,7 @@ function Calendario() {
         <label>Cliente:</label>
         <select
           value={clienteId}
-          onChange={(e) => {
-            setClienteId(Number(e.target.value));
-            const cliente = clientes.find(
-              (c) => c.id === Number(e.target.value)
-            );
-            setNombre(cliente ? cliente.nombre : "");
-          }}
+          onChange={(e) => setClienteId(Number(e.target.value))}
           required
         >
           <option value="">Seleccionar cliente</option>

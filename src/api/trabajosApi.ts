@@ -13,12 +13,20 @@ export interface Trabajo {
 }
 
 export const getTrabajos = async (): Promise<Trabajo[]> => {
-  const res = await axios.get<{ data: Trabajo[] }>(API_URL);
-  return res.data.data;
+  try {
+    const res = await axios.get<{ data: Trabajo[] }>(API_URL);
+    return res.data.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-export const updateTrabajo = (id: number, datos: Partial<Trabajo>) =>
-  axios.put(`${API_URL}/${id}`, datos);
+export const updateTrabajo = async (
+  id: number,
+  datos: Partial<Trabajo>
+): Promise<void> => {
+  await axios.put(`${API_URL}/${id}`, datos);
+};
 
 export const addTrabajo = async (trabajo: {
   clienteId: number;
@@ -31,7 +39,6 @@ export const addTrabajo = async (trabajo: {
   return res.data.id;
 };
 
-// ✅ Nueva función para eliminar trabajo
-export const deleteTrabajo = async (id: number) => {
+export const deleteTrabajo = async (id: number): Promise<void> => {
   await axios.delete(`${API_URL}/${id}`);
 };

@@ -1,6 +1,10 @@
-// src/components/Control/Control.tsx
 import { useEffect, useState } from "react";
-import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  DropResult,
+} from "@hello-pangea/dnd";
 import {
   getClientes,
   Cliente,
@@ -21,7 +25,7 @@ function Control() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);
   const [materiales, setMateriales] = useState<Material[]>([]);
   const [ordenClientes, setOrdenClientes] = useState<Cliente[]>([]);
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
+  const [clienteSeleccionado, setClienteSeleccionado] = useState<number | null>(
     null
   );
   const [deudas, setDeudas] = useState<ResumenDeuda[]>([]);
@@ -43,15 +47,11 @@ function Control() {
       getTrabajos(),
       getMateriales(),
     ]);
-    console.log("ClientesData", clientesData);
-    console.log("TrabajosData", trabajosData);
-    console.log("MaterialesData", materialesData);
-
     const clientesConRegistros = clientesData
       .filter(
         (c) =>
-          trabajosData.some((t) => t.nombre === c.nombre) ||
-          materialesData.some((m) => m.nombre === c.nombre)
+          trabajosData.some((t) => t.clienteId === c.id) ||
+          materialesData.some((m) => m.clienteId === c.id)
       )
       .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
 
@@ -60,12 +60,10 @@ function Control() {
     setOrdenClientes(clientesConRegistros);
 
     const resumenDeudas = await getDeudaReal();
-    console.log("Resumen de deudas calculadas:", resumenDeudas);
-
     setDeudas(resumenDeudas);
   };
 
-  const onDragEnd = async (result: any) => {
+  const onDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
     const updated = Array.from(ordenClientes);
@@ -89,14 +87,14 @@ function Control() {
   const marcarComoPagado = async (id: number) => {
     await updateTrabajo(id, { pagado: 1 });
     toast.success("Trabajo marcado como pagado");
-    cargarDatos();
+    await cargarDatos();
   };
 
   const eliminarTrabajo = async (id: number) => {
     if (window.confirm("¿Eliminar este trabajo?")) {
       await deleteTrabajo(id);
       toast.success("Trabajo eliminado");
-      cargarDatos();
+      await cargarDatos();
     }
   };
 
@@ -110,16 +108,16 @@ function Control() {
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef}>
                   {ordenClientes.map((cliente, index) => {
-                    const seleccionado = clienteSeleccionado === cliente.nombre;
+                    const seleccionado = clienteSeleccionado === cliente.id;
                     const trabajosCliente = trabajos
-                      .filter((t) => t.nombre === cliente.nombre)
+                      .filter((t) => t.clienteId === cliente.id)
                       .sort(
                         (a, b) =>
                           new Date(a.fecha).getTime() -
                           new Date(b.fecha).getTime()
                       );
                     const materialesCliente = materiales.filter(
-                      (m) => m.nombre === cliente.nombre
+                      (m) => m.clienteId === cliente.id
                     );
                     const deuda = deudas.find(
                       (d) => d.clienteId === cliente.id
@@ -129,12 +127,10 @@ function Control() {
                       (acc, t) => acc + t.horas,
                       0
                     );
-                    // Calcula total de horas de trabajos pagados
                     const totalHorasPagadas = trabajosCliente
                       .filter((t) => t.pagado)
                       .reduce((acc, t) => acc + t.horas, 0);
 
-                    // Calcula el total cobrado (horas pagadas x precio/hora del cliente)
                     const totalCobrado = totalHorasPagadas * cliente.precioHora;
 
                     return (
@@ -156,7 +152,7 @@ function Control() {
                             <p
                               onClick={() =>
                                 setClienteSeleccionado(
-                                  seleccionado ? null : cliente.nombre
+                                  seleccionado ? null : cliente.id
                                 )
                               }
                               style={{
@@ -274,9 +270,11 @@ function Control() {
                                                 >
                                                   <button
                                                     className="boton-accion"
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                       e.stopPropagation();
-                                                      marcarComoPagado(t.id);
+                                                      await marcarComoPagado(
+                                                        t.id
+                                                      );
                                                       setTrabajoSeleccionado(
                                                         null
                                                       );
@@ -287,9 +285,11 @@ function Control() {
                                                   </button>
                                                   <button
                                                     className="boton-accion"
-                                                    onClick={(e) => {
+                                                    onClick={async (e) => {
                                                       e.stopPropagation();
-                                                      eliminarTrabajo(t.id);
+                                                      await eliminarTrabajo(
+                                                        t.id
+                                                      );
                                                       setTrabajoSeleccionado(
                                                         null
                                                       );

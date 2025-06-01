@@ -5,9 +5,10 @@ const API_URL = `${API_BASE}/api/deuda-real`;
 
 export interface PagoUsado {
   id: number;
-  fecha: string;
-  cantidad: number;
+  fecha?: string; // ← Puede venir o no (según API)
+  cantidad?: number; // ← Puede venir o no
   usado: number;
+  cuadrado?: number; // ← Añadido para ver si el pago está completamente usado
 }
 
 export interface ResumenDeuda {
@@ -17,6 +18,7 @@ export interface ResumenDeuda {
   totalMaterialesPendientes: number;
   totalPagado: number;
   totalDeuda: number;
+  saldoACuenta?: number; // ← Añádelo si tu API lo devuelve
   pagosUsados: PagoUsado[];
 }
 

@@ -14,7 +14,6 @@ function Materiales() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [descripcion, setDescripcion] = useState("");
   const [coste, setCoste] = useState("");
-  const [nombre, setNombre] = useState("");
   const [fecha, setFecha] = useState("");
   const [clienteSeleccionado, setClienteSeleccionado] =
     useState<Cliente | null>(null);
@@ -41,10 +40,11 @@ function Materiales() {
     const nuevoId = await addMaterial({
       descripcion,
       coste: parsedCoste,
-      nombre: clienteSeleccionado.nombre, // Para mostrar
+      nombre: clienteSeleccionado.nombre, // Solo para mostrar
       fecha,
       pagado: 0,
-      clienteId: clienteSeleccionado.id, // 👈 ESTE ES EL IMPORTANTE
+      clienteId: clienteSeleccionado.id,
+      cuadrado: 0, // Añadido por compatibilidad
     });
 
     setMateriales((prev) => [
@@ -57,12 +57,12 @@ function Materiales() {
         fecha,
         pagado: 0,
         clienteId: clienteSeleccionado.id,
+        cuadrado: 0, // Añadido por compatibilidad
       },
     ]);
 
     setDescripcion("");
     setCoste("");
-    setNombre("");
     setFecha("");
     setClienteSeleccionado(null);
     toast.success("Material añadido");
@@ -76,10 +76,9 @@ function Materiales() {
 
   const materialesPendientes = materiales.filter((m) => m.pagado === 0);
 
-  const mostrarBotones = !!(
+  const mostrarBotonAñadir = !!(
     descripcion.trim() ||
     coste.trim() ||
-    nombre.trim() ||
     fecha.trim()
   );
 
@@ -105,7 +104,6 @@ function Materiales() {
           onChange={(e) => {
             const cli = clientes.find((c) => c.id === Number(e.target.value));
             setClienteSeleccionado(cli || null);
-            setNombre(cli?.nombre || "");
           }}
           required
         >
@@ -121,7 +119,7 @@ function Materiales() {
           value={fecha}
           onChange={(e) => setFecha(e.target.value)}
         />
-        {mostrarBotones && <button type="submit">Añadir Material</button>}
+        {mostrarBotonAñadir && <button type="submit">Añadir Material</button>}
       </form>
 
       <div className="card">
@@ -149,7 +147,6 @@ function Materiales() {
                 className="boton-accion"
                 onClick={() => marcarComoPagado(material.id)}
                 style={{
-                  display: mostrarBotones ? "inline-block" : "none",
                   marginLeft: "10px",
                 }}
               >

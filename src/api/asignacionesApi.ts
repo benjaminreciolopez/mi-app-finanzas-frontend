@@ -7,6 +7,7 @@ export interface PagoAsignado {
   usado: number;
   fecha_pago: string;
   fecha_tarea: string;
+  cuadrado?: number; // ← Añadido: puede ser 1 o 0 (opcional para compatibilidad)
 }
 
 export async function getAsignacionesCliente(

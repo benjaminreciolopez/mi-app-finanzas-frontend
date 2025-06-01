@@ -45,20 +45,22 @@ function Clientes() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nombre || !precioHora) return;
-
-    if (modoEdicion && clienteSeleccionado) {
-      await updateCliente(clienteSeleccionado.id, {
-        nombre,
-        precioHora: parseFloat(precioHora),
-      });
-    } else {
-      await addCliente({ nombre, precioHora: parseFloat(precioHora) });
+    try {
+      if (modoEdicion && clienteSeleccionado) {
+        await updateCliente(clienteSeleccionado.id, {
+          nombre,
+          precioHora: parseFloat(precioHora),
+        });
+      } else {
+        await addCliente({ nombre, precioHora: parseFloat(precioHora) });
+      }
+      resetFormulario();
+      cargarClientes();
+    } catch (error) {
+      // @ts-ignore
+      alert("Error al guardar cliente");
     }
-
-    resetFormulario();
-    cargarClientes();
   };
-
   const handleEditar = () => {
     if (clienteSeleccionado) {
       setNombre(clienteSeleccionado.nombre);
@@ -69,9 +71,14 @@ function Clientes() {
 
   const handleEliminar = async () => {
     if (clienteSeleccionado) {
-      await deleteCliente(clienteSeleccionado.id);
-      resetFormulario();
-      cargarClientes();
+      try {
+        await deleteCliente(clienteSeleccionado.id);
+        resetFormulario();
+        cargarClientes();
+      } catch (error) {
+        // @ts-ignore
+        alert("Error al eliminar cliente");
+      }
     }
   };
 

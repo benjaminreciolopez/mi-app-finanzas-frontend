@@ -17,7 +17,7 @@ export const getClientes = async (): Promise<Cliente[]> => {
 
 export const actualizarOrdenClientes = async (
   ordenes: { id: number; orden: number }[]
-) => {
+): Promise<void> => {
   await fetch(`${import.meta.env.VITE_API_URL}/api/clientes/orden`, {
     method: "PUT",
     headers: {
@@ -27,13 +27,27 @@ export const actualizarOrdenClientes = async (
   });
 };
 
+// Si quieres recibir el id al crear un cliente, descomenta esta función:
+// export const addCliente = async (cliente: { nombre: string; precioHora: number }): Promise<number> => {
+//   const res = await axios.post<{ id: number }>(API_URL, cliente);
+//   return res.data.id;
+// };
+
+// Si no te hace falta, puedes dejarlo así:
 export const addCliente = async (cliente: {
   nombre: string;
   precioHora: number;
-}) => {
+}): Promise<void> => {
   await axios.post(API_URL, cliente);
 };
-export const updateCliente = (id: number, cliente: Partial<Cliente>) =>
-  axios.put(`${API_URL}/${id}`, cliente);
 
-export const deleteCliente = (id: number) => axios.delete(`${API_URL}/${id}`);
+export const updateCliente = async (
+  id: number,
+  cliente: Partial<Cliente>
+): Promise<void> => {
+  await axios.put(`${API_URL}/${id}`, cliente);
+};
+
+export const deleteCliente = async (id: number): Promise<void> => {
+  await axios.delete(`${API_URL}/${id}`);
+};

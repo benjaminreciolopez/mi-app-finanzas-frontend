@@ -10,9 +10,11 @@ export interface Material {
   nombre: string;
   fecha: string;
   pagado: number;
+  cuadrado: number; // <--- Añadido
   clienteId: number;
 }
 
+// Añade cuadrado también en el input si lo usas en formularios
 export const getMateriales = async (): Promise<Material[]> => {
   const res = await axios.get<{ data: Material[] }>(API_URL);
   return res.data.data;
@@ -23,7 +25,8 @@ export const addMaterial = async (material: {
   coste: number;
   nombre: string;
   fecha: string;
-  pagado: number;
+  pagado?: number; // Ahora puede ser opcional
+  cuadrado?: number; // <--- Añadido
   clienteId: number;
 }): Promise<number> => {
   const res = await axios.post<{ id: number }>(API_URL, material);

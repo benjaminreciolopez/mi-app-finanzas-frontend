@@ -17,18 +17,22 @@ interface ResumenMensual {
   total: number;
 }
 
+// ✅ Saca la URL fuera del componente para evitar recalculado
+const API_URL = `${import.meta.env.VITE_API_URL}/api/evolucion`;
+
 function Evolucion() {
   const añoActual = new Date().getFullYear();
   const [año, setAño] = useState<number>(añoActual);
   const [datos, setDatos] = useState<ResumenMensual[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     cargarEvolucion(año);
+    // eslint-disable-next-line
   }, [año]);
 
-  const API_URL = `${import.meta.env.VITE_API_URL}/api/evolucion`;
-
   const cargarEvolucion = async (añoElegido: number) => {
+    setLoading(true);
     try {
       const res = await axios.get<{ data: ResumenMensual[] }>(
         `${API_URL}?año=${añoElegido}`
@@ -36,6 +40,9 @@ function Evolucion() {
       setDatos(res.data.data);
     } catch (error) {
       console.error("❌ Error cargando evolución:", error);
+      setDatos([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,6 +64,7 @@ function Evolucion() {
     return nombres[mes - 1] || "";
   };
 
+  // Construye array con 12 meses (rellenados con total 0 si no hay datos)
   const mesesCompletos = Array.from({ length: 12 }, (_, i) => ({
     mes: formatearMes(i + 1),
     total: 0,
@@ -88,6 +96,18 @@ function Evolucion() {
           </select>
         </label>
       </div>
+
+      {/* Mensaje si está cargando */}
+      {loading && (
+        <p style={{ color: "#888", textAlign: "center" }}>Cargando datos...</p>
+      )}
+
+      {/* Mensaje si no hay datos */}
+      {!loading && mesesCompletos.every((m) => m.total === 0) && (
+        <p style={{ color: "#999", textAlign: "center" }}>
+          No hay datos para este año.
+        </p>
+      )}
 
       <div style={{ width: "100%", height: 400 }}>
         <ResponsiveContainer width="100%" height="100%">
