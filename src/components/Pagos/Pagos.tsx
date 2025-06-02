@@ -21,7 +21,7 @@ interface PagoConNombre extends Pago {
 interface PagoUsado {
   id: number;
   usado: number;
-  fecha?: string; // <- sin el ?
+  fecha?: string;
 }
 
 type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
