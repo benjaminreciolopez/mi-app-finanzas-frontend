@@ -110,6 +110,23 @@ input:focus, select:focus, textarea:focus {
     border-top: 1px solid #e5e7eb;
     z-index: 1000;
   }
+.clientes-list {
+  max-height: 350px;
+  overflow-y: auto;
+  margin-top: 20px;
+  /* Opcional scroll bonito */
+  scrollbar-width: thin;
+  scrollbar-color: #4f46e5 #e5e7eb;
+}
+
+.clientes-list::-webkit-scrollbar {
+  width: 8px;
+  background: #e5e7eb;
+}
+.clientes-list::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 8px;
+}
 
   .bottom-nav a {
     flex: 1;
