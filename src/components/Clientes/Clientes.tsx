@@ -125,7 +125,14 @@ function Clientes() {
         )}
       </form>
 
-      <div className="card">
+      <div
+        className="card"
+        style={{
+          maxHeight: "350px", // Puedes ajustar el alto
+          overflowY: "auto",
+          marginTop: "20px",
+        }}
+      >
         {clientes.map((cliente) => (
           <div
             key={cliente.id}
