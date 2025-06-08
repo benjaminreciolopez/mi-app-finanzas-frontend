@@ -59,46 +59,22 @@ function Navigation() {
 function AppContent() {
   const pages = [
     <PageWrapper key="evolucion">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Evolucion />
-        </div>
-      </div>
+      <Evolucion />
     </PageWrapper>,
     <PageWrapper key="clientes">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Clientes />
-        </div>
-      </div>
+      <Clientes />
     </PageWrapper>,
     <PageWrapper key="calendario">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Calendario />
-        </div>
-      </div>
+      <Calendario />
     </PageWrapper>,
     <PageWrapper key="control">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Control />
-        </div>
-      </div>
+      <Control />
     </PageWrapper>,
     <PageWrapper key="materiales">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Materiales />
-        </div>
-      </div>
+      <Materiales />
     </PageWrapper>,
     <PageWrapper key="pagos">
-      <div style={{ minHeight: "100vh", background: "#fff" }}>
-        <div className="container">
-          <Pagos />
-        </div>
-      </div>
+      <Pagos />
     </PageWrapper>,
   ];
 
@@ -106,7 +82,6 @@ function AppContent() {
     <>
       <GlobalStyles />
       <Navigation />
-      {/* NO ENVUELVAS el SwipeNavigator en .container */}
       <SwipeNavigator childrenArray={pages} />
       <ToastContainer position="top-center" autoClose={2000} />
     </>

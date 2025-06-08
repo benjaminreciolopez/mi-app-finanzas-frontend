@@ -331,6 +331,14 @@ input[type="date"]:disabled {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
+#root {
+  min-height: 100vh;
+  min-width: 100vw;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 `;
 
