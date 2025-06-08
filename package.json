@@ -23,6 +23,7 @@
     "react-toastify": "^11.0.5",
     "recharts": "^2.15.3",
     "styled-components": "^6.1.17",
+    "swiper": "^11.2.8",
     "use-long-press": "^3.3.0"
   },
   "devDependencies": {

@@ -1,8 +1,9 @@
-import { useSwipeable } from "react-swipeable";
+// @ts-ignore
+import "swiper/css";
+import { Swiper, SwiperSlide } from "swiper/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useNavigationDirectionUpdate } from "../../NavigationDirectionContext";
-import { useSwipeDirectionUpdate } from "./SwipeDirectionContext";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import type { Swiper as SwiperType } from "swiper";
 
 const rutas = [
   "/",
@@ -13,60 +14,45 @@ const rutas = [
   "/pagos",
 ];
 
-function SwipeNavigator({ children }: { children: React.ReactNode }) {
+interface SwipeNavigatorProps {
+  childrenArray: React.ReactNode[];
+}
+
+function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const setDirection = useNavigationDirectionUpdate();
-  const setSwipe = useSwipeDirectionUpdate();
-  const swiping = useRef(false);
+  const swiperRef = useRef<SwiperType | null>(null);
 
-  const currentIndex = rutas.indexOf(location.pathname);
+  useEffect(() => {
+    const idx = rutas.indexOf(location.pathname);
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(idx, 0);
+    }
+  }, [location.pathname]);
 
-  const handlers = useSwipeable({
-    onSwiped: () => {
-      // Evita swipes dobles y restablece dirección tras animar
-      setTimeout(() => setSwipe("none"), 340);
-      swiping.current = false;
-    },
-    onSwipedLeft: () => {
-      if (swiping.current) return;
-      swiping.current = true;
-      if (currentIndex < rutas.length - 1) {
-        setDirection("left");
-        setSwipe("left");
-        navigate(rutas[currentIndex + 1]);
-      }
-    },
-    onSwipedRight: () => {
-      if (swiping.current) return;
-      swiping.current = true;
-      if (currentIndex > 0) {
-        setDirection("right");
-        setSwipe("right");
-        navigate(rutas[currentIndex - 1]);
-      }
-    },
-    delta: 50,
-    preventScrollOnSwipe: true,
-    trackTouch: true,
-    trackMouse: false,
-  });
-
-  // El style asegura altura y oculta desbordes, ideal para móviles
   return (
-    <div
-      {...handlers}
-      className="page-container"
+    <Swiper
+      onSlideChange={(swiper) => {
+        const ruta = rutas[swiper.activeIndex];
+        if (location.pathname !== ruta) {
+          navigate(ruta);
+        }
+      }}
+      initialSlide={rutas.indexOf(location.pathname)}
+      resistanceRatio={0.5}
+      speed={300}
+      onSwiper={(swiper) => {
+        swiperRef.current = swiper;
+      }}
       style={{
-        minHeight: "calc(100vh - 56px)",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-        touchAction: "pan-y",
+        height: "100vh",
+        background: "#fff",
       }}
     >
-      {children}
-    </div>
+      {childrenArray.map((component: React.ReactNode, idx: number) => (
+        <SwiperSlide key={rutas[idx]}>{component}</SwiperSlide>
+      ))}
+    </Swiper>
   );
 }
 
