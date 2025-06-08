@@ -1,3 +1,4 @@
+// @ts-ignore
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -22,20 +23,30 @@ function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
   const location = useLocation();
   const swiperRef = useRef<SwiperType | null>(null);
 
-  // SIEMPRE calcular índice de slide por la ruta actual
+  // SIEMPRE recalcula el índice en cada render
   const currentIdx = rutas.indexOf(location.pathname);
 
-  if (currentIdx === -1) return null;
+  // Si la ruta es desconocida, fuerza a 0
+  useEffect(() => {
+    if (currentIdx === -1) {
+      navigate("/");
+    }
+  }, [currentIdx, navigate]);
 
   useEffect(() => {
-    if (swiperRef.current && currentIdx !== swiperRef.current.activeIndex) {
+    // Cuando cambia la ruta, mueve el slide SIEMPRE
+    if (
+      swiperRef.current &&
+      swiperRef.current.activeIndex !== currentIdx &&
+      currentIdx !== -1
+    ) {
       swiperRef.current.slideTo(currentIdx, 0);
     }
   }, [currentIdx]);
 
   return (
     <Swiper
-      initialSlide={currentIdx} // ¡Siempre usa el current!
+      initialSlide={currentIdx === -1 ? 0 : currentIdx}
       onSlideChange={(swiper) => {
         const ruta = rutas[swiper.activeIndex];
         if (location.pathname !== ruta) {
