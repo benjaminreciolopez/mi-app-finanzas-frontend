@@ -59,22 +59,34 @@ function Navigation() {
 function AppContent() {
   const pages = [
     <PageWrapper key="evolucion">
-      <Evolucion />
+      <div className="container">
+        <Evolucion />
+      </div>
     </PageWrapper>,
     <PageWrapper key="clientes">
-      <Clientes />
+      <div className="container">
+        <Clientes />
+      </div>
     </PageWrapper>,
     <PageWrapper key="calendario">
-      <Calendario />
+      <div className="container">
+        <Calendario />
+      </div>
     </PageWrapper>,
     <PageWrapper key="control">
-      <Control />
+      <div className="container">
+        <Control />
+      </div>
     </PageWrapper>,
     <PageWrapper key="materiales">
-      <Materiales />
+      <div className="container">
+        <Materiales />
+      </div>
     </PageWrapper>,
     <PageWrapper key="pagos">
-      <Pagos />
+      <div className="container">
+        <Pagos />
+      </div>
     </PageWrapper>,
   ];
 
@@ -82,9 +94,9 @@ function AppContent() {
     <>
       <GlobalStyles />
       <Navigation />
-      <div className="container" style={{ paddingTop: "70px" }}>
-        <SwipeNavigator childrenArray={pages} />
-      </div>
+      {/* <div className="container" style={{ paddingTop: "70px" }}>  <-- quita esto */}
+      <SwipeNavigator childrenArray={pages} />
+      {/* </div> */}
       <ToastContainer position="top-center" autoClose={2000} />
     </>
   );

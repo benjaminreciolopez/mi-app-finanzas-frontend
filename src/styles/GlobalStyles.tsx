@@ -317,6 +317,10 @@ input[type="date"]:disabled {
   background: #f5f7fa;
   color: #aaa;
 }
+.swiper, .swiper-wrapper, .swiper-slide {
+  width: 100vw !important;
+  min-height: 100vh !important;
+}
 
 `;
 
