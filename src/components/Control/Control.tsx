@@ -99,7 +99,7 @@ function Control() {
   };
 
   return (
-    <div className="container">
+    <div style={{ padding: "1rem", minHeight: "100vh" }}>
       <h2 className="title">Control de Clientes</h2>
       <div className="card">
         <div style={{ maxHeight: "70vh", overflowY: "auto" }}>
