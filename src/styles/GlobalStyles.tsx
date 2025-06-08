@@ -75,13 +75,14 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px #c7d2fe;
 }
 
-  .container {
-    width: 100%;
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 76px 16px 20px;
-    background-color: #f9fafb;
-  }
+.container {
+  width: 100vw;
+  max-width: 100vw;
+  margin: 0;
+  padding: 76px 8px 20px;
+  background-color: #f9fafb;
+  box-sizing: border-box;
+}
 
   .card {
     background-color: #ffffff;
