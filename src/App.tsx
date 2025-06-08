@@ -59,33 +59,45 @@ function Navigation() {
 function AppContent() {
   const pages = [
     <PageWrapper key="evolucion">
-      <div className="container">
-        <Evolucion />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Evolucion />
+        </div>
       </div>
     </PageWrapper>,
     <PageWrapper key="clientes">
-      <div className="container">
-        <Clientes />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Clientes />
+        </div>
       </div>
     </PageWrapper>,
     <PageWrapper key="calendario">
-      <div className="container">
-        <Calendario />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Calendario />
+        </div>
       </div>
     </PageWrapper>,
     <PageWrapper key="control">
-      <div className="container">
-        <Control />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Control />
+        </div>
       </div>
     </PageWrapper>,
     <PageWrapper key="materiales">
-      <div className="container">
-        <Materiales />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Materiales />
+        </div>
       </div>
     </PageWrapper>,
     <PageWrapper key="pagos">
-      <div className="container">
-        <Pagos />
+      <div style={{ minHeight: "100vh", background: "#fff" }}>
+        <div className="container">
+          <Pagos />
+        </div>
       </div>
     </PageWrapper>,
   ];
@@ -94,9 +106,8 @@ function AppContent() {
     <>
       <GlobalStyles />
       <Navigation />
-      {/* <div className="container" style={{ paddingTop: "70px" }}>  <-- quita esto */}
+      {/* NO ENVUELVAS el SwipeNavigator en .container */}
       <SwipeNavigator childrenArray={pages} />
-      {/* </div> */}
       <ToastContainer position="top-center" autoClose={2000} />
     </>
   );

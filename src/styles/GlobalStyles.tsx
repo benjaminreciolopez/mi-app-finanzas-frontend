@@ -317,9 +317,18 @@ input[type="date"]:disabled {
   background: #f5f7fa;
   color: #aaa;
 }
-.swiper, .swiper-wrapper, .swiper-slide {
+.swiper,
+.swiper-wrapper,
+.swiper-slide {
   width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
   min-height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: visible !important;
+  background: #fff !important;
+  position: relative;
 }
 
 `;
