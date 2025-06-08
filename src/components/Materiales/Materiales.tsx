@@ -83,7 +83,7 @@ function Materiales() {
   );
 
   return (
-    <div style={{ padding: "1rem", minHeight: "100vh" }}>
+    <div className="container">
       <h2 className="title">Registro de Materiales</h2>
 
       <form onSubmit={handleSubmit}>

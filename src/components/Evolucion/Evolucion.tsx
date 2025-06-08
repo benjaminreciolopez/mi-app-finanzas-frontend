@@ -78,7 +78,7 @@ function Evolucion() {
   });
 
   return (
-    <div style={{ padding: "1rem", minHeight: "100vh" }}>
+    <div className="container" style={{ padding: "1rem", minHeight: "100vh" }}>
       <h2 className="title">Evolución de Ingresos</h2>
 
       <div style={{ marginBottom: "1rem" }}>

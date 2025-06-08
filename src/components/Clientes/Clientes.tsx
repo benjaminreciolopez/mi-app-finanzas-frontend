@@ -90,7 +90,7 @@ function Clientes() {
   };
 
   return (
-    <div style={{ padding: "1rem", minHeight: "100vh" }}>
+    <div className="container">
       <h2 className="title">{modoEdicion ? "Editar Cliente" : "Clientes"}</h2>
 
       <form onSubmit={handleSubmit}>

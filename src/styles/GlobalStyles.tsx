@@ -6,6 +6,19 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
+  html, body {
+    overflow-x: hidden;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #f5f7fa;
+    font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333333;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
   h1, h2, h3, h4, h5, h6, p {
     margin: 0;
@@ -62,14 +75,13 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 2px #c7d2fe;
 }
 
-.container {
-  width: 100%;
-  max-width: 100vw;
-  margin: 0 auto;
-  padding: 76px 8px 20px;
-  box-sizing: border-box;
-  background-color: #f9fafb;
-}
+  .container {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 76px 16px 20px;
+    background-color: #f9fafb;
+  }
 
   .card {
     background-color: #ffffff;
@@ -261,14 +273,13 @@ input:focus, select:focus, textarea:focus {
 }
 .page-transition {
   position: absolute;
-  width: 100vw;
-  min-width: 100vw;
-  left: 0;
+  width: 100%;
+  height: 100%;
   top: 0;
+  left: 0;
   background: #fff;
   z-index: 2;
   will-change: transform, opacity;
-  overflow-x: hidden;
 }
 .historial-pagos {
   max-height: 55vh;      /* Cambia 55vh por el % de pantalla que prefieras */
@@ -306,51 +317,6 @@ input[type="date"]:disabled {
   background: #f5f7fa;
   color: #aaa;
 }
-.swiper, .swiper-wrapper, .swiper-slide {
-    width: 100vw !important;
-    min-width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    overflow-x: hidden !important;
-  }
- .swiper-slide .container {
-    width: 100% !important;
-    max-width: 100vw !important;
-    margin: 0;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-html, body, #root {
-    width: 100vw;
-    min-width: 100vw;
-    max-width: 100vw;
-    min-height: 100vh;
-    height: 100vh;
-    max-height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    box-sizing: border-box;
-    background: #f5f7fa;
-    font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #333;
-    line-height: 1.6;
-    overscroll-behavior-x: none;
-    touch-action: manipulation;
-    position: relative;
-}
-img, video, table {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
 
 `;
 

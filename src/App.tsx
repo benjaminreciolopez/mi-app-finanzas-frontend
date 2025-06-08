@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Link } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import {
   AiOutlineUser,
   AiOutlineCalendar,
@@ -16,9 +22,9 @@ import GlobalStyles from "./styles/GlobalStyles";
 import Pagos from "./components/Pagos/Pagos";
 import SwipeNavigator from "./components/navigation/SwipeNavigator";
 import PageWrapper from "./components/navigation/PageWrapper";
+import { AnimatePresence } from "framer-motion";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useLocation } from "react-router-dom";
 
 function Navigation() {
   const location = useLocation();
@@ -57,32 +63,68 @@ function Navigation() {
 }
 
 function AppContent() {
-  const pages = [
-    <PageWrapper key="evolucion">
-      <Evolucion />
-    </PageWrapper>,
-    <PageWrapper key="clientes">
-      <Clientes />
-    </PageWrapper>,
-    <PageWrapper key="calendario">
-      <Calendario />
-    </PageWrapper>,
-    <PageWrapper key="control">
-      <Control />
-    </PageWrapper>,
-    <PageWrapper key="materiales">
-      <Materiales />
-    </PageWrapper>,
-    <PageWrapper key="pagos">
-      <Pagos />
-    </PageWrapper>,
-  ];
+  const location = useLocation();
 
   return (
     <>
       <GlobalStyles />
       <Navigation />
-      <SwipeNavigator childrenArray={pages} />
+      <SwipeNavigator>
+        <div className="container" style={{ paddingTop: "70px" }}>
+          <AnimatePresence mode="wait">
+            <Routes location={location} key={location.pathname}>
+              <Route
+                path="/"
+                element={
+                  <PageWrapper>
+                    <Evolucion />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/clientes"
+                element={
+                  <PageWrapper>
+                    <Clientes />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/calendario"
+                element={
+                  <PageWrapper>
+                    <Calendario />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/control"
+                element={
+                  <PageWrapper>
+                    <Control />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/materiales"
+                element={
+                  <PageWrapper>
+                    <Materiales />
+                  </PageWrapper>
+                }
+              />
+              <Route
+                path="/pagos"
+                element={
+                  <PageWrapper>
+                    <Pagos />
+                  </PageWrapper>
+                }
+              />
+            </Routes>
+          </AnimatePresence>
+        </div>
+      </SwipeNavigator>
       <ToastContainer position="top-center" autoClose={2000} />
     </>
   );

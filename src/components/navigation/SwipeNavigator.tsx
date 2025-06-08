@@ -1,9 +1,8 @@
-// @ts-ignore
-import "swiper/css";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { useSwipeable } from "react-swipeable";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useRef, useEffect } from "react";
-import type { Swiper as SwiperType } from "swiper";
+import { useNavigationDirectionUpdate } from "../../NavigationDirectionContext";
+import { useSwipeDirectionUpdate } from "./SwipeDirectionContext";
+import { useRef } from "react";
 
 const rutas = [
   "/",
@@ -14,59 +13,61 @@ const rutas = [
   "/pagos",
 ];
 
-interface SwipeNavigatorProps {
-  childrenArray: React.ReactNode[];
-}
-
-function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
+function SwipeNavigator({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const swiperRef = useRef<SwiperType | null>(null);
+  const setDirection = useNavigationDirectionUpdate();
+  const setSwipe = useSwipeDirectionUpdate();
+  const swiping = useRef(false);
 
-  // SIEMPRE recalcula el índice en cada render
-  const currentIdx = rutas.indexOf(location.pathname);
+  const currentIndex = rutas.indexOf(location.pathname);
 
-  // Si la ruta es desconocida, fuerza a 0
-  useEffect(() => {
-    if (currentIdx === -1) {
-      navigate("/");
-    }
-  }, [currentIdx, navigate]);
+  const handlers = useSwipeable({
+    onSwiped: () => {
+      // Evita swipes dobles y restablece dirección tras animar
+      setTimeout(() => setSwipe("none"), 340);
+      swiping.current = false;
+    },
+    onSwipedLeft: () => {
+      if (swiping.current) return;
+      swiping.current = true;
+      if (currentIndex < rutas.length - 1) {
+        setDirection("left");
+        setSwipe("left");
+        navigate(rutas[currentIndex + 1]);
+      }
+    },
+    onSwipedRight: () => {
+      if (swiping.current) return;
+      swiping.current = true;
+      if (currentIndex > 0) {
+        setDirection("right");
+        setSwipe("right");
+        navigate(rutas[currentIndex - 1]);
+      }
+    },
+    delta: 50,
+    preventScrollOnSwipe: true,
+    trackTouch: true,
+    trackMouse: false,
+  });
 
-  useEffect(() => {
-    // Cuando cambia la ruta, mueve el slide SIEMPRE
-    if (
-      swiperRef.current &&
-      swiperRef.current.activeIndex !== currentIdx &&
-      currentIdx !== -1
-    ) {
-      swiperRef.current.slideTo(currentIdx, 0);
-    }
-  }, [currentIdx]);
-
+  // El style asegura altura y oculta desbordes, ideal para móviles
   return (
-    <Swiper
-      initialSlide={currentIdx === -1 ? 0 : currentIdx}
-      onSlideChange={(swiper) => {
-        const ruta = rutas[swiper.activeIndex];
-        if (location.pathname !== ruta) {
-          navigate(ruta);
-        }
-      }}
-      resistanceRatio={0.5}
-      speed={300}
-      onSwiper={(swiper) => {
-        swiperRef.current = swiper;
-      }}
+    <div
+      {...handlers}
+      className="page-container"
       style={{
-        height: "100vh",
-        background: "#fff",
+        minHeight: "calc(100vh - 56px)",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+        touchAction: "pan-y",
       }}
     >
-      {childrenArray.map((component: React.ReactNode, idx: number) => (
-        <SwiperSlide key={rutas[idx]}>{component}</SwiperSlide>
-      ))}
-    </Swiper>
+      {children}
+    </div>
   );
 }
+
 export default SwipeNavigator;

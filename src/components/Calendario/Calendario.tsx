@@ -73,7 +73,7 @@ function Calendario() {
   };
 
   return (
-    <div style={{ padding: "1rem", minHeight: "100vh" }}>
+    <div className="container">
       <h2 className="title">Añadir Trabajo</h2>
       <form onSubmit={handleSubmit} className="card">
         <label>Cliente:</label>
