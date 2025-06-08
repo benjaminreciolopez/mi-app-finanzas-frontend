@@ -6,19 +6,6 @@ const GlobalStyles = createGlobalStyle`
     box-sizing: border-box;
   }
 
-  html, body {
-    overflow-x: hidden;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #f5f7fa;
-    font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    color: #333333;
-    line-height: 1.6;
-    min-height: 100vh;
-  }
 
   h1, h2, h3, h4, h5, h6, p {
     margin: 0;
@@ -76,12 +63,12 @@ input:focus, select:focus, textarea:focus {
 }
 
 .container {
-  width: 100vw;
+  width: 100%;
   max-width: 100vw;
-  margin: 0;
+  margin: 0 auto;
   padding: 76px 8px 20px;
-  background-color: #f9fafb;
   box-sizing: border-box;
+  background-color: #f9fafb;
 }
 
   .card {
@@ -319,40 +306,51 @@ input[type="date"]:disabled {
   background: #f5f7fa;
   color: #aaa;
 }
-.swiper,
-.swiper-wrapper,
-.swiper-slide {
-  width: 100vw !important;
-  max-width: 100vw !important;
-  min-width: 100vw !important;
-  height: 100vh !important;
-  max-height: 100vh !important;
-  min-height: 100vh !important;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+.swiper, .swiper-wrapper, .swiper-slide {
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden !important;
+  }
+ .swiper-slide .container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+html, body, #root {
+    width: 100vw;
+    min-width: 100vw;
+    max-width: 100vw;
+    min-height: 100vh;
+    height: 100vh;
+    max-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    background: #f5f7fa;
+    font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    overscroll-behavior-x: none;
+    touch-action: manipulation;
+    position: relative;
+}
+img, video, table {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
-.swiper-slide .container {
-  max-width: 100vw !important;
-  width: 100vw !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  margin: 0;
-}
-
-#root {
-  width: 100vw !important;
-  min-width: 100vw !important;
-  max-width: 100vw !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
-  max-height: 100vh !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  box-sizing: border-box;
-  overflow-x: hidden;
-}
 
 `;
 
