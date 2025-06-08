@@ -23,12 +23,17 @@ function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
   const location = useLocation();
   const swiperRef = useRef<SwiperType | null>(null);
 
+  // Calcula el índice de la ruta actual
+  const currentIdx = rutas.indexOf(location.pathname);
+
+  // Si la ruta no está en el array, NO renderizamos Swiper
+  if (currentIdx === -1) return null;
+
   useEffect(() => {
-    const idx = rutas.indexOf(location.pathname);
     if (swiperRef.current) {
-      swiperRef.current.slideTo(idx, 0);
+      swiperRef.current.slideTo(currentIdx, 0);
     }
-  }, [location.pathname]);
+  }, [currentIdx]);
 
   return (
     <Swiper
@@ -38,7 +43,7 @@ function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
           navigate(ruta);
         }
       }}
-      initialSlide={rutas.indexOf(location.pathname)}
+      initialSlide={currentIdx}
       resistanceRatio={0.5}
       speed={300}
       onSwiper={(swiper) => {
