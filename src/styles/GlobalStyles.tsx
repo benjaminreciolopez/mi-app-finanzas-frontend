@@ -321,14 +321,14 @@ input[type="date"]:disabled {
 .swiper-wrapper,
 .swiper-slide {
   width: 100vw !important;
-  min-width: 100vw !important;
   max-width: 100vw !important;
-  height: 100vh !important;
-  min-height: 100vh !important;
-  max-height: 100vh !important;
-  overflow: visible !important;
-  background: #fff !important;
-  position: relative;
+  min-width: 100vw !important;
+  box-sizing: border-box;
+}
+.swiper-slide .container {
+  max-width: 100vw !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 `;
