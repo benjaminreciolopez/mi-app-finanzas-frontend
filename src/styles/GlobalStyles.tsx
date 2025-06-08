@@ -324,20 +324,33 @@ input[type="date"]:disabled {
   width: 100vw !important;
   max-width: 100vw !important;
   min-width: 100vw !important;
+  height: 100vh !important;
+  max-height: 100vh !important;
+  min-height: 100vh !important;
   box-sizing: border-box;
-}
-.swiper-slide .container {
-  max-width: 100vw !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-#root {
-  min-height: 100vh;
-  min-width: 100vw;
-  width: 100vw;
   margin: 0;
   padding: 0;
+}
+
+.swiper-slide .container {
+  max-width: 100vw !important;
+  width: 100vw !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  margin: 0;
+}
+
+#root {
+  width: 100vw !important;
+  min-width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+  max-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 `;
