@@ -1,8 +1,7 @@
-// @ts-ignore
 import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import type { Swiper as SwiperType } from "swiper";
 
 const rutas = [
@@ -23,11 +22,10 @@ function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
   const location = useLocation();
   const swiperRef = useRef<SwiperType | null>(null);
 
-  // Solo calcular una vez el slide inicial
-  const initialIdx = useMemo(() => rutas.indexOf(location.pathname), []);
+  // SIEMPRE calcular índice de slide por la ruta actual
   const currentIdx = rutas.indexOf(location.pathname);
 
-  if (initialIdx === -1) return null;
+  if (currentIdx === -1) return null;
 
   useEffect(() => {
     if (swiperRef.current && currentIdx !== swiperRef.current.activeIndex) {
@@ -37,7 +35,7 @@ function SwipeNavigator({ childrenArray }: SwipeNavigatorProps) {
 
   return (
     <Swiper
-      initialSlide={initialIdx}
+      initialSlide={currentIdx} // ¡Siempre usa el current!
       onSlideChange={(swiper) => {
         const ruta = rutas[swiper.activeIndex];
         if (location.pathname !== ruta) {

@@ -273,13 +273,14 @@ input:focus, select:focus, textarea:focus {
 }
 .page-transition {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
+  width: 100vw;
+  min-width: 100vw;
   left: 0;
+  top: 0;
   background: #fff;
   z-index: 2;
   will-change: transform, opacity;
+  overflow-x: hidden;
 }
 .historial-pagos {
   max-height: 55vh;      /* Cambia 55vh por el % de pantalla que prefieras */
