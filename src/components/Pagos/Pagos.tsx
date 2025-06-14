@@ -197,8 +197,6 @@ function Pagos() {
           ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
           ...nuevosPagosCliente,
         ]);
-
-        toast.success("Pago registrado correctamente");
       } else {
         await cargarDatos();
       }
@@ -634,7 +632,9 @@ function Pagos() {
                 pagoRecienCreado.id,
                 asignacionesConFecha
               );
-              toast.success("Asignaciones guardadas");
+              toast.success(
+                "Pago registrado y asignaciones guardadas correctamente"
+              );
 
               await cargarDatos();
               const cliente = clientes.find(
