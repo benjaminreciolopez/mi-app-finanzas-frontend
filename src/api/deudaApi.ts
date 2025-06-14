@@ -21,6 +21,19 @@ export interface ResumenDeuda {
   saldoACuenta?: number; // ← Añádelo si tu API lo devuelve
   pagosUsados: PagoUsado[];
 }
+export async function getPendientes(clienteId: number) {
+  try {
+    const res = await fetch(`${API_BASE}/api/deuda/${clienteId}/pendientes`);
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`Error al obtener pendientes: ${errorText}`);
+    }
+    return await res.json();
+  } catch (error) {
+    console.error("Error al obtener pendientes:", error);
+    return [];
+  }
+}
 
 export async function getDeudaReal(): Promise<ResumenDeuda[]> {
   try {

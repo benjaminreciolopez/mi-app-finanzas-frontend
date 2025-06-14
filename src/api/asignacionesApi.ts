@@ -22,25 +22,31 @@ export async function getAsignacionesCliente(
   return await res.json();
 }
 
-// Guardar asignaciones manuales de un pago
 export async function guardarAsignaciones(
   pagoId: number,
   asignaciones: {
     tareaId: number;
     tipo: "trabajo" | "material";
     usado: number;
-    fechaTarea: string; // ✅ Agregar este campo
+    fechaTarea: string;
   }[]
 ): Promise<void> {
   const API_BASE = import.meta.env.VITE_API_URL;
+
+  const cuerpo = asignaciones.map((a) => ({
+    trabajoid: a.tipo === "trabajo" ? a.tareaId : null,
+    materialid: a.tipo === "material" ? a.tareaId : null,
+    usado: a.usado,
+    fecha_tarea: a.fechaTarea,
+  }));
+
   const res = await fetch(`${API_BASE}/api/asignaciones`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       pagoId,
-      asignaciones,
-      fechaPago: new Date().toISOString(), // ✅ También es requerido por el backend
-      clienteId: null, // puedes dejarlo como null si el backend no lo necesita para la inserción
+      asignaciones: cuerpo,
+      fechaPago: new Date().toISOString(), // ¡Correcto!
     }),
   });
 
