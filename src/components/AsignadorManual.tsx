@@ -135,7 +135,14 @@ const AsignadorManual: React.FC<Props> = ({
               <th>Acción</th>
             </tr>
           </thead>
-          <tbody>{[...trabajos, ...materiales].map(renderFila)}</tbody>
+          <tbody>
+            {[...trabajos, ...materiales]
+              .sort(
+                (a, b) =>
+                  new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
+              )
+              .map(renderFila)}
+          </tbody>
         </table>
 
         <div style={{ display: "flex", justifyContent: "space-between" }}>
