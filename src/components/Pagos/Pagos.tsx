@@ -571,11 +571,26 @@ function Pagos() {
           onConfirmarAsignaciones={async (asignaciones) => {
             if (!pagoRecienCreado) return;
 
+            // ✅ Agregamos la fechaTarea correspondiente desde los datos de pendientes
+            const asignacionesConFecha = asignaciones.map((a) => {
+              const fuente =
+                a.tipo === "trabajo"
+                  ? pendientes.trabajos
+                  : pendientes.materiales;
+              const tarea = fuente.find((t) => t.id === a.tareaId);
+              return {
+                ...a,
+                fechaTarea: tarea?.fecha,
+              };
+            });
+
             try {
-              await guardarAsignaciones(pagoRecienCreado.id, asignaciones);
+              await guardarAsignaciones(
+                pagoRecienCreado.id,
+                asignacionesConFecha
+              );
               toast.success("Asignaciones guardadas");
 
-              // Refresca los datos después de asignar
               await cargarDatos();
               const cliente = clientes.find(
                 (c) => c.id === pagoRecienCreado.clienteId

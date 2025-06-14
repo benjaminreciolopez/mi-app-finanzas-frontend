@@ -29,13 +29,19 @@ export async function guardarAsignaciones(
     tareaId: number;
     tipo: "trabajo" | "material";
     usado: number;
+    fechaTarea: string; // ✅ Agregar este campo
   }[]
 ): Promise<void> {
   const API_BASE = import.meta.env.VITE_API_URL;
   const res = await fetch(`${API_BASE}/api/asignaciones`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pagoId, asignaciones }),
+    body: JSON.stringify({
+      pagoId,
+      asignaciones,
+      fechaPago: new Date().toISOString(), // ✅ También es requerido por el backend
+      clienteId: null, // puedes dejarlo como null si el backend no lo necesita para la inserción
+    }),
   });
 
   if (!res.ok) {
