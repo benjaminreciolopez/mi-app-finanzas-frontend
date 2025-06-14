@@ -26,6 +26,11 @@ interface PagoUsado {
   usado: number;
   fecha?: string;
 }
+interface TareaPendiente {
+  id: number;
+  coste: number;
+  fecha: string;
+}
 
 type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
 
@@ -148,11 +153,51 @@ function Pagos() {
         });
 
         setPendientes(pendientesData);
+
+        // ⬇️ NUEVO: si el pago coincide con la deuda, generar asignaciones automáticamente
+        const totalDeuda = [
+          ...pendientesData.trabajos,
+          ...pendientesData.materiales,
+        ].reduce((sum, t) => sum + t.coste, 0);
+
+        if (Math.abs(parseFloat(cantidad) - totalDeuda) < 0.01) {
+          const asignacionesAuto = [
+            ...pendientesData.trabajos.map((t: TareaPendiente) => ({
+              tareaId: t.id,
+              tipo: "trabajo",
+              usado: t.coste,
+              fechaTarea: t.fecha,
+            })),
+            ...pendientesData.materiales.map((m: TareaPendiente) => ({
+              tareaId: m.id,
+              tipo: "material",
+              usado: m.coste,
+              fechaTarea: m.fecha,
+            })),
+          ];
+
+          await guardarAsignaciones(respuesta.id, asignacionesAuto);
+          toast.success(
+            "Pago registrado y asignaciones aplicadas automáticamente"
+          );
+          await cargarDatos();
+
+          const cliente = clientes.find(
+            (c) => c.id === respuesta.resumen!.clienteId
+          );
+          if (cliente) setClienteSeleccionado(cliente.nombre);
+
+          return; // Evita mostrar el modal
+        }
+
+        // ⬇️ Mostrar modal solo si no coincide
         setMostrarAsignador(true);
+
         setPagosConNombre((prev) => [
           ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
           ...nuevosPagosCliente,
         ]);
+
         toast.success("Pago registrado correctamente");
       } else {
         await cargarDatos();
