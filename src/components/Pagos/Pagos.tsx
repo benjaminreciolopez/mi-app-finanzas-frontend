@@ -610,11 +610,18 @@ function Pagos() {
           trabajos={pendientes.trabajos}
           materiales={pendientes.materiales}
           pago={pagoRecienCreado}
-          onCerrar={() => setMostrarAsignador(false)}
+          onCerrar={async () => {
+            if (pagoRecienCreado) {
+              await deletePago(pagoRecienCreado.id);
+              toast.info("Pago cancelado y eliminado");
+              await cargarDatos();
+            }
+            setPagoRecienCreado(null);
+            setMostrarAsignador(false);
+          }}
           onConfirmarAsignaciones={async (asignaciones) => {
             if (!pagoRecienCreado) return;
 
-            // ✅ Agregamos la fechaTarea correspondiente desde los datos de pendientes
             const asignacionesConFecha = asignaciones.map((a) => {
               const fuente =
                 a.tipo === "trabajo"
@@ -635,8 +642,8 @@ function Pagos() {
               toast.success(
                 "Pago registrado y asignaciones guardadas correctamente"
               );
-
               await cargarDatos();
+
               const cliente = clientes.find(
                 (c) => c.id === pagoRecienCreado.clienteId
               );
@@ -648,6 +655,7 @@ function Pagos() {
               console.error(error);
             } finally {
               setMostrarAsignador(false);
+              setPagoRecienCreado(null);
             }
           }}
         />
