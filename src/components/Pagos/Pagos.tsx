@@ -613,9 +613,17 @@ function Pagos() {
           pago={pagoRecienCreado}
           onCerrar={async () => {
             if (pagoRecienCreado) {
-              await deletePago(pagoRecienCreado.id);
-              toast.info("Pago cancelado y eliminado");
-              await cargarDatos();
+              try {
+                await deletePago(pagoRecienCreado.id);
+                toast.info("Pago cancelado y eliminado");
+              } catch (error) {
+                console.warn(
+                  "⚠️ No se pudo eliminar el pago (puede que ya esté eliminado):",
+                  error
+                );
+              } finally {
+                await cargarDatos();
+              }
             }
             setPagoRecienCreado(null);
             setMostrarAsignador(false);
