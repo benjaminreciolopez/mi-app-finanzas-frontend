@@ -63,70 +63,73 @@ function AsignadorDeEstado({ pago, trabajos, materiales, onClose }: Props) {
   };
 
   return (
-    <div className="modal">
-      <h3>Marcar tareas como saldadas</h3>
-      <p>
-        Saldo disponible: {pago.cantidad.toFixed(2)}€ <br />
-        <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€
-      </p>
+    <div className="modal-backdrop">
+      <div className="modal">
+        <h3>Marcar tareas como saldadas</h3>
+        <p>
+          Saldo disponible: {pago.cantidad.toFixed(2)}€ <br />
+          <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€
+        </p>
 
-      <div style={{ maxHeight: "320px", overflowY: "auto" }}>
-        <h4 style={{ marginTop: "1rem" }}>Trabajos</h4>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {trabajos.map((t) => {
-            const coste = t.horas * t.precioHora;
-            const seleccionado = seleccionados.some(
-              (s) => s.id === t.id && s.tipo === "trabajo"
-            );
-            return (
-              <li key={t.id} style={{ marginBottom: "6px" }}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={seleccionado}
-                    onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
-                  />{" "}
-                  {t.fecha} - {t.horas}h x {t.precioHora}€/h ={" "}
-                  {coste.toFixed(2)}€
-                </label>
-              </li>
-            );
-          })}
-        </ul>
+        <div style={{ maxHeight: "320px", overflowY: "auto" }}>
+          <h4 style={{ marginTop: "1rem" }}>Trabajos</h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {trabajos.map((t) => {
+              const coste = t.horas * t.precioHora;
+              const seleccionado = seleccionados.some(
+                (s) => s.id === t.id && s.tipo === "trabajo"
+              );
+              return (
+                <li key={t.id} style={{ marginBottom: "6px" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={seleccionado}
+                      onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
+                    />{" "}
+                    {t.fecha} - {t.horas}h x {t.precioHora}€/h ={" "}
+                    {coste.toFixed(2)}€
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
 
-        <h4 style={{ marginTop: "1rem" }}>Materiales</h4>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {materiales.map((m) => {
-            const seleccionado = seleccionados.some(
-              (s) => s.id === m.id && s.tipo === "material"
-            );
-            return (
-              <li key={m.id} style={{ marginBottom: "6px" }}>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={seleccionado}
-                    onChange={() => toggleSeleccion(m.id, "material", m.coste)}
-                  />{" "}
-                  {m.fecha} - {m.descripcion || "Material"}:{" "}
-                  {m.coste.toFixed(2)}€
-                </label>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+          <h4 style={{ marginTop: "1rem" }}>Materiales</h4>
+          <ul style={{ listStyle: "none", padding: 0 }}>
+            {materiales.map((m) => {
+              const seleccionado = seleccionados.some(
+                (s) => s.id === m.id && s.tipo === "material"
+              );
+              return (
+                <li key={m.id} style={{ marginBottom: "6px" }}>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={seleccionado}
+                      onChange={() =>
+                        toggleSeleccion(m.id, "material", m.coste)
+                      }
+                    />{" "}
+                    {m.fecha} - {m.descripcion || "Material"}:{" "}
+                    {m.coste.toFixed(2)}€
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
 
-      <div style={{ marginTop: "1.5rem", display: "flex", gap: "8px" }}>
-        <button onClick={handleGuardar} disabled={guardando}>
-          {guardando ? "Guardando..." : "Guardar cambios"}
-        </button>
-        <button onClick={onClose} disabled={guardando}>
-          Cancelar
-        </button>
+        <div style={{ marginTop: "1.5rem", display: "flex", gap: "8px" }}>
+          <button onClick={handleGuardar} disabled={guardando}>
+            {guardando ? "Guardando..." : "Guardar cambios"}
+          </button>
+          <button onClick={onClose} disabled={guardando}>
+            Cancelar
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
 export default AsignadorDeEstado;

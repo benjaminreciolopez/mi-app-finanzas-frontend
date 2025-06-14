@@ -374,6 +374,29 @@ input[type="date"]:disabled {
       transform: translateY(0);
     }
   }
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(1px);
+    animation: desvanecer 0.3s ease-out forwards;
+  }
+
+  @keyframes desvanecer {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
 `;
 
