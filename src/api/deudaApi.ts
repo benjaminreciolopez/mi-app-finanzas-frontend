@@ -21,17 +21,40 @@ export interface ResumenDeuda {
   saldoACuenta?: number; // ← Añádelo si tu API lo devuelve
   pagosUsados: PagoUsado[];
 }
-export async function getPendientes(clienteId: number) {
+export interface TrabajoOMaterial {
+  id: number;
+  tipo: "trabajo" | "material";
+  fecha: string;
+  coste: number;
+  pagado: number;
+  pendiente: number;
+}
+
+export async function getPendientes(
+  clienteId: number
+): Promise<{ trabajos: TrabajoOMaterial[]; materiales: TrabajoOMaterial[] }> {
   try {
     const res = await fetch(`${API_BASE}/api/deuda/${clienteId}/pendientes`);
     if (!res.ok) {
       const errorText = await res.text();
       throw new Error(`Error al obtener pendientes: ${errorText}`);
     }
-    return await res.json();
+
+    const json = await res.json();
+
+    if (
+      !json ||
+      !Array.isArray(json.trabajos) ||
+      !Array.isArray(json.materiales)
+    ) {
+      throw new Error("Respuesta inesperada del servidor");
+    }
+
+    return json;
   } catch (error) {
     console.error("Error al obtener pendientes:", error);
-    return [];
+    // Devolvemos objetos vacíos para evitar el fallo de "no iterable"
+    return { trabajos: [], materiales: [] };
   }
 }
 

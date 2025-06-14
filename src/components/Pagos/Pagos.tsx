@@ -7,6 +7,7 @@ import {
   Pago,
 } from "../../api/pagosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
+import { getPendientes } from "../../api/deudaApi";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import { getDeudaReal } from "../../api/deudaApi";
@@ -15,7 +16,6 @@ import {
   getAsignacionesCliente,
   PagoAsignado,
 } from "../../api/asignacionesApi";
-const API_BASE = import.meta.env.VITE_API_URL;
 import AsignadorManual from "../AsignadorManual"; // ajusta ruta si es distinta
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -133,10 +133,7 @@ function Pagos() {
           })
         );
 
-        const pendientesRes = await fetch(
-          `${API_BASE}/api/deuda/${respuesta.resumen.clienteId}/pendientes`
-        );
-        const pendientesData = await pendientesRes.json();
+        const pendientesData = await getPendientes(respuesta.resumen.clienteId);
 
         setUsoPagosPorCliente((prev) => ({
           ...prev,
@@ -160,16 +157,21 @@ function Pagos() {
         ].reduce((sum, t) => sum + t.coste, 0);
 
         if (Math.abs(parseFloat(cantidad) - totalDeuda) < 0.01) {
-          const asignacionesAuto = [
+          const asignacionesAuto: {
+            tareaId: number;
+            tipo: "trabajo" | "material";
+            usado: number;
+            fechaTarea: string;
+          }[] = [
             ...pendientesData.trabajos.map((t: TareaPendiente) => ({
               tareaId: t.id,
-              tipo: "trabajo",
+              tipo: "trabajo" as const,
               usado: t.coste,
               fechaTarea: t.fecha,
             })),
             ...pendientesData.materiales.map((m: TareaPendiente) => ({
               tareaId: m.id,
-              tipo: "material",
+              tipo: "material" as const,
               usado: m.coste,
               fechaTarea: m.fecha,
             })),
@@ -627,9 +629,16 @@ function Pagos() {
                   ? pendientes.trabajos
                   : pendientes.materiales;
               const tarea = fuente.find((t) => t.id === a.tareaId);
+
+              // 🔧 convertimos tipo a literal exacto y aseguramos que fechaTarea sea string
               return {
-                ...a,
-                fechaTarea: tarea?.fecha,
+                tareaId: a.tareaId,
+                tipo:
+                  a.tipo === "trabajo"
+                    ? "trabajo"
+                    : ("material" as "trabajo" | "material"),
+                usado: a.usado,
+                fechaTarea: tarea?.fecha || "",
               };
             });
 
