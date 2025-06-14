@@ -7,16 +7,10 @@ import {
   Pago,
 } from "../../api/pagosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
-import { getPendientes } from "../../api/deudaApi";
 import { toast } from "react-toastify";
-import { AnimatePresence, motion } from "framer-motion";
 import { getDeudaReal } from "../../api/deudaApi";
-import { guardarAsignaciones } from "../../api/asignacionesApi";
-import {
-  getAsignacionesCliente,
-  PagoAsignado,
-} from "../../api/asignacionesApi";
-import AsignadorManual from "../AsignadorManual"; // ajusta ruta si es distinta
+import { motion, AnimatePresence } from "framer-motion";
+
 interface PagoConNombre extends Pago {
   nombre: string;
 }
@@ -24,11 +18,6 @@ interface PagoUsado {
   id: number;
   usado: number;
   fecha?: string;
-}
-interface TareaPendiente {
-  id: number;
-  coste: number;
-  fecha: string;
 }
 
 type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
@@ -40,34 +29,12 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
-    null
-  );
-  const [mostrarAsignador, setMostrarAsignador] = useState(false);
-  const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
-  const [pendientes, setPendientes] = useState<{
-    trabajos: any[];
-    materiales: any[];
-  }>({ trabajos: [], materiales: [] });
 
-  const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
   const pagosListRef = useRef<HTMLUListElement>(null);
   const [loadingPago, setLoadingPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
   const [usoPagosPorCliente, setUsoPagosPorCliente] =
     useState<UsoPagosPorCliente>({});
-
-  useEffect(() => {
-    if (!clienteSeleccionado) {
-      setAsignaciones([]);
-      return;
-    }
-    const cliente = clientes.find((c) => c.nombre === clienteSeleccionado);
-    if (!cliente) return;
-    getAsignacionesCliente(cliente.id)
-      .then(setAsignaciones)
-      .catch(() => setAsignaciones([]));
-  }, [clienteSeleccionado, clientes]);
 
   useEffect(() => {
     cargarDatos();
@@ -109,98 +76,19 @@ function Pagos() {
     setLoadingPago(true);
 
     try {
-      const respuesta = await addPago({
+      await addPago({
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
         fecha: new Date(fecha).toISOString(),
         observaciones: observaciones.trim() || undefined,
       });
 
+      toast.success("Pago registrado");
       setClienteId("");
       setCantidad("");
       setFecha("");
       setObservaciones("");
-
-      if (respuesta.resumen && respuesta.id != null) {
-        const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
-          (p: PagoUsado) => ({
-            id: p.id ?? 0,
-            clienteId: respuesta.resumen!.clienteId,
-            cantidad: p.usado,
-            fecha: p.fecha || fecha,
-            observaciones: "",
-            nombre: respuesta.resumen!.nombre,
-          })
-        );
-
-        const pendientesData = await getPendientes(respuesta.resumen.clienteId);
-
-        setUsoPagosPorCliente((prev) => ({
-          ...prev,
-          [respuesta.resumen!.clienteId]: respuesta.resumen!.pagosUsados,
-        }));
-
-        setPagoRecienCreado({
-          id: respuesta.id,
-          clienteId: respuesta.resumen!.clienteId,
-          cantidad: parseFloat(cantidad),
-          fecha,
-          observaciones,
-        });
-
-        setPendientes(pendientesData);
-
-        // ⬇️ NUEVO: si el pago coincide con la deuda, generar asignaciones automáticamente
-        const totalDeuda = [
-          ...pendientesData.trabajos,
-          ...pendientesData.materiales,
-        ].reduce((sum, t) => sum + t.coste, 0);
-
-        if (Math.abs(parseFloat(cantidad) - totalDeuda) < 0.01) {
-          const asignacionesAuto: {
-            tareaId: number;
-            tipo: "trabajo" | "material";
-            usado: number;
-            fechaTarea: string;
-          }[] = [
-            ...pendientesData.trabajos.map((t: TareaPendiente) => ({
-              tareaId: t.id,
-              tipo: "trabajo" as const,
-              usado: t.coste,
-              fechaTarea: t.fecha,
-            })),
-            ...pendientesData.materiales.map((m: TareaPendiente) => ({
-              tareaId: m.id,
-              tipo: "material" as const,
-              usado: m.coste,
-              fechaTarea: m.fecha,
-            })),
-          ];
-
-          await guardarAsignaciones(respuesta.id, asignacionesAuto);
-          toast.success(
-            "Pago registrado y asignaciones aplicadas automáticamente"
-          );
-          await cargarDatos();
-
-          const cliente = clientes.find(
-            (c) => c.id === respuesta.resumen!.clienteId
-          );
-          if (cliente) setClienteSeleccionado(cliente.nombre);
-
-          return; // Evita mostrar el modal
-        }
-
-        // ⬇️ Mostrar modal solo si no coincide
-        setMostrarAsignador(true);
-
-        setPagosConNombre((prev) => [
-          ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
-          ...nuevosPagosCliente,
-        ]);
-      } else {
-        await cargarDatos();
-      }
+      await cargarDatos();
     } catch (error) {
       toast.error("Error al registrar el pago");
       console.error(error);
@@ -304,10 +192,6 @@ function Pagos() {
           value={clienteId}
           onChange={(e) => {
             setClienteId(e.target.value);
-            const cliente = clientes.find(
-              (c) => c.id === parseInt(e.target.value)
-            );
-            setClienteSeleccionado(cliente ? cliente.nombre : null);
           }}
           required
         >
@@ -570,130 +454,11 @@ function Pagos() {
                     </li>
                   ))}
                 </motion.ul>
-                {/* --- Detalle de uso de pagos para este cliente --- */}
-                <div className="card" style={{ marginTop: 16 }}>
-                  <h4>🧾 Detalle de uso de pagos</h4>
-                  {asignaciones.length === 0 ? (
-                    <p>No hay pagos asignados para este cliente.</p>
-                  ) : (
-                    <table style={{ width: "100%", fontSize: "0.97em" }}>
-                      <thead>
-                        <tr>
-                          <th>Fecha pago</th>
-                          <th>Tipo</th>
-                          <th>Fecha tarea</th>
-                          <th>Monto aplicado (€)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {asignaciones.map((a) => (
-                          <tr key={a.id}>
-                            <td>{a.fecha_pago?.slice(0, 10)}</td>
-                            <td>
-                              {a.tipo === "trabajo" ? "Trabajo" : "Material"}
-                            </td>
-                            <td>{a.fecha_tarea?.slice(0, 10)}</td>
-                            <td>{a.usado.toFixed(2)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
               </>
             );
           })()
         )}
       </div>
-      {mostrarAsignador && pagoRecienCreado && (
-        <AsignadorManual
-          trabajos={pendientes.trabajos}
-          materiales={pendientes.materiales}
-          pago={pagoRecienCreado}
-          onCerrar={async () => {
-            if (pagoRecienCreado) {
-              try {
-                const pagosActualizados = await getPagos();
-                const sigueExistiendo = pagosActualizados.some(
-                  (p) => p.id === pagoRecienCreado.id
-                );
-
-                if (sigueExistiendo) {
-                  try {
-                    await deletePago(pagoRecienCreado.id);
-                    toast.info("Pago cancelado y eliminado");
-                  } catch (err: any) {
-                    if (err?.response?.status === 404) {
-                      console.info("🟡 El pago ya había sido eliminado.");
-                    } else {
-                      console.warn(
-                        "⚠️ Error al intentar eliminar el pago:",
-                        err
-                      );
-                    }
-                  }
-                } else {
-                  console.info("🟡 El pago ya no existía en la base de datos.");
-                }
-              } catch (e) {
-                console.warn("⚠️ Error al verificar existencia del pago:", e);
-              } finally {
-                await cargarDatos();
-                setPagoRecienCreado(null);
-                setMostrarAsignador(false);
-              }
-            } else {
-              setMostrarAsignador(false);
-            }
-          }}
-          onConfirmarAsignaciones={async (asignaciones) => {
-            if (!pagoRecienCreado) return;
-
-            const asignacionesConFecha = asignaciones.map((a) => {
-              const fuente =
-                a.tipo === "trabajo"
-                  ? pendientes.trabajos
-                  : pendientes.materiales;
-              const tarea = fuente.find((t) => t.id === a.tareaId);
-
-              // 🔧 convertimos tipo a literal exacto y aseguramos que fechaTarea sea string
-              return {
-                tareaId: a.tareaId,
-                tipo:
-                  a.tipo === "trabajo"
-                    ? "trabajo"
-                    : ("material" as "trabajo" | "material"),
-                usado: a.usado,
-                fechaTarea: tarea?.fecha || "",
-              };
-            });
-
-            try {
-              await guardarAsignaciones(
-                pagoRecienCreado.id,
-                asignacionesConFecha
-              );
-              toast.success(
-                "Pago registrado y asignaciones guardadas correctamente"
-              );
-              await cargarDatos();
-
-              const cliente = clientes.find(
-                (c) => c.id === pagoRecienCreado.clienteId
-              );
-              if (cliente) {
-                setClienteSeleccionado(cliente.nombre);
-              }
-            } catch (error) {
-              toast.error("Error al guardar asignaciones");
-              console.error(error);
-            } finally {
-              setMostrarAsignador(false);
-              setPagoRecienCreado(null);
-            }
-          }}
-        />
-      )}
     </div>
   );
 }
