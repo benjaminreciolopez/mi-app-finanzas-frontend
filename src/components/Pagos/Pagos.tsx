@@ -10,10 +10,13 @@ import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
 import { AnimatePresence, motion } from "framer-motion";
 import { getDeudaReal } from "../../api/deudaApi";
+import { guardarAsignaciones } from "../../api/asignacionesApi";
 import {
   getAsignacionesCliente,
   PagoAsignado,
 } from "../../api/asignacionesApi";
+const API_BASE = import.meta.env.VITE_API_URL;
+import AsignadorManual from "../AsignadorManual"; // ajusta ruta si es distinta
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -36,6 +39,13 @@ function Pagos() {
   const [clienteSeleccionado, setClienteSeleccionado] = useState<string | null>(
     null
   );
+  const [mostrarAsignador, setMostrarAsignador] = useState(false);
+  const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
+  const [pendientes, setPendientes] = useState<{
+    trabajos: any[];
+    materiales: any[];
+  }>({ trabajos: [], materiales: [] });
+
   const [asignaciones, setAsignaciones] = useState<PagoAsignado[]>([]);
   const pagosListRef = useRef<HTMLUListElement>(null);
   const [loadingPago, setLoadingPago] = useState(false);
@@ -95,7 +105,6 @@ function Pagos() {
     setLoadingPago(true);
 
     try {
-      // Nuevo: recibe { id, message, resumen }
       const respuesta = await addPago({
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
@@ -109,32 +118,44 @@ function Pagos() {
       setFecha("");
       setObservaciones("");
 
-      // Actualiza pagos y uso de pagos con el resumen devuelto
-      if (respuesta.resumen) {
-        // Si quieres refrescar toda la tabla:
+      if (respuesta.resumen && respuesta.id != null) {
+        const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
+          (p: PagoUsado) => ({
+            id: p.id ?? 0,
+            clienteId: respuesta.resumen!.clienteId,
+            cantidad: p.usado,
+            fecha: p.fecha || fecha,
+            observaciones: "",
+            nombre: respuesta.resumen!.nombre,
+          })
+        );
+
+        const pendientesRes = await fetch(
+          `${API_BASE}/api/deuda/${respuesta.resumen.clienteId}/pendientes`
+        );
+        const pendientesData = await pendientesRes.json();
+
         setUsoPagosPorCliente((prev) => ({
           ...prev,
-          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+          [respuesta.resumen!.clienteId]: respuesta.resumen!.pagosUsados,
         }));
-        setPagosConNombre((prev) => {
-          // Reemplaza todos los pagos del cliente con los del resumen actualizado
-          const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
-            (p: PagoUsado) => ({
-              id: parseInt(p.id as any), // Ojo, según el backend, puede que p.id ya sea number, ajusta si hace falta
-              clienteId: respuesta.resumen.clienteId,
-              cantidad: p.usado,
-              fecha: p.fecha || fecha, // o actualizado.fecha, según el contexto
-              observaciones: "",
-              nombre: respuesta.resumen.nombre,
-            })
-          );
-          return [
-            ...prev.filter((p) => p.clienteId !== respuesta.resumen.clienteId),
-            ...nuevosPagosCliente,
-          ];
+
+        setPagoRecienCreado({
+          id: respuesta.id,
+          clienteId: respuesta.resumen!.clienteId,
+          cantidad: parseFloat(cantidad),
+          fecha,
+          observaciones,
         });
+
+        setPendientes(pendientesData);
+        setMostrarAsignador(true);
+        setPagosConNombre((prev) => [
+          ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
+          ...nuevosPagosCliente,
+        ]);
       } else {
-        await cargarDatos(); // fallback si no hay resumen
+        await cargarDatos();
       }
     } catch (error) {
       toast.error("Error al registrar el pago");
@@ -143,70 +164,79 @@ function Pagos() {
       setLoadingPago(false);
     }
   };
-
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;
+
     const actualizado = { ...pago, [campo]: valor };
 
     try {
-      // Nuevo: recibe { message, resumen }
       const respuesta = await updatePago(id, {
-        cantidad: parseFloat(actualizado.cantidad.toString()),
+        cantidad:
+          typeof actualizado.cantidad === "number"
+            ? actualizado.cantidad
+            : parseFloat(
+                (actualizado.cantidad as string | number).toString() || "0"
+              ),
         fecha: new Date(actualizado.fecha).toISOString(),
         observaciones: actualizado.observaciones,
       });
+
       toast.success("Pago actualizado");
 
       if (respuesta.resumen) {
         setUsoPagosPorCliente((prev) => ({
           ...prev,
-          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+          [respuesta.resumen!.clienteId]: respuesta.resumen!.pagosUsados,
         }));
+
         setPagosConNombre((prev) => {
-          // Reemplaza todos los pagos del cliente con los del resumen actualizado
-          const nuevosPagosCliente = respuesta.resumen.pagosUsados.map(
+          const nuevosPagosCliente = respuesta.resumen!.pagosUsados.map(
             (p: PagoUsado) => ({
-              id: parseInt(p.id as any),
-              clienteId: respuesta.resumen.clienteId,
+              id: p.id ?? 0,
+              clienteId: respuesta.resumen!.clienteId,
               cantidad: p.usado,
               fecha: p.fecha || actualizado.fecha,
               observaciones: actualizado.observaciones,
-              nombre: respuesta.resumen.nombre,
+              nombre: respuesta.resumen!.nombre,
             })
           );
+
           return [
-            ...prev.filter((p) => p.clienteId !== respuesta.resumen.clienteId),
+            ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
             ...nuevosPagosCliente,
           ];
         });
       } else {
-        cargarDatos();
+        await cargarDatos();
       }
+
       setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al actualizar");
+      console.error(error);
     }
   };
-
   const handleDelete = async (id: number) => {
     try {
-      // Nuevo: recibe { message, resumen }
       const respuesta = await deletePago(id);
       toast.success("Pago eliminado");
 
       if (respuesta.resumen) {
         setUsoPagosPorCliente((prev) => ({
           ...prev,
-          [respuesta.resumen.clienteId]: respuesta.resumen.pagosUsados,
+          [respuesta.resumen!.clienteId]: respuesta.resumen!.pagosUsados,
         }));
+
         setPagosConNombre((prev) => prev.filter((p) => p.id !== id));
       } else {
-        cargarDatos();
+        await cargarDatos();
       }
+
       setPagoSeleccionado(null);
     } catch (error) {
       toast.error("Error al eliminar el pago");
+      console.error(error);
     }
   };
 
@@ -531,6 +561,37 @@ function Pagos() {
           })()
         )}
       </div>
+      {/* Cierra la tarjeta de historial de pagos */}
+      {mostrarAsignador && pagoRecienCreado && (
+        <AsignadorManual
+          trabajos={pendientes.trabajos}
+          materiales={pendientes.materiales}
+          pago={pagoRecienCreado}
+          onCerrar={() => setMostrarAsignador(false)}
+          onConfirmarAsignaciones={async (asignaciones) => {
+            if (!pagoRecienCreado) return;
+
+            try {
+              await guardarAsignaciones(pagoRecienCreado.id, asignaciones);
+              toast.success("Asignaciones guardadas");
+
+              // Refresca los datos después de asignar
+              await cargarDatos();
+              const cliente = clientes.find(
+                (c) => c.id === pagoRecienCreado.clienteId
+              );
+              if (cliente) {
+                setClienteSeleccionado(cliente.nombre);
+              }
+            } catch (error) {
+              toast.error("Error al guardar asignaciones");
+              console.error(error);
+            } finally {
+              setMostrarAsignador(false);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
