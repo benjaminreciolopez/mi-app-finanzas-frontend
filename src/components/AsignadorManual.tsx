@@ -144,16 +144,11 @@ const AsignadorManual: React.FC<Props> = ({
             disabled={seleccionados.length === 0}
             onClick={() =>
               onConfirmarAsignaciones(
-                seleccionados.map(({ id, tipo, usado }) => {
-                  const fuente = tipo === "trabajo" ? trabajos : materiales;
-                  const encontrada = fuente.find((t) => t.id === id);
-                  return {
-                    tareaId: id,
-                    tipo,
-                    usado,
-                    fechaTarea: encontrada?.fecha || new Date().toISOString(),
-                  };
-                })
+                seleccionados.map(({ id, tipo, usado }) => ({
+                  tareaId: id,
+                  tipo,
+                  usado,
+                }))
               )
             }
           >
