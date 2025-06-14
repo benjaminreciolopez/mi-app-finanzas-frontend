@@ -37,6 +37,7 @@ export async function guardarAsignaciones(
     trabajoid: a.tipo === "trabajo" ? a.tareaId : null,
     materialid: a.tipo === "material" ? a.tareaId : null,
     usado: a.usado,
+    tipo: a.tipo,
     fecha_tarea: a.fechaTarea,
   }));
 
@@ -46,7 +47,7 @@ export async function guardarAsignaciones(
     body: JSON.stringify({
       pagoId,
       asignaciones: cuerpo,
-      fechaPago: new Date().toISOString(), // ¡Correcto!
+      fechaPago: new Date().toISOString(),
     }),
   });
 

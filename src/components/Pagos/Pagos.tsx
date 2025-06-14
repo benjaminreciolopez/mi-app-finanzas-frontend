@@ -17,7 +17,6 @@ import {
 } from "../../api/asignacionesApi";
 const API_BASE = import.meta.env.VITE_API_URL;
 import AsignadorManual from "../AsignadorManual"; // ajusta ruta si es distinta
-
 interface PagoConNombre extends Pago {
   nombre: string;
 }
