@@ -31,7 +31,7 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [mostrarAsignador, setMostrarAsignador] = useState(false);
+  const [mostrarAsignador, setMostrarAsignador] = useState(true);
   const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
   const [pendientesCliente, setPendientesCliente] = useState<{
     trabajos: any[];
@@ -99,6 +99,8 @@ function Pagos() {
       const totalPendiente =
         pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
         pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
+      console.log("Cantidad del nuevo pago:", nuevoPago.cantidad);
+      console.log("Deuda total pendiente:", totalPendiente);
 
       // Si el pago no cubre todo, mostrar el asignador de estado
       if (nuevoPago.cantidad < totalPendiente) {
