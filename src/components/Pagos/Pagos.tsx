@@ -112,7 +112,6 @@ function Pagos() {
         observaciones: observaciones.trim() || undefined,
       });
 
-      toast.success("Pago registrado correctamente");
       setClienteId("");
       setCantidad("");
       setFecha("");
@@ -154,6 +153,7 @@ function Pagos() {
           ...prev.filter((p) => p.clienteId !== respuesta.resumen!.clienteId),
           ...nuevosPagosCliente,
         ]);
+        toast.success("Pago registrado correctamente");
       } else {
         await cargarDatos();
       }

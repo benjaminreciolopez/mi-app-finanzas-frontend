@@ -1,3 +1,5 @@
+// api/asignacionesApi.ts
+
 export interface PagoAsignado {
   id: number;
   clienteId: number;
@@ -19,8 +21,8 @@ export async function getAsignacionesCliente(
   if (!res.ok) throw new Error("Error al obtener asignaciones");
   return await res.json();
 }
-// api/asignacionesApi.ts
 
+// Guardar asignaciones manuales de un pago
 export async function guardarAsignaciones(
   pagoId: number,
   asignaciones: {
@@ -37,6 +39,7 @@ export async function guardarAsignaciones(
   });
 
   if (!res.ok) {
-    throw new Error("Error al guardar las asignaciones");
+    const error = await res.json();
+    throw new Error(error.error || "Error al guardar las asignaciones");
   }
 }
