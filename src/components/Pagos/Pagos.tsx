@@ -10,6 +10,8 @@ import { getClientes, Cliente } from "../../api/clientesApi";
 import { toast } from "react-toastify";
 import { getDeudaReal } from "../../api/deudaApi";
 import { motion, AnimatePresence } from "framer-motion";
+import AsignadorDeEstado from "./AsignadorDeEstado"; // si está en la misma carpeta
+import { getPendientes } from "../../api/deudaApi"; // ✅ Correcto
 
 interface PagoConNombre extends Pago {
   nombre: string;
@@ -29,7 +31,12 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-
+  const [mostrarAsignador, setMostrarAsignador] = useState(false);
+  const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
+  const [pendientesCliente, setPendientesCliente] = useState<{
+    trabajos: any[];
+    materiales: any[];
+  }>({ trabajos: [], materiales: [] });
   const pagosListRef = useRef<HTMLUListElement>(null);
   const [loadingPago, setLoadingPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
@@ -76,18 +83,36 @@ function Pagos() {
     setLoadingPago(true);
 
     try {
-      await addPago({
+      const nuevoPago: Omit<Pago, "id"> = {
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
         fecha: new Date(fecha).toISOString(),
         observaciones: observaciones.trim() || undefined,
-      });
+      };
 
+      const respuesta = await addPago(nuevoPago);
+      setPagoRecienCreado(respuesta.pago); // asumiendo que 'respuesta' tiene 'pago'
       toast.success("Pago registrado");
+
+      // Cargar deuda pendiente actual
+      const pendientes = await getPendientes(parseInt(clienteId));
+      const totalPendiente =
+        pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
+        pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
+
+      // Si el pago no cubre todo, mostrar el asignador de estado
+      if (nuevoPago.cantidad < totalPendiente) {
+        setPagoRecienCreado(respuesta.pago);
+        setPendientesCliente(pendientes);
+        setMostrarAsignador(true);
+      }
+
+      // Limpiar formulario
       setClienteId("");
       setCantidad("");
       setFecha("");
       setObservaciones("");
+
       await cargarDatos();
     } catch (error) {
       toast.error("Error al registrar el pago");
@@ -459,6 +484,18 @@ function Pagos() {
           })()
         )}
       </div>
+      {mostrarAsignador && pagoRecienCreado && (
+        <AsignadorDeEstado
+          pago={pagoRecienCreado}
+          trabajos={pendientesCliente.trabajos}
+          materiales={pendientesCliente.materiales}
+          onClose={() => {
+            setMostrarAsignador(false);
+            setPagoRecienCreado(null);
+            cargarDatos();
+          }}
+        />
+      )}
     </div>
   );
 }

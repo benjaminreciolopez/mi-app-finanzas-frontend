@@ -317,6 +317,63 @@ input[type="date"]:disabled {
   background: #f5f7fa;
   color: #aaa;
 }
+  /* Modal de AsignadorDeEstado */
+  .modal {
+    background-color: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    max-width: 420px;
+    width: 100%;
+    margin: 40px auto;
+    z-index: 2000;
+    position: relative;
+    animation: aparecer 0.3s ease-out forwards;
+  }
+
+  .modal h3 {
+    font-size: 1.25rem;
+    margin-bottom: 12px;
+  }
+
+  .modal h4 {
+    font-size: 1.1rem;
+    margin-top: 18px;
+    margin-bottom: 6px;
+    color: #4f46e5;
+  }
+
+  .modal ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .modal li {
+    margin-bottom: 6px;
+  }
+
+  .modal input[type="checkbox"] {
+    margin-right: 8px;
+    transform: scale(1.1);
+    cursor: pointer;
+  }
+
+  .modal button {
+    min-width: 120px;
+    text-align: center;
+  }
+
+  @keyframes aparecer {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 
 `;
 

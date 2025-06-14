@@ -6,10 +6,12 @@ const API_URL = `${API_BASE}/api/trabajos`;
 export interface Trabajo {
   id: number;
   clienteId: number;
-  nombre: string;
   fecha: string;
   horas: number;
-  pagado: number;
+  precioHora: number;
+  pagado: number; // debe ser 0 o 1
+  cuadrado: number; // también 0 o 1
+  observaciones?: string;
 }
 
 export const getTrabajos = async (): Promise<Trabajo[]> => {
