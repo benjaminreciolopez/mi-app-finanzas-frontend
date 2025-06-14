@@ -605,7 +605,6 @@ function Pagos() {
           })()
         )}
       </div>
-      {/* Cierra la tarjeta de historial de pagos */}
       {mostrarAsignador && pagoRecienCreado && (
         <AsignadorManual
           trabajos={pendientes.trabajos}
@@ -614,19 +613,38 @@ function Pagos() {
           onCerrar={async () => {
             if (pagoRecienCreado) {
               try {
-                await deletePago(pagoRecienCreado.id);
-                toast.info("Pago cancelado y eliminado");
-              } catch (error) {
-                console.warn(
-                  "⚠️ No se pudo eliminar el pago (puede que ya esté eliminado):",
-                  error
+                const pagosActualizados = await getPagos();
+                const sigueExistiendo = pagosActualizados.some(
+                  (p) => p.id === pagoRecienCreado.id
                 );
+
+                if (sigueExistiendo) {
+                  try {
+                    await deletePago(pagoRecienCreado.id);
+                    toast.info("Pago cancelado y eliminado");
+                  } catch (err: any) {
+                    if (err?.response?.status === 404) {
+                      console.info("🟡 El pago ya había sido eliminado.");
+                    } else {
+                      console.warn(
+                        "⚠️ Error al intentar eliminar el pago:",
+                        err
+                      );
+                    }
+                  }
+                } else {
+                  console.info("🟡 El pago ya no existía en la base de datos.");
+                }
+              } catch (e) {
+                console.warn("⚠️ Error al verificar existencia del pago:", e);
               } finally {
                 await cargarDatos();
+                setPagoRecienCreado(null);
+                setMostrarAsignador(false);
               }
+            } else {
+              setMostrarAsignador(false);
             }
-            setPagoRecienCreado(null);
-            setMostrarAsignador(false);
           }}
           onConfirmarAsignaciones={async (asignaciones) => {
             if (!pagoRecienCreado) return;
