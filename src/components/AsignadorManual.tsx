@@ -3,7 +3,9 @@ import React, { useState } from "react";
 interface TrabajoOMaterial {
   id: number;
   fecha: string;
-  coste: number; // para trabajo: horas * precioHora
+  coste: number; // coste total
+  pagado: number; // pagado hasta ahora
+  pendiente: number; // lo que queda por pagar
   tipo: "trabajo" | "material";
 }
 
@@ -35,21 +37,17 @@ const AsignadorManual: React.FC<Props> = ({
   const totalAsignado = seleccionados.reduce((acc, s) => acc + s.usado, 0);
   const restante = pago.cantidad - totalAsignado;
 
-  const toggleSeleccion = (
-    tarea: TrabajoOMaterial,
-    completo: boolean = true
-  ) => {
+  const toggleSeleccion = (tarea: TrabajoOMaterial) => {
     const yaEsta = seleccionados.find(
       (s) => s.id === tarea.id && s.tipo === tarea.tipo
     );
+
     if (yaEsta) {
       setSeleccionados((prev) =>
         prev.filter((s) => !(s.id === tarea.id && s.tipo === tarea.tipo))
       );
     } else {
-      const aUsar = completo
-        ? Math.min(restante, tarea.coste)
-        : Math.min(restante, tarea.coste); // más adelante puedes hacerlo editable
+      const aUsar = Math.min(restante, tarea.pendiente);
       if (aUsar > 0) {
         setSeleccionados((prev) => [
           ...prev,
@@ -63,8 +61,9 @@ const AsignadorManual: React.FC<Props> = ({
     const marcado = seleccionados.find(
       (s) => s.id === t.id && s.tipo === t.tipo
     );
-    const cubierto = (marcado?.usado ?? 0) >= t.coste;
-    const pendiente = t.coste - (marcado?.usado ?? 0);
+    const totalUsado = t.pagado + (marcado?.usado ?? 0);
+    const cubierto = totalUsado >= t.coste;
+    const pendiente = t.coste - totalUsado;
 
     return (
       <tr key={`${t.tipo}-${t.id}`}>
@@ -76,7 +75,7 @@ const AsignadorManual: React.FC<Props> = ({
             ? cubierto
               ? "✅ Cuadrado"
               : `🟡 Falta ${pendiente.toFixed(2)}€`
-            : "-"}
+            : `${t.pendiente.toFixed(2)}€ pendientes`}
         </td>
         <td>
           <button
