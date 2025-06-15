@@ -38,7 +38,10 @@ function Control() {
   }, [clienteSeleccionado]);
 
   useEffect(() => {
-    cargarDatos();
+    if (localStorage.getItem("forzarRecargaControl") === "true") {
+      cargarDatos();
+      localStorage.removeItem("forzarRecargaControl");
+    }
   }, []);
 
   const cargarDatos = async () => {

@@ -562,6 +562,7 @@ function Pagos() {
             toast.success("Pago registrado");
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
+            localStorage.setItem("forzarRecargaControl", "true"); // ✅ esto es nuevo
             await cargarDatos(); // ✅ espera la recarga
           }}
           onCancelar={async () => {
