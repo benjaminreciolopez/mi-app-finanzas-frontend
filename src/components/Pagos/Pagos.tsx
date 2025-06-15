@@ -96,6 +96,7 @@ function Pagos() {
       setPagoRecienCreado(pagoRegistrado); // guardamos para modal si es necesario
 
       // 2. Obtener deuda actual (pendientes sin saldar)
+      await new Promise((res) => setTimeout(res, 300)); // esperar 300ms
       const pendientes = await getPendientes(parseInt(clienteId));
 
       // 3. Calcular la deuda total
