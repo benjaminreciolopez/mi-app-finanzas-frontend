@@ -89,7 +89,11 @@ function Pagos() {
       };
 
       const respuesta = await addPago(nuevoPago);
-      const pagoRegistrado = respuesta.pago;
+      const pagoRegistrado = respuesta?.pago;
+      if (!pagoRegistrado || pagoRegistrado.cantidad === undefined) {
+        toast.error("Error al registrar el pago (sin datos)");
+        return;
+      }
       setPagoRecienCreado(pagoRegistrado);
 
       // Reintento para obtener deuda después del nuevo pago
@@ -512,9 +516,9 @@ function Pagos() {
         )}
       </div>
       {mostrarAsignador &&
-        pagoRecienCreado?.cantidad !== undefined &&
-        pendientesCliente?.trabajos &&
-        pendientesCliente?.materiales && (
+        typeof pagoRecienCreado?.cantidad === "number" &&
+        Array.isArray(pendientesCliente?.trabajos) &&
+        Array.isArray(pendientesCliente?.materiales) && (
           <AsignadorDeEstado
             pago={pagoRecienCreado}
             trabajos={pendientesCliente.trabajos}
