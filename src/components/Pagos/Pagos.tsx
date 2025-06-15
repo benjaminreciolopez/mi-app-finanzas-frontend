@@ -558,16 +558,16 @@ function Pagos() {
           materiales={pendientesCliente.materiales}
           saldoACuenta={pendientesCliente.saldoDisponible ?? 0}
           clienteId={parseInt(clienteId)}
-          onGuardar={() => {
+          onGuardar={async () => {
             toast.success("Pago registrado");
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
-            cargarDatos();
+            await cargarDatos(); // ✅ espera la recarga
           }}
-          onCancelar={() => {
+          onCancelar={async () => {
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
-            cargarDatos();
+            await cargarDatos(); // ✅ recarga aunque se cancele
           }}
         />
       )}
