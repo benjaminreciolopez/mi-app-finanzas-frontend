@@ -31,7 +31,7 @@ function Pagos() {
   const [cantidad, setCantidad] = useState("");
   const [fecha, setFecha] = useState("");
   const [observaciones, setObservaciones] = useState("");
-  const [mostrarAsignador, setMostrarAsignador] = useState(true);
+  const [mostrarAsignador, setMostrarAsignador] = useState(false);
   const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
   const [pendientesCliente, setPendientesCliente] = useState<{
     trabajos: any[];
@@ -92,7 +92,7 @@ function Pagos() {
 
       const respuesta = await addPago(nuevoPago);
       setPagoRecienCreado(respuesta.pago); // asumiendo que 'respuesta' tiene 'pago'
-      toast.success("Pago registrado");
+      //toast.success("Pago registrado");
 
       // Cargar deuda pendiente actual
       const pendientes = await getPendientes(parseInt(clienteId));
@@ -107,6 +107,11 @@ function Pagos() {
         setPagoRecienCreado(respuesta.pago);
         setPendientesCliente(pendientes);
         setMostrarAsignador(true);
+      } else {
+        // ✅ asegurar que no se muestre si no hace falta
+        setMostrarAsignador(false);
+        setPagoRecienCreado(null);
+        toast.success("Pago registrado");
       }
 
       // Limpiar formulario
@@ -491,9 +496,16 @@ function Pagos() {
           pago={pagoRecienCreado}
           trabajos={pendientesCliente.trabajos}
           materiales={pendientesCliente.materiales}
-          onClose={() => {
+          onGuardar={() => {
+            toast.success("Pago registrado"); // ✅ solo si se guarda
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
+            cargarDatos();
+          }}
+          onCancelar={() => {
+            setMostrarAsignador(false);
+            setPagoRecienCreado(null);
+            // No mostramos toast aquí
             cargarDatos();
           }}
         />

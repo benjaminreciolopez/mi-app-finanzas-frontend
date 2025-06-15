@@ -11,10 +11,17 @@ interface Props {
   };
   trabajos: (Trabajo & { precioHora: number })[];
   materiales: Material[];
-  onClose: () => void;
+  onGuardar: () => void;
+  onCancelar: () => void; // ✅ Añadido
 }
 
-function AsignadorDeEstado({ pago, trabajos, materiales, onClose }: Props) {
+function AsignadorDeEstado({
+  pago,
+  trabajos,
+  materiales,
+  onGuardar,
+  onCancelar,
+}: Props) {
   const [seleccionados, setSeleccionados] = useState<
     { id: number; tipo: "trabajo" | "material"; coste: number }[]
   >([]);
@@ -53,7 +60,7 @@ function AsignadorDeEstado({ pago, trabajos, materiales, onClose }: Props) {
         }
       }
       toast.success("Tareas actualizadas correctamente");
-      onClose();
+      onGuardar(); // ✅ Llamada al evento de éxito
     } catch (error) {
       toast.error("Error al guardar cambios");
       console.error(error);
@@ -124,7 +131,7 @@ function AsignadorDeEstado({ pago, trabajos, materiales, onClose }: Props) {
           <button onClick={handleGuardar} disabled={guardando}>
             {guardando ? "Guardando..." : "Guardar cambios"}
           </button>
-          <button onClick={onClose} disabled={guardando}>
+          <button onClick={onCancelar} disabled={guardando}>
             Cancelar
           </button>
         </div>
@@ -132,4 +139,5 @@ function AsignadorDeEstado({ pago, trabajos, materiales, onClose }: Props) {
     </div>
   );
 }
+
 export default AsignadorDeEstado;
