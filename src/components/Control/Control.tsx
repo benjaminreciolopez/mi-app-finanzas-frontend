@@ -171,9 +171,15 @@ function Control() {
                             </p>
 
                             <div style={{ marginLeft: "1rem" }}>
+                              {deuda && deuda.totalTareasPendientes !== 0 && (
+                                <div>
+                                  Total por saldar:{" "}
+                                  {deuda.totalTareasPendientes.toFixed(2)} €
+                                </div>
+                              )}
                               {deuda && deuda.totalDeuda !== 0 && (
                                 <div>
-                                  Total deuda: {deuda.totalDeuda.toFixed(2)} €
+                                  Deuda real: {deuda.totalDeuda.toFixed(2)} €
                                 </div>
                               )}
                               {deuda && deuda.totalHorasPendientes !== 0 && (

@@ -18,6 +18,7 @@ export interface ResumenDeuda {
   totalMaterialesPendientes: number;
   totalPagado: number;
   totalDeuda: number;
+  totalTareasPendientes: number;
   saldoACuenta?: number; // ← Añádelo si tu API lo devuelve
   pagosUsados: PagoUsado[];
 }
