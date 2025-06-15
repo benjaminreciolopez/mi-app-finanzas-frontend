@@ -122,6 +122,7 @@ function Control() {
                     const deuda = deudas.find(
                       (d) => d.clienteId === cliente.id
                     );
+                    const saldoACuenta = deuda?.saldoACuenta ?? 0;
 
                     const totalHoras = trabajosCliente.reduce(
                       (acc, t) => acc + t.horas,
@@ -171,27 +172,34 @@ function Control() {
                             </p>
 
                             <div style={{ marginLeft: "1rem" }}>
-                              {deuda && deuda.totalTareasPendientes !== 0 && (
-                                <div>
-                                  Total por saldar:{" "}
-                                  {deuda.totalTareasPendientes.toFixed(2)} €
-                                </div>
-                              )}
-                              {deuda && deuda.totalDeuda !== 0 && (
-                                <div>
-                                  Deuda real: {deuda.totalDeuda.toFixed(2)} €
-                                </div>
+                              {deuda && (
+                                <>
+                                  <div>
+                                    💼 Total tareas sin pagar:{" "}
+                                    {deuda.totalTareasPendientes.toFixed(2)} €
+                                  </div>
+                                  <div>
+                                    💰 Saldo a cuenta: {saldoACuenta.toFixed(2)}{" "}
+                                    €
+                                  </div>
+                                  <div>
+                                    🔻 Deuda real pendiente:{" "}
+                                    <strong>
+                                      {deuda.totalDeuda.toFixed(2)} €
+                                    </strong>
+                                  </div>
+                                </>
                               )}
                               {deuda && deuda.totalHorasPendientes !== 0 && (
                                 <div>
-                                  Horas pendientes: {deuda.totalHorasPendientes}
-                                  h
+                                  🕒 Horas pendientes:{" "}
+                                  {deuda.totalHorasPendientes} h
                                 </div>
                               )}
                               {deuda &&
                                 deuda.totalMaterialesPendientes !== 0 && (
                                   <div>
-                                    Materiales pendientes:{" "}
+                                    🧱 Materiales pendientes:{" "}
                                     {deuda.totalMaterialesPendientes.toFixed(2)}{" "}
                                     €
                                   </div>
