@@ -34,6 +34,7 @@ function Pagos() {
   const [mostrarAsignador, setMostrarAsignador] = useState(false);
   const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
   const [pendientesCliente, setPendientesCliente] = useState<{
+    saldoDisponible?: number;
     trabajos: any[];
     materiales: any[];
   }>({ trabajos: [], materiales: [] });
@@ -515,27 +516,26 @@ function Pagos() {
           })()
         )}
       </div>
-      {mostrarAsignador &&
-        typeof pagoRecienCreado?.cantidad === "number" &&
-        Array.isArray(pendientesCliente?.trabajos) &&
-        Array.isArray(pendientesCliente?.materiales) && (
-          <AsignadorDeEstado
-            pago={pagoRecienCreado}
-            trabajos={pendientesCliente.trabajos}
-            materiales={pendientesCliente.materiales}
-            onGuardar={() => {
-              toast.success("Pago registrado");
-              setMostrarAsignador(false);
-              setPagoRecienCreado(null);
-              cargarDatos();
-            }}
-            onCancelar={() => {
-              setMostrarAsignador(false);
-              setPagoRecienCreado(null);
-              cargarDatos();
-            }}
-          />
-        )}
+      {mostrarAsignador && pagoRecienCreado && (
+        <AsignadorDeEstado
+          pago={pagoRecienCreado}
+          trabajos={pendientesCliente.trabajos}
+          materiales={pendientesCliente.materiales}
+          saldoACuenta={pendientesCliente.saldoDisponible ?? 0}
+          clienteId={parseInt(clienteId)}
+          onGuardar={() => {
+            toast.success("Pago registrado");
+            setMostrarAsignador(false);
+            setPagoRecienCreado(null);
+            cargarDatos();
+          }}
+          onCancelar={() => {
+            setMostrarAsignador(false);
+            setPagoRecienCreado(null);
+            cargarDatos();
+          }}
+        />
+      )}
     </div>
   );
 }

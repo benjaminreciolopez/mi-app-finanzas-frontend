@@ -8,6 +8,7 @@ export interface Cliente {
   nombre: string;
   precioHora: number;
   orden?: number;
+  saldoDisponible?: number; // Este campo es opcional
 }
 
 export const getClientes = async (): Promise<Cliente[]> => {

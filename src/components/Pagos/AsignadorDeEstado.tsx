@@ -1,16 +1,14 @@
-// src/components/Pagos/AsignadorDeEstado.tsx
-
 import { useState, useMemo } from "react";
 import { Trabajo, updateTrabajo } from "../../api/trabajosApi";
 import { Material, updateMaterial } from "../../api/materialesApi";
 import { toast } from "react-toastify";
 
 interface Props {
-  pago: {
-    cantidad: number;
-  };
+  pago: { cantidad: number } | null;
   trabajos: (Trabajo & { precioHora: number })[];
   materiales: Material[];
+  saldoACuenta: number;
+  clienteId: number; // 👉 nuevo
   onGuardar: () => void;
   onCancelar: () => void;
 }
@@ -19,6 +17,8 @@ function AsignadorDeEstado({
   pago,
   trabajos,
   materiales,
+  saldoACuenta,
+  clienteId,
   onGuardar,
   onCancelar,
 }: Props) {
@@ -33,7 +33,25 @@ function AsignadorDeEstado({
   );
 
   const saldoDisponible = pago?.cantidad ?? 0;
-  const saldoRestante = +(saldoDisponible - totalSeleccionado).toFixed(2);
+  const saldoTotal = +(saldoDisponible + saldoACuenta).toFixed(2);
+  const saldoRestante = +(saldoTotal - totalSeleccionado).toFixed(2);
+  const actualizarSaldoCliente = async (
+    clienteId: number,
+    nuevoSaldo: number
+  ) => {
+    try {
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/api/clientes/${clienteId}/saldo`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ saldo: nuevoSaldo }),
+        }
+      );
+    } catch (error) {
+      console.error("❌ Error al actualizar saldo del cliente:", error);
+    }
+  };
 
   const toggleSeleccion = (
     id: number,
@@ -62,6 +80,7 @@ function AsignadorDeEstado({
           await updateMaterial(s.id, { pagado: 1, cuadrado: 1 });
         }
       }
+      await actualizarSaldoCliente(clienteId, saldoRestante);
       toast.success("Tareas marcadas como saldadas");
       onGuardar();
     } catch (error) {
@@ -77,7 +96,12 @@ function AsignadorDeEstado({
       <div className="modal" style={{ maxWidth: 480, padding: "1.5rem" }}>
         <h3 style={{ marginBottom: 8 }}>Marcar tareas como saldadas</h3>
         <p>
-          <strong>Saldo disponible:</strong> {saldoDisponible.toFixed(2)}€{" "}
+          <strong>Saldo nuevo pago:</strong> {saldoDisponible.toFixed(2)}€{" "}
+          <br />
+          <strong>Saldo anterior a cuenta:</strong> {saldoACuenta.toFixed(2)}€{" "}
+          <br />
+          <strong>Saldo total disponible:</strong>{" "}
+          <span style={{ fontWeight: 600 }}>{saldoTotal.toFixed(2)}€</span>{" "}
           <br />
           <strong>Saldo restante:</strong>{" "}
           <span
@@ -92,6 +116,7 @@ function AsignadorDeEstado({
           <strong>Tareas seleccionadas:</strong> {seleccionados.length}
         </p>
 
+        {/* Lista de trabajos */}
         <div
           style={{
             maxHeight: "320px",
@@ -136,6 +161,7 @@ function AsignadorDeEstado({
               })}
           </ul>
 
+          {/* Lista de materiales */}
           <h4 style={{ margin: "1rem 0 0.5rem" }}>Materiales</h4>
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {[...materiales]

@@ -11,6 +11,7 @@ interface Cliente {
   id: number;
   nombre: string;
   precioHora: number;
+  saldoDisponible?: number;
 }
 
 function Clientes() {
