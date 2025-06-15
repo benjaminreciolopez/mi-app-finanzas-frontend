@@ -34,7 +34,10 @@ function AsignadorDeEstado({
 
   const saldoDisponible = pago?.cantidad ?? 0;
   const saldoTotal = +(saldoDisponible + saldoACuenta).toFixed(2);
-  const saldoRestante = +(saldoTotal - totalSeleccionado).toFixed(2);
+  const saldoRestante = Math.max(
+    +(saldoTotal - totalSeleccionado).toFixed(2),
+    0
+  );
   const actualizarSaldoCliente = async (
     clienteId: number,
     nuevoSaldo: number
@@ -45,7 +48,7 @@ function AsignadorDeEstado({
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ saldo: nuevoSaldo }),
+          body: JSON.stringify({ nuevoSaldo }), // 🔧 CAMBIO AQUÍ
         }
       );
     } catch (error) {
@@ -80,7 +83,10 @@ function AsignadorDeEstado({
           await updateMaterial(s.id, { pagado: 1, cuadrado: 1 });
         }
       }
-      await actualizarSaldoCliente(clienteId, saldoRestante);
+      await actualizarSaldoCliente(
+        clienteId,
+        Math.max(+saldoRestante.toFixed(2), 0)
+      );
       toast.success("Tareas marcadas como saldadas");
       onGuardar();
     } catch (error) {
