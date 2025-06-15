@@ -112,25 +112,36 @@ function Pagos() {
         }
 
         totalDeuda =
-          pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
-          pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
+          pendientes.trabajos.reduce((acc, t) => acc + (t.pendiente ?? 0), 0) +
+          pendientes.materiales.reduce((acc, m) => acc + (m.pendiente ?? 0), 0);
 
-        // Salir del bucle si la deuda ya se ha ajustado
-        if (
-          Math.abs(totalDeuda - nuevoPago.cantidad) < 0.01 ||
-          totalDeuda < nuevoPago.cantidad
-        )
-          break;
-
+        if (totalDeuda < 0.01) break; // deuda resuelta
         retries++;
         await new Promise((res) => setTimeout(res, 300));
       }
 
+      const resumenDeudas = await getDeudaReal();
+      const resumenCliente = resumenDeudas.find(
+        (r) => r.clienteId === parseInt(clienteId)
+      );
+      const saldoAnterior = resumenCliente?.saldoACuenta ?? 0;
+      const saldoTotal = nuevoPago.cantidad + saldoAnterior;
+
       console.log("Cantidad del nuevo pago:", pagoRegistrado.cantidad);
       console.log("Deuda total pendiente:", totalDeuda);
+      console.log("Saldo anterior:", saldoAnterior);
+      console.log("Saldo total:", saldoTotal);
 
-      if (pagoRegistrado.cantidad < totalDeuda - 0.01) {
-        setPendientesCliente(pendientes ?? { trabajos: [], materiales: [] });
+      if (totalDeuda < 0.01) {
+        toast.success("Pago registrado");
+        setPagoRecienCreado(null);
+        setMostrarAsignador(false);
+      } else if (saldoTotal < totalDeuda - 0.01) {
+        setPendientesCliente({
+          trabajos: pendientes?.trabajos ?? [],
+          materiales: pendientes?.materiales ?? [],
+          saldoDisponible: saldoAnterior, // para mostrar el saldo que ya tenía
+        });
         setMostrarAsignador(true);
       } else {
         toast.success("Pago registrado");
@@ -152,7 +163,6 @@ function Pagos() {
       setLoadingPago(false);
     }
   };
-
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;

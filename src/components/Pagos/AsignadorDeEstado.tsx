@@ -83,10 +83,14 @@ function AsignadorDeEstado({
           await updateMaterial(s.id, { pagado: 1, cuadrado: 1 });
         }
       }
-      await actualizarSaldoCliente(
-        clienteId,
-        Math.max(+saldoRestante.toFixed(2), 0)
-      );
+
+      const nuevoSaldo = +(
+        saldoDisponible +
+        saldoACuenta -
+        totalSeleccionado
+      ).toFixed(2);
+      await actualizarSaldoCliente(clienteId, Math.max(nuevoSaldo, 0));
+
       toast.success("Tareas marcadas como saldadas");
       onGuardar();
     } catch (error) {
