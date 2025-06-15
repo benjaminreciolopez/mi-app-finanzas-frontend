@@ -74,7 +74,7 @@ function AsignadorDeEstado({
       <div className="modal">
         <h3>Marcar tareas como saldadas</h3>
         <p>
-          Saldo disponible: {pago.cantidad.toFixed(2)}€ <br />
+          Saldo disponible: {(pago?.cantidad ?? 0).toFixed(2)}€ <br />
           <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€ <br />
           Tareas seleccionadas: {seleccionados.length}
         </p>

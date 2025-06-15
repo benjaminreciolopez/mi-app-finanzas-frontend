@@ -88,32 +88,34 @@ function Pagos() {
         observaciones: observaciones.trim() || undefined,
       };
 
-      // 1. Registrar el nuevo pago
       const respuesta = await addPago(nuevoPago);
       const pagoRegistrado = respuesta.pago;
       setPagoRecienCreado(pagoRegistrado);
 
-      // 2. Esperar a que Supabase refleje el nuevo estado de deuda
-      let pendientes: { trabajos: any[]; materiales: any[] } | undefined =
-        undefined;
+      // Reintento para obtener deuda después del nuevo pago
+      let pendientes;
       let totalDeuda = Infinity;
       const maxRetries = 5;
       let retries = 0;
 
       while (retries < maxRetries) {
-        const resultado = await getPendientes(parseInt(clienteId));
-        if (!resultado) {
+        pendientes = await getPendientes(parseInt(clienteId));
+        if (!pendientes) {
           retries++;
           await new Promise((res) => setTimeout(res, 300));
           continue;
         }
 
-        pendientes = resultado;
         totalDeuda =
           pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
           pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
 
-        if (totalDeuda <= pagoRegistrado.cantidad + 0.01) break;
+        // Salir del bucle si la deuda ya se ha ajustado
+        if (
+          Math.abs(totalDeuda - nuevoPago.cantidad) < 0.01 ||
+          totalDeuda < nuevoPago.cantidad
+        )
+          break;
 
         retries++;
         await new Promise((res) => setTimeout(res, 300));
@@ -122,9 +124,8 @@ function Pagos() {
       console.log("Cantidad del nuevo pago:", pagoRegistrado.cantidad);
       console.log("Deuda total pendiente:", totalDeuda);
 
-      // 3. Mostrar modal si no cubre toda la deuda
-      if (pendientes && pagoRegistrado.cantidad < totalDeuda - 0.01) {
-        setPendientesCliente(pendientes);
+      if (pagoRegistrado.cantidad < totalDeuda - 0.01) {
+        setPendientesCliente(pendientes ?? { trabajos: [], materiales: [] });
         setMostrarAsignador(true);
       } else {
         toast.success("Pago registrado");
@@ -132,7 +133,7 @@ function Pagos() {
         setMostrarAsignador(false);
       }
 
-      // 4. Limpiar formulario
+      // Reset formulario
       setClienteId("");
       setCantidad("");
       setFecha("");
@@ -516,7 +517,7 @@ function Pagos() {
           trabajos={pendientesCliente.trabajos}
           materiales={pendientesCliente.materiales}
           onGuardar={() => {
-            toast.success("Pago registrado"); // ✅ solo si se guarda
+            toast.success("Pago registrado");
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
             cargarDatos();
@@ -524,7 +525,6 @@ function Pagos() {
           onCancelar={() => {
             setMostrarAsignador(false);
             setPagoRecienCreado(null);
-            // No mostramos toast aquí
             cargarDatos();
           }}
         />
