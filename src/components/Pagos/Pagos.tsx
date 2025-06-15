@@ -74,8 +74,6 @@ function Pagos() {
     setPagosConNombre(pagosConNombres);
   };
 
-  // ... imports y hooks como antes ...
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clienteId || !cantidad || !fecha) return;
@@ -93,22 +91,39 @@ function Pagos() {
       // 1. Registrar el nuevo pago
       const respuesta = await addPago(nuevoPago);
       const pagoRegistrado = respuesta.pago;
-      setPagoRecienCreado(pagoRegistrado); // guardamos para modal si es necesario
+      setPagoRecienCreado(pagoRegistrado);
 
-      // 2. Obtener deuda actual (pendientes sin saldar)
-      await new Promise((res) => setTimeout(res, 300)); // esperar 300ms
-      const pendientes = await getPendientes(parseInt(clienteId));
+      // 2. Esperar a que Supabase refleje el nuevo estado de deuda
+      let pendientes: { trabajos: any[]; materiales: any[] } | undefined =
+        undefined;
+      let totalDeuda = Infinity;
+      const maxRetries = 5;
+      let retries = 0;
 
-      // 3. Calcular la deuda total
-      const totalDeuda =
-        pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
-        pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
+      while (retries < maxRetries) {
+        const resultado = await getPendientes(parseInt(clienteId));
+        if (!resultado) {
+          retries++;
+          await new Promise((res) => setTimeout(res, 300));
+          continue;
+        }
 
-      console.log("Cantidad del nuevo pago:", nuevoPago.cantidad);
-      console.log("Deuda total:", totalDeuda);
+        pendientes = resultado;
+        totalDeuda =
+          pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
+          pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
 
-      // 4. Mostrar modal si no cubre todo
-      if (nuevoPago.cantidad < totalDeuda - 0.01) {
+        if (totalDeuda <= pagoRegistrado.cantidad + 0.01) break;
+
+        retries++;
+        await new Promise((res) => setTimeout(res, 300));
+      }
+
+      console.log("Cantidad del nuevo pago:", pagoRegistrado.cantidad);
+      console.log("Deuda total pendiente:", totalDeuda);
+
+      // 3. Mostrar modal si no cubre toda la deuda
+      if (pendientes && pagoRegistrado.cantidad < totalDeuda - 0.01) {
         setPendientesCliente(pendientes);
         setMostrarAsignador(true);
       } else {
@@ -117,7 +132,7 @@ function Pagos() {
         setMostrarAsignador(false);
       }
 
-      // 5. Limpiar formulario
+      // 4. Limpiar formulario
       setClienteId("");
       setCantidad("");
       setFecha("");
@@ -131,6 +146,7 @@ function Pagos() {
       setLoadingPago(false);
     }
   };
+
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;
