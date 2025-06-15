@@ -511,24 +511,27 @@ function Pagos() {
           })()
         )}
       </div>
-      {mostrarAsignador && pagoRecienCreado && (
-        <AsignadorDeEstado
-          pago={pagoRecienCreado}
-          trabajos={pendientesCliente.trabajos}
-          materiales={pendientesCliente.materiales}
-          onGuardar={() => {
-            toast.success("Pago registrado");
-            setMostrarAsignador(false);
-            setPagoRecienCreado(null);
-            cargarDatos();
-          }}
-          onCancelar={() => {
-            setMostrarAsignador(false);
-            setPagoRecienCreado(null);
-            cargarDatos();
-          }}
-        />
-      )}
+      {mostrarAsignador &&
+        pagoRecienCreado?.cantidad !== undefined &&
+        pendientesCliente?.trabajos &&
+        pendientesCliente?.materiales && (
+          <AsignadorDeEstado
+            pago={pagoRecienCreado}
+            trabajos={pendientesCliente.trabajos}
+            materiales={pendientesCliente.materiales}
+            onGuardar={() => {
+              toast.success("Pago registrado");
+              setMostrarAsignador(false);
+              setPagoRecienCreado(null);
+              cargarDatos();
+            }}
+            onCancelar={() => {
+              setMostrarAsignador(false);
+              setPagoRecienCreado(null);
+              cargarDatos();
+            }}
+          />
+        )}
     </div>
   );
 }
