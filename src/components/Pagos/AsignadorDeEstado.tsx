@@ -12,7 +12,7 @@ interface Props {
   trabajos: (Trabajo & { precioHora: number })[];
   materiales: Material[];
   onGuardar: () => void;
-  onCancelar: () => void; // ✅ Añadido
+  onCancelar: () => void;
 }
 
 function AsignadorDeEstado({
@@ -33,20 +33,22 @@ function AsignadorDeEstado({
   );
 
   const saldoDisponible = pago?.cantidad ?? 0;
-  const saldoRestante = saldoDisponible - totalSeleccionado;
+  const saldoRestante = +(saldoDisponible - totalSeleccionado).toFixed(2);
 
   const toggleSeleccion = (
     id: number,
     tipo: "trabajo" | "material",
     coste: number
   ) => {
-    const existe = seleccionados.find((s) => s.id === id && s.tipo === tipo);
-    if (existe) {
-      setSeleccionados(
-        seleccionados.filter((s) => s.id !== id || s.tipo !== tipo)
-      );
+    const index = seleccionados.findIndex(
+      (s) => s.id === id && s.tipo === tipo
+    );
+    if (index !== -1) {
+      setSeleccionados((prev) => prev.filter((_, i) => i !== index));
     } else if (saldoRestante >= coste - 0.01) {
-      setSeleccionados([...seleccionados, { id, tipo, coste }]);
+      setSeleccionados((prev) => [...prev, { id, tipo, coste }]);
+    } else {
+      toast.warning("Saldo insuficiente para seleccionar esta tarea");
     }
   };
 
@@ -60,8 +62,8 @@ function AsignadorDeEstado({
           await updateMaterial(s.id, { pagado: 1, cuadrado: 1 });
         }
       }
-      toast.success("Tareas actualizadas correctamente");
-      onGuardar(); // ✅ Llamada al evento de éxito
+      toast.success("Tareas marcadas como saldadas");
+      onGuardar();
     } catch (error) {
       toast.error("Error al guardar cambios");
       console.error(error);
@@ -72,12 +74,22 @@ function AsignadorDeEstado({
 
   return (
     <div className="modal-backdrop">
-      <div className="modal">
-        <h3>Marcar tareas como saldadas</h3>
+      <div className="modal" style={{ maxWidth: 480, padding: "1.5rem" }}>
+        <h3 style={{ marginBottom: 8 }}>Marcar tareas como saldadas</h3>
         <p>
-          Saldo disponible: {saldoDisponible.toFixed(2)}€ <br />
-          <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€ <br />
-          Tareas seleccionadas: {seleccionados.length}
+          <strong>Saldo disponible:</strong> {saldoDisponible.toFixed(2)}€{" "}
+          <br />
+          <strong>Saldo restante:</strong>{" "}
+          <span
+            style={{
+              color: saldoRestante < 0 ? "crimson" : "#2d2",
+              fontWeight: 600,
+            }}
+          >
+            {saldoRestante.toFixed(2)}€
+          </span>{" "}
+          <br />
+          <strong>Tareas seleccionadas:</strong> {seleccionados.length}
         </p>
 
         <div
@@ -86,53 +98,77 @@ function AsignadorDeEstado({
             overflowY: "auto",
             paddingRight: "6px",
             marginTop: "1rem",
+            borderTop: "1px solid #ddd",
+            paddingTop: "1rem",
           }}
         >
-          <h4 style={{ marginTop: "1rem" }}>Trabajos</h4>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {trabajos.map((t) => {
-              const coste = t.horas * t.precioHora;
-              const seleccionado = seleccionados.some(
-                (s) => s.id === t.id && s.tipo === "trabajo"
-              );
-              return (
-                <li key={t.id} style={{ marginBottom: "6px" }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={seleccionado}
-                      onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
-                    />{" "}
-                    {t.fecha} - {t.horas}h x {t.precioHora}€/h ={" "}
-                    {coste.toFixed(2)}€
-                  </label>
-                </li>
-              );
-            })}
+          <h4 style={{ marginBottom: "0.5rem" }}>Trabajos</h4>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {[...trabajos]
+              .sort((a, b) => a.fecha.localeCompare(b.fecha))
+              .map((t) => {
+                const coste = +(t.horas * t.precioHora).toFixed(2);
+                const seleccionado = seleccionados.some(
+                  (s) => s.id === t.id && s.tipo === "trabajo"
+                );
+                return (
+                  <li
+                    key={t.id}
+                    style={{
+                      marginBottom: "6px",
+                      background: seleccionado ? "#eef6fb" : "transparent",
+                      padding: "4px 6px",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <label style={{ cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={seleccionado}
+                        onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
+                        style={{ marginRight: 8 }}
+                      />
+                      {t.fecha || "Sin fecha"} – {t.horas}h × {t.precioHora}€/h
+                      = <strong>{coste.toFixed(2)}€</strong>
+                    </label>
+                  </li>
+                );
+              })}
           </ul>
 
-          <h4 style={{ marginTop: "1rem" }}>Materiales</h4>
-          <ul style={{ listStyle: "none", padding: 0 }}>
-            {materiales.map((m) => {
-              const seleccionado = seleccionados.some(
-                (s) => s.id === m.id && s.tipo === "material"
-              );
-              return (
-                <li key={m.id} style={{ marginBottom: "6px" }}>
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={seleccionado}
-                      onChange={() =>
-                        toggleSeleccion(m.id, "material", m.coste)
-                      }
-                    />{" "}
-                    {m.fecha} - {m.descripcion || "Material"}:{" "}
-                    {m.coste.toFixed(2)}€
-                  </label>
-                </li>
-              );
-            })}
+          <h4 style={{ margin: "1rem 0 0.5rem" }}>Materiales</h4>
+          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            {[...materiales]
+              .sort((a, b) => a.fecha.localeCompare(b.fecha))
+              .map((m) => {
+                const seleccionado = seleccionados.some(
+                  (s) => s.id === m.id && s.tipo === "material"
+                );
+                return (
+                  <li
+                    key={m.id}
+                    style={{
+                      marginBottom: "6px",
+                      background: seleccionado ? "#eef6fb" : "transparent",
+                      padding: "4px 6px",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <label style={{ cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={seleccionado}
+                        onChange={() =>
+                          toggleSeleccion(m.id, "material", m.coste)
+                        }
+                        style={{ marginRight: 8 }}
+                      />
+                      {m.fecha || "Sin fecha"} – {m.descripcion || "Material"}:{" "}
+                      <strong>{m.coste.toFixed(2)}€</strong>
+                    </label>
+                  </li>
+                );
+              })}
           </ul>
         </div>
 
