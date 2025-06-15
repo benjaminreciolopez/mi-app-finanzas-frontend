@@ -47,7 +47,7 @@ function AsignadorDeEstado({
     [seleccionados]
   );
 
-  const saldoDisponible = pago?.cantidad ?? 0;
+  const saldoDisponible = pago ? pago.cantidad : 0;
   const saldoTotal = +(saldoDisponible + saldoACuenta).toFixed(2);
   const saldoRestante = Math.max(
     +(saldoTotal - totalSeleccionado).toFixed(2),
