@@ -13,6 +13,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import AsignadorDeEstado from "./AsignadorDeEstado"; // si está en la misma carpeta
 import { getPendientes } from "../../api/deudaApi"; // ✅ Correcto
 
+type TrabajoPendiente = {
+  id: number;
+  fecha: string;
+  horas: number;
+  precioHora: number;
+  coste: number;
+};
+type MaterialPendiente = {
+  id: number;
+  fecha: string;
+  descripcion?: string;
+  coste: number;
+};
+type PendientesCliente = {
+  trabajos: TrabajoPendiente[];
+  materiales: MaterialPendiente[];
+  saldoDisponible?: number;
+};
+
 interface PagoConNombre extends Pago {
   nombre: string;
 }
@@ -21,7 +40,6 @@ interface PagoUsado {
   usado: number;
   fecha?: string;
 }
-
 type UsoPagosPorCliente = { [clienteId: number]: PagoUsado[] };
 
 function Pagos() {
@@ -33,11 +51,12 @@ function Pagos() {
   const [observaciones, setObservaciones] = useState("");
   const [mostrarAsignador, setMostrarAsignador] = useState(false);
   const [pagoRecienCreado, setPagoRecienCreado] = useState<Pago | null>(null);
-  const [pendientesCliente, setPendientesCliente] = useState<{
-    saldoDisponible?: number;
-    trabajos: any[];
-    materiales: any[];
-  }>({ trabajos: [], materiales: [] });
+  const [pendientesCliente, setPendientesCliente] = useState<PendientesCliente>(
+    {
+      trabajos: [] as TrabajoPendiente[],
+      materiales: [] as MaterialPendiente[],
+    }
+  );
   const pagosListRef = useRef<HTMLUListElement>(null);
   const [loadingPago, setLoadingPago] = useState(false);
   const [pagoSeleccionado, setPagoSeleccionado] = useState<number | null>(null);
@@ -95,31 +114,41 @@ function Pagos() {
         toast.error("Error al registrar el pago (sin datos)");
         return;
       }
-      setPagoRecienCreado(pagoRegistrado);
 
-      // Reintento para obtener deuda después del nuevo pago
-      let pendientes;
-      let totalDeuda = Infinity;
+      // Intentar obtener tareas/materiales pendientes (con reintentos por lag de DB/Supabase)
+      let pendientes: {
+        trabajos: TrabajoPendiente[];
+        materiales: MaterialPendiente[];
+      } = {
+        trabajos: [],
+        materiales: [],
+      };
       const maxRetries = 5;
       let retries = 0;
-
       while (retries < maxRetries) {
-        pendientes = await getPendientes(parseInt(clienteId));
-        if (!pendientes) {
-          retries++;
-          await new Promise((res) => setTimeout(res, 300));
-          continue;
+        const p = await getPendientes(parseInt(clienteId));
+        if (p && (p.trabajos.length > 0 || p.materiales.length > 0)) {
+          pendientes = {
+            trabajos: p.trabajos.map((t) => ({
+              id: t.id,
+              fecha: t.fecha,
+              horas: t.horas ?? 0,
+              precioHora: t.precioHora ?? 0,
+              coste: t.coste,
+            })),
+            materiales: p.materiales.map((m) => ({
+              id: m.id,
+              fecha: m.fecha,
+              descripcion: m.descripcion ?? "Material",
+              coste: m.coste,
+            })),
+          };
         }
-
-        totalDeuda =
-          pendientes.trabajos.reduce((acc, t) => acc + (t.pendiente ?? 0), 0) +
-          pendientes.materiales.reduce((acc, m) => acc + (m.pendiente ?? 0), 0);
-
-        if (totalDeuda < 0.01) break; // deuda resuelta
         retries++;
         await new Promise((res) => setTimeout(res, 300));
       }
 
+      // Obtener saldo a cuenta actualizado del resumen del cliente
       const resumenDeudas = await getDeudaReal();
       const resumenCliente = resumenDeudas.find(
         (r) => r.clienteId === parseInt(clienteId)
@@ -127,21 +156,17 @@ function Pagos() {
       const saldoAnterior = resumenCliente?.saldoACuenta ?? 0;
       const saldoTotal = nuevoPago.cantidad + saldoAnterior;
 
-      console.log("Cantidad del nuevo pago:", pagoRegistrado.cantidad);
-      console.log("Deuda total pendiente:", totalDeuda);
-      console.log("Saldo anterior:", saldoAnterior);
-      console.log("Saldo total:", saldoTotal);
-
-      if (totalDeuda < 0.01) {
-        toast.success("Pago registrado");
-        setPagoRecienCreado(null);
-        setMostrarAsignador(false);
-      } else if (saldoTotal < totalDeuda - 0.01) {
+      // Mostrar el modal SOLO si hay tareas o materiales pendientes y saldo total > 0
+      if (
+        (pendientes.trabajos.length > 0 || pendientes.materiales.length > 0) &&
+        saldoTotal > 0.01
+      ) {
         setPendientesCliente({
-          trabajos: pendientes?.trabajos ?? [],
-          materiales: pendientes?.materiales ?? [],
-          saldoDisponible: saldoAnterior, // para mostrar el saldo que ya tenía
+          trabajos: pendientes.trabajos,
+          materiales: pendientes.materiales,
+          saldoDisponible: saldoAnterior,
         });
+        setPagoRecienCreado(pagoRegistrado);
         setMostrarAsignador(true);
       } else {
         toast.success("Pago registrado");

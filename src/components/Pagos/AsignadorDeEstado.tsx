@@ -1,14 +1,29 @@
 import { useState, useMemo } from "react";
-import { Trabajo, updateTrabajo } from "../../api/trabajosApi";
-import { Material, updateMaterial } from "../../api/materialesApi";
+import { updateTrabajo } from "../../api/trabajosApi";
+import { updateMaterial } from "../../api/materialesApi";
 import { toast } from "react-toastify";
+
+// ✅ TIPOS MÍNIMOS QUE USA EL MODAL (coinciden con lo que devuelve getPendientes)
+type TrabajoPendiente = {
+  id: number;
+  fecha: string;
+  horas: number;
+  precioHora: number;
+  coste: number;
+};
+type MaterialPendiente = {
+  id: number;
+  fecha: string;
+  descripcion?: string;
+  coste: number;
+};
 
 interface Props {
   pago: { cantidad: number } | null;
-  trabajos: (Trabajo & { precioHora: number })[];
-  materiales: Material[];
+  trabajos: TrabajoPendiente[];
+  materiales: MaterialPendiente[];
   saldoACuenta: number;
-  clienteId: number; // 👉 nuevo
+  clienteId: number;
   onGuardar: () => void;
   onCancelar: () => void;
 }

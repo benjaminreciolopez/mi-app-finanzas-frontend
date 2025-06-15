@@ -24,6 +24,7 @@ export interface ResumenDeuda {
 export interface TrabajoOMaterial {
   id: number;
   tipo: "trabajo" | "material";
+  descripcion?: string; // Solo para materiales
   fecha: string;
   coste: number;
   pagado?: number; // Puede no estar presente
