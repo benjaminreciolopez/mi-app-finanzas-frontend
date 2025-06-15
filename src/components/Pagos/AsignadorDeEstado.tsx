@@ -57,13 +57,14 @@ function AsignadorDeEstado({
     clienteId: number,
     nuevoSaldo: number
   ) => {
+    if (!clienteId || isNaN(clienteId)) return;
     try {
       await fetch(
         `${import.meta.env.VITE_API_URL}/api/clientes/${clienteId}/saldo`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nuevoSaldo }), // 🔧 CAMBIO AQUÍ
+          body: JSON.stringify({ nuevoSaldo }),
         }
       );
     } catch (error) {

@@ -557,7 +557,7 @@ function Pagos() {
           trabajos={pendientesCliente.trabajos}
           materiales={pendientesCliente.materiales}
           saldoACuenta={pendientesCliente.saldoDisponible ?? 0}
-          clienteId={parseInt(clienteId)}
+          clienteId={Number(clienteId)}
           onGuardar={async () => {
             toast.success("Pago registrado");
             setMostrarAsignador(false);
