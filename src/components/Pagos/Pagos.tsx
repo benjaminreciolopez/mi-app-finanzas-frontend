@@ -90,35 +90,33 @@ function Pagos() {
         observaciones: observaciones.trim() || undefined,
       };
 
+      // 1. Registrar el nuevo pago
       const respuesta = await addPago(nuevoPago);
-      setPagoRecienCreado(respuesta.pago); // asumiendo que 'respuesta' tiene 'pago'
-      //toast.success("Pago registrado");
+      const pagoRegistrado = respuesta.pago;
+      setPagoRecienCreado(pagoRegistrado); // guardamos para modal si es necesario
 
-      // Cargar deuda pendiente actual
+      // 2. Obtener deuda actual (pendientes sin saldar)
       const pendientes = await getPendientes(parseInt(clienteId));
-      const totalPendienteAntes =
+
+      // 3. Calcular la deuda total
+      const totalDeuda =
         pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
         pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
 
-      const totalPendienteDespues = totalPendienteAntes - nuevoPago.cantidad;
-
       console.log("Cantidad del nuevo pago:", nuevoPago.cantidad);
-      console.log(
-        "Deuda total pendiente después de pago:",
-        totalPendienteDespues
-      );
+      console.log("Deuda total:", totalDeuda);
 
-      if (totalPendienteDespues > 0.01) {
-        setPagoRecienCreado(respuesta.pago);
+      // 4. Mostrar modal si no cubre todo
+      if (nuevoPago.cantidad < totalDeuda - 0.01) {
         setPendientesCliente(pendientes);
         setMostrarAsignador(true);
       } else {
         toast.success("Pago registrado");
-        setMostrarAsignador(false);
         setPagoRecienCreado(null);
+        setMostrarAsignador(false);
       }
 
-      // Limpiar formulario
+      // 5. Limpiar formulario
       setClienteId("");
       setCantidad("");
       setFecha("");

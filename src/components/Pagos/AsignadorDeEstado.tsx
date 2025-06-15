@@ -75,10 +75,18 @@ function AsignadorDeEstado({
         <h3>Marcar tareas como saldadas</h3>
         <p>
           Saldo disponible: {pago.cantidad.toFixed(2)}€ <br />
-          <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€
+          <strong>Saldo restante:</strong> {saldoRestante.toFixed(2)}€ <br />
+          Tareas seleccionadas: {seleccionados.length}
         </p>
 
-        <div style={{ maxHeight: "320px", overflowY: "auto" }}>
+        <div
+          style={{
+            maxHeight: "320px",
+            overflowY: "auto",
+            paddingRight: "6px",
+            marginTop: "1rem",
+          }}
+        >
           <h4 style={{ marginTop: "1rem" }}>Trabajos</h4>
           <ul style={{ listStyle: "none", padding: 0 }}>
             {trabajos.map((t) => {
@@ -128,7 +136,10 @@ function AsignadorDeEstado({
         </div>
 
         <div style={{ marginTop: "1.5rem", display: "flex", gap: "8px" }}>
-          <button onClick={handleGuardar} disabled={guardando}>
+          <button
+            onClick={handleGuardar}
+            disabled={guardando || seleccionados.length === 0}
+          >
             {guardando ? "Guardando..." : "Guardar cambios"}
           </button>
           <button onClick={onCancelar} disabled={guardando}>
