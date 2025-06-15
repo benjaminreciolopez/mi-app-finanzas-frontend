@@ -96,22 +96,26 @@ function Pagos() {
 
       // Cargar deuda pendiente actual
       const pendientes = await getPendientes(parseInt(clienteId));
-      const totalPendiente =
+      const totalPendienteAntes =
         pendientes.trabajos.reduce((acc, t) => acc + t.pendiente, 0) +
         pendientes.materiales.reduce((acc, m) => acc + m.pendiente, 0);
-      console.log("Cantidad del nuevo pago:", nuevoPago.cantidad);
-      console.log("Deuda total pendiente:", totalPendiente);
 
-      // Si el pago no cubre todo, mostrar el asignador de estado
-      if (nuevoPago.cantidad < totalPendiente) {
+      const totalPendienteDespues = totalPendienteAntes - nuevoPago.cantidad;
+
+      console.log("Cantidad del nuevo pago:", nuevoPago.cantidad);
+      console.log(
+        "Deuda total pendiente después de pago:",
+        totalPendienteDespues
+      );
+
+      if (totalPendienteDespues > 0.01) {
         setPagoRecienCreado(respuesta.pago);
         setPendientesCliente(pendientes);
         setMostrarAsignador(true);
       } else {
-        // ✅ asegurar que no se muestre si no hace falta
+        toast.success("Pago registrado");
         setMostrarAsignador(false);
         setPagoRecienCreado(null);
-        toast.success("Pago registrado");
       }
 
       // Limpiar formulario
