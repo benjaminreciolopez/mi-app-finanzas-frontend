@@ -41,6 +41,8 @@ function Control() {
     if (localStorage.getItem("forzarRecargaControl") === "true") {
       cargarDatos();
       localStorage.removeItem("forzarRecargaControl");
+    } else {
+      cargarDatos();
     }
   }, []);
 
