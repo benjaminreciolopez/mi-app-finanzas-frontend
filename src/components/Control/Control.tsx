@@ -50,13 +50,14 @@ function Control() {
       getTrabajos(),
       getMateriales(),
     ]);
-    const clientesConRegistros = clientesData
-      .filter(
-        (c) =>
-          trabajosData.some((t) => t.clienteId === c.id) ||
-          materialesData.some((m) => m.clienteId === c.id)
-      )
-      .sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
+
+    console.log("Clientes:", clientesData);
+    console.log("Trabajos:", trabajosData);
+    console.log("Materiales:", materialesData);
+
+    const clientesConRegistros = clientesData.sort(
+      (a, b) => (a.orden ?? 0) - (b.orden ?? 0)
+    );
 
     setTrabajos(trabajosData);
     setMateriales(materialesData);
