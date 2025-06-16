@@ -33,7 +33,6 @@ function AsignadorDeEstado({
   trabajos,
   materiales,
   saldoACuenta,
-  clienteId,
   onGuardar,
   onCancelar,
 }: Props) {
@@ -53,24 +52,6 @@ function AsignadorDeEstado({
     +(saldoTotal - totalSeleccionado).toFixed(2),
     0
   );
-  const actualizarSaldoCliente = async (
-    clienteId: number,
-    nuevoSaldo: number
-  ) => {
-    if (!clienteId || isNaN(clienteId)) return;
-    try {
-      await fetch(
-        `${import.meta.env.VITE_API_URL}/api/clientes/${clienteId}/saldo`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ nuevoSaldo }),
-        }
-      );
-    } catch (error) {
-      console.error("❌ Error al actualizar saldo del cliente:", error);
-    }
-  };
 
   const toggleSeleccion = (
     id: number,
@@ -98,17 +79,11 @@ function AsignadorDeEstado({
         } else {
           await updateMaterial(s.id, { pagado: 1, cuadrado: 1 });
         }
+        // Aquí cada API ya llama a actualizarSaldoCliente por detrás
       }
 
-      const nuevoSaldo = +(
-        saldoDisponible +
-        saldoACuenta -
-        totalSeleccionado
-      ).toFixed(2);
-      await actualizarSaldoCliente(clienteId, Math.max(nuevoSaldo, 0));
-
       toast.success("Tareas marcadas como saldadas");
-      onGuardar();
+      onGuardar(); // Esto debe recargar los datos del cliente en el frontend
     } catch (error) {
       toast.error("Error al guardar cambios");
       console.error(error);
