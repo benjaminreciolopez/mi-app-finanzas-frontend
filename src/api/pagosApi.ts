@@ -22,25 +22,19 @@ export interface RespuestaPago {
 
 // ✅ Obtener todos los pagos
 export const getPagos = async (): Promise<Pago[]> => {
-  const res = await axios.get<{ data: Pago[] }>(API_URL);
-  return res.data.data;
+  const res = await axios.get<Pago[]>(API_URL);
+  return res.data;
 };
 
 // ✅ Añadir un nuevo pago
-export async function addPago(pago: NuevoPago): Promise<RespuestaPago> {
-  const res = await fetch(API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(pago),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.error || "Error al añadir el pago");
+export const addPago = async (pago: NuevoPago): Promise<RespuestaPago> => {
+  try {
+    const res = await axios.post<RespuestaPago>(API_URL, pago);
+    return res.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.error || "Error al añadir el pago");
   }
-
-  return await res.json();
-}
+};
 
 // ✅ Actualizar un pago
 export const updatePago = async (
