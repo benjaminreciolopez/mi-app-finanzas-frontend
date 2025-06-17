@@ -151,6 +151,11 @@ function AsignadorDeEstado({
                       <input
                         type="checkbox"
                         checked={seleccionado}
+                        disabled={
+                          // Solo puedes marcar si tienes saldo suficiente o ya está seleccionado
+                          (!seleccionado && saldoRestante < coste - 0.01) ||
+                          guardando
+                        }
                         onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
                         style={{ marginRight: 8 }}
                       />
@@ -185,6 +190,10 @@ function AsignadorDeEstado({
                       <input
                         type="checkbox"
                         checked={seleccionado}
+                        disabled={
+                          (!seleccionado && saldoRestante < m.coste - 0.01) ||
+                          guardando
+                        }
                         onChange={() =>
                           toggleSeleccion(m.id, "material", m.coste)
                         }
