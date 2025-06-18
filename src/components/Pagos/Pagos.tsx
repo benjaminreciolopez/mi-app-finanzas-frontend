@@ -101,6 +101,14 @@ function Pagos() {
     setLoadingPago(true);
 
     try {
+      // 1️⃣ Obtén el saldo anterior antes de registrar el pago
+      const resumenDeudasAntes = await getDeudaReal();
+      const resumenClienteAntes = resumenDeudasAntes.find(
+        (r) => r.clienteId === parseInt(clienteId)
+      );
+      const saldoAnterior = resumenClienteAntes?.saldoACuenta ?? 0;
+
+      // 2️⃣ Registra el pago
       const nuevoPago: Omit<Pago, "id"> = {
         clienteId: parseInt(clienteId),
         cantidad: parseFloat(cantidad),
@@ -112,10 +120,11 @@ function Pagos() {
       const pagoRegistrado = respuesta?.pago;
       if (!pagoRegistrado || pagoRegistrado.cantidad === undefined) {
         toast.error("Error al registrar el pago (sin datos)");
+        setLoadingPago(false);
         return;
       }
 
-      // Intentar obtener tareas/materiales pendientes (con reintentos por lag de DB/Supabase)
+      // 3️⃣ Obtén los trabajos y materiales pendientes (puedes dejar tu lógica de reintentos)
       let pendientes: {
         trabajos: TrabajoPendiente[];
         materiales: MaterialPendiente[];
@@ -148,38 +157,16 @@ function Pagos() {
         await new Promise((res) => setTimeout(res, 300));
       }
 
-      // Obtener saldo a cuenta actualizado del resumen del cliente
-      const resumenDeudas = await getDeudaReal();
-      const resumenCliente = resumenDeudas.find(
-        (r) => r.clienteId === parseInt(clienteId)
-      );
-      const saldoAnterior = resumenCliente?.saldoACuenta ?? 0;
-      const saldoTotal = nuevoPago.cantidad + saldoAnterior;
-
-      // Debug logs
-      console.log("--- DEBUG MODAL ASIGNADOR ---");
-      console.log("Cliente ID:", clienteId);
-      console.log("Pendientes trabajos:", pendientes.trabajos);
-      console.log("Pendientes materiales:", pendientes.materiales);
-      console.log("Saldo Anterior:", saldoAnterior);
-      console.log("Nuevo Pago Cantidad:", nuevoPago.cantidad);
-      console.log("Saldo Total Calculado:", saldoTotal);
-      console.log(
-        "Condición Trabajos/Materiales OK?:",
-        pendientes.trabajos.length > 0 || pendientes.materiales.length > 0
-      );
-      console.log("Condición Saldo Total OK?:", saldoTotal > 0.01);
-      console.log("--- FIN DEBUG MODAL ASIGNADOR ---");
-
-      // Mostrar el modal SOLO si hay tareas o materiales pendientes y saldo total > 0
+      // 4️⃣ Abre el modal SOLO si hay trabajos/materiales pendientes y saldo real disponible
+      const saldoTotalDisponible = saldoAnterior + nuevoPago.cantidad;
       if (
         (pendientes.trabajos.length > 0 || pendientes.materiales.length > 0) &&
-        saldoTotal > 0.01
+        saldoTotalDisponible > 0.01
       ) {
         setPendientesCliente({
           trabajos: pendientes.trabajos,
           materiales: pendientes.materiales,
-          saldoDisponible: saldoAnterior,
+          saldoDisponible: saldoTotalDisponible,
         });
         setPagoRecienCreado(pagoRegistrado);
         setMostrarAsignador(true);
@@ -203,6 +190,7 @@ function Pagos() {
       setLoadingPago(false);
     }
   };
+
   const handleUpdate = async (id: number, campo: string, valor: string) => {
     const pago = pagosConNombre.find((p) => p.id === id);
     if (!pago) return;
