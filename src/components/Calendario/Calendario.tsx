@@ -75,64 +75,52 @@ function Calendario() {
   return (
     <div className="container">
       <h2 className="title">Añadir Trabajo</h2>
-      <div
-        style={{
-          maxHeight: "75vh",
-          overflowY: "auto",
-          marginBottom: "1rem",
-        }}
-      >
-        <form onSubmit={handleSubmit} className="card">
-          <label>Cliente:</label>
-          <select
-            value={clienteId}
-            onChange={(e) => setClienteId(Number(e.target.value))}
-            required
-          >
-            <option value="">Seleccionar cliente</option>
-            {clientes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
+      <form onSubmit={handleSubmit} className="card form-scroll">
+        <label>Cliente:</label>
+        <select
+          value={clienteId}
+          onChange={(e) => setClienteId(Number(e.target.value))}
+          required
+        >
+          <option value="">Seleccionar cliente</option>
+          {clientes.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
+            </option>
+          ))}
+        </select>
 
-          <label>Fecha:</label>
-          {mostrarBotonHoy && (
-            <div className="flex justify-end mb-2">
-              <button
-                type="button"
-                className="boton-accion"
-                onClick={volverAHoy}
-              >
-                📅 Hoy
-              </button>
-            </div>
-          )}
-          <Calendar
-            key={calendarKey}
-            value={fecha}
-            onChange={(value) => handleChangeFecha(value as Date)}
-          />
+        <label>Fecha:</label>
+        {mostrarBotonHoy && (
+          <div className="flex justify-end mb-2">
+            <button type="button" className="boton-accion" onClick={volverAHoy}>
+              📅 Hoy
+            </button>
+          </div>
+        )}
+        <Calendar
+          key={calendarKey}
+          value={fecha}
+          onChange={(value) => handleChangeFecha(value as Date)}
+        />
 
-          <label>Horas trabajadas:</label>
-          <input
-            type="number"
-            placeholder="Horas"
-            value={horas}
-            onChange={(e) => setHoras(e.target.value)}
-            required
-          />
+        <label>Horas trabajadas:</label>
+        <input
+          type="number"
+          placeholder="Horas"
+          value={horas}
+          onChange={(e) => setHoras(e.target.value)}
+          required
+        />
 
-          <button
-            type="submit"
-            className="boton-accion"
-            style={{ marginTop: "10px" }}
-          >
-            ➕ Añadir Trabajo
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className="boton-accion"
+          style={{ marginTop: "10px" }}
+        >
+          ➕ Añadir Trabajo
+        </button>
+      </form>
       {resumen && (
         <div
           style={{

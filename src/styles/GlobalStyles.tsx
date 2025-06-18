@@ -299,6 +299,26 @@ input:focus, select:focus, textarea:focus {
   background: #a5b4fc;
   border-radius: 6px;
 }
+.form-scroll {
+  max-height: 75vh;
+  min-height: 220px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: #4f46e5 #f3f4f6;
+  /* Scroll suave para móvil y desktop */
+  scroll-behavior: smooth;
+}
+.form-scroll::-webkit-scrollbar {
+  width: 7px;
+  background: #f3f4f6;
+}
+.form-scroll::-webkit-scrollbar-thumb {
+  background: #a5b4fc;
+  border-radius: 6px;
+}
+
 input[type="date"] {
   width: 100%;
   border: 1px solid #e0e0e0;
@@ -388,6 +408,13 @@ input[type="date"]:disabled {
     backdrop-filter: blur(1px);
     animation: desvanecer 0.3s ease-out forwards;
   }
+@media (max-width: 480px) {
+  .form-scroll {
+    max-height: 63vh;
+    min-height: 180px;
+    margin-bottom: 68px; /* deja hueco por si hay menú inferior */
+  }
+}
 
   @keyframes desvanecer {
     from {
