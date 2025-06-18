@@ -174,26 +174,27 @@ function Control() {
                               {seleccionado ? "▼" : "▶"} {cliente.nombre}
                             </p>
 
-                            {/* Solo mostrar datos si NO está todo a cero */}
                             {!todoCero && (
                               <div style={{ marginLeft: "1rem" }}>
-                                {deuda && (
-                                  <>
-                                    <div>
-                                      💼 Total tareas sin pagar:{" "}
-                                      {deuda.totalTareasPendientes.toFixed(2)} €
-                                    </div>
-                                    <div>
-                                      💰 Saldo a cuenta:{" "}
-                                      {saldoACuenta.toFixed(2)} €
-                                    </div>
-                                    <div>
-                                      🔻 Deuda real pendiente:{" "}
-                                      <strong>
-                                        {deuda.totalDeuda.toFixed(2)} €
-                                      </strong>
-                                    </div>
-                                  </>
+                                {deuda && deuda.totalTareasPendientes !== 0 && (
+                                  <div>
+                                    💼 Total tareas sin pagar:{" "}
+                                    {deuda.totalTareasPendientes.toFixed(2)} €
+                                  </div>
+                                )}
+                                {saldoACuenta !== 0 && (
+                                  <div>
+                                    💰 Saldo a cuenta: {saldoACuenta.toFixed(2)}{" "}
+                                    €
+                                  </div>
+                                )}
+                                {deuda && deuda.totalDeuda !== 0 && (
+                                  <div>
+                                    🔻 Deuda real pendiente:{" "}
+                                    <strong>
+                                      {deuda.totalDeuda.toFixed(2)} €
+                                    </strong>
+                                  </div>
                                 )}
                                 {deuda && deuda.totalHorasPendientes !== 0 && (
                                   <div>
@@ -214,7 +215,6 @@ function Control() {
                               </div>
                             )}
 
-                            {/* Solo mostrar detalles (trabajos/materiales) si NO está todo a cero y está seleccionado */}
                             {!todoCero && seleccionado && (
                               <div
                                 className="card"
