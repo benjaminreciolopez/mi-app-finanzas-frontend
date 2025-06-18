@@ -22,8 +22,10 @@ export interface RespuestaPago {
 
 // ✅ Obtener todos los pagos
 export const getPagos = async (): Promise<Pago[]> => {
-  const res = await axios.get<Pago[]>(API_URL);
-  return res.data;
+  const res = await axios.get<any>(API_URL);
+  if (Array.isArray(res.data)) return res.data;
+  if (res.data && Array.isArray(res.data.data)) return res.data.data;
+  return [];
 };
 
 // ✅ Añadir un nuevo pago
