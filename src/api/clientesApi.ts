@@ -12,8 +12,15 @@ export interface Cliente {
 }
 
 export const getClientes = async (): Promise<Cliente[]> => {
-  const res = await axios.get<{ data: Cliente[] }>(API_URL);
-  return res.data.data;
+  try {
+    const res = await axios.get<{ data: Cliente[] }>(API_URL);
+    // Si res.data.data es undefined, devuelve []
+    if (!Array.isArray(res.data.data)) return [];
+    return res.data.data;
+  } catch (error) {
+    // Si hay error, devuelve array vacío
+    return [];
+  }
 };
 
 export const actualizarOrdenClientes = async (
