@@ -10,12 +10,7 @@ import {
   Cliente,
   actualizarOrdenClientes,
 } from "../../api/clientesApi";
-import {
-  getTrabajos,
-  updateTrabajo,
-  deleteTrabajo,
-  Trabajo,
-} from "../../api/trabajosApi";
+import { getTrabajos, deleteTrabajo, Trabajo } from "../../api/trabajosApi";
 import { getMateriales, Material } from "../../api/materialesApi";
 import { toast } from "react-toastify";
 import { getDeudaReal, ResumenDeuda } from "../../api/deudaApi";
@@ -90,12 +85,6 @@ function Control() {
     }
   };
 
-  const marcarComoPagado = async (id: number) => {
-    await updateTrabajo(id, { pagado: 1 });
-    toast.success("Trabajo marcado como pagado");
-    await cargarDatos();
-  };
-
   const eliminarTrabajo = async (id: number) => {
     if (window.confirm("¿Eliminar este trabajo?")) {
       await deleteTrabajo(id);
@@ -137,8 +126,16 @@ function Control() {
                     const totalHorasPagadas = trabajosCliente
                       .filter((t) => t.pagado)
                       .reduce((acc, t) => acc + t.horas, 0);
-
                     const totalCobrado = totalHorasPagadas * cliente.precioHora;
+
+                    const todoCero =
+                      (deuda?.totalTareasPendientes ?? 0) === 0 &&
+                      (deuda?.saldoACuenta ?? 0) === 0 &&
+                      (deuda?.totalDeuda ?? 0) === 0 &&
+                      (deuda?.totalHorasPendientes ?? 0) === 0 &&
+                      (deuda?.totalMaterialesPendientes ?? 0) === 0 &&
+                      trabajosCliente.length === 0 &&
+                      materialesCliente.length === 0;
 
                     return (
                       <Draggable
@@ -177,41 +174,48 @@ function Control() {
                               {seleccionado ? "▼" : "▶"} {cliente.nombre}
                             </p>
 
-                            <div style={{ marginLeft: "1rem" }}>
-                              {deuda && (
-                                <>
+                            {/* Solo mostrar datos si NO está todo a cero */}
+                            {!todoCero && (
+                              <div style={{ marginLeft: "1rem" }}>
+                                {deuda && (
+                                  <>
+                                    <div>
+                                      💼 Total tareas sin pagar:{" "}
+                                      {deuda.totalTareasPendientes.toFixed(2)} €
+                                    </div>
+                                    <div>
+                                      💰 Saldo a cuenta:{" "}
+                                      {saldoACuenta.toFixed(2)} €
+                                    </div>
+                                    <div>
+                                      🔻 Deuda real pendiente:{" "}
+                                      <strong>
+                                        {deuda.totalDeuda.toFixed(2)} €
+                                      </strong>
+                                    </div>
+                                  </>
+                                )}
+                                {deuda && deuda.totalHorasPendientes !== 0 && (
                                   <div>
-                                    💼 Total tareas sin pagar:{" "}
-                                    {deuda.totalTareasPendientes.toFixed(2)} €
-                                  </div>
-                                  <div>
-                                    💰 Saldo a cuenta: {saldoACuenta.toFixed(2)}{" "}
-                                    €
-                                  </div>
-                                  <div>
-                                    🔻 Deuda real pendiente:{" "}
-                                    <strong>
-                                      {deuda.totalDeuda.toFixed(2)} €
-                                    </strong>
-                                  </div>
-                                </>
-                              )}
-                              {deuda && deuda.totalHorasPendientes !== 0 && (
-                                <div>
-                                  🕒 Horas pendientes:{" "}
-                                  {deuda.totalHorasPendientes} h
-                                </div>
-                              )}
-                              {deuda &&
-                                deuda.totalMaterialesPendientes !== 0 && (
-                                  <div>
-                                    🧱 Materiales pendientes:{" "}
-                                    {deuda.totalMaterialesPendientes.toFixed(2)}{" "}
-                                    €
+                                    🕒 Horas pendientes:{" "}
+                                    {deuda.totalHorasPendientes} h
                                   </div>
                                 )}
-                            </div>
-                            {seleccionado && (
+                                {deuda &&
+                                  deuda.totalMaterialesPendientes !== 0 && (
+                                    <div>
+                                      🧱 Materiales pendientes:{" "}
+                                      {deuda.totalMaterialesPendientes.toFixed(
+                                        2
+                                      )}{" "}
+                                      €
+                                    </div>
+                                  )}
+                              </div>
+                            )}
+
+                            {/* Solo mostrar detalles (trabajos/materiales) si NO está todo a cero y está seleccionado */}
+                            {!todoCero && seleccionado && (
                               <div
                                 className="card"
                                 style={{ marginTop: "0.5rem" }}
@@ -270,6 +274,7 @@ function Control() {
                                             ? "(Pagado)"
                                             : "(Pendiente)"}
                                           <AnimatePresence>
+                                            {/* Solo queda el botón eliminar */}
                                             {!t.pagado &&
                                               trabajoSeleccionado === t.id && (
                                                 <motion.div
@@ -278,7 +283,10 @@ function Control() {
                                                     opacity: 0,
                                                     x: 20,
                                                   }}
-                                                  animate={{ opacity: 1, x: 0 }}
+                                                  animate={{
+                                                    opacity: 1,
+                                                    x: 0,
+                                                  }}
                                                   exit={{ opacity: 0, x: 20 }}
                                                   transition={{
                                                     duration: 0.18,
@@ -288,21 +296,6 @@ function Control() {
                                                     marginLeft: 12,
                                                   }}
                                                 >
-                                                  <button
-                                                    className="boton-accion"
-                                                    onClick={async (e) => {
-                                                      e.stopPropagation();
-                                                      await marcarComoPagado(
-                                                        t.id
-                                                      );
-                                                      setTrabajoSeleccionado(
-                                                        null
-                                                      );
-                                                    }}
-                                                    style={{ marginRight: 4 }}
-                                                  >
-                                                    ✅ Marcar pagado
-                                                  </button>
                                                   <button
                                                     className="boton-accion"
                                                     onClick={async (e) => {
