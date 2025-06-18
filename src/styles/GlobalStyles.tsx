@@ -350,6 +350,21 @@ input[type="date"]:disabled {
     position: relative;
     animation: aparecer 0.3s ease-out forwards;
   }
+.modal .tarea-card {
+  background-color: #f9fafb;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.modal .tarea-card.selected {
+  background-color: #eef6ff;
+}
 
   .modal h3 {
     font-size: 1.25rem;
@@ -424,6 +439,25 @@ input[type="date"]:disabled {
       opacity: 1;
     }
   }
+.modal .tarea-card.selected::after {
+  content: '✓';
+  color: #22c55e; /* verde */
+  font-weight: bold;
+  margin-left: auto;
+  font-size: 1.2rem;
+  animation: aparecerCheck 0.2s ease-out;
+}
+
+@keyframes aparecerCheck {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
 `;
 

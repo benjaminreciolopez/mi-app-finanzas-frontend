@@ -93,8 +93,8 @@ function AsignadorDeEstado({
 
   return (
     <div className="modal-backdrop">
-      <div className="modal" style={{ maxWidth: 480, padding: "1.5rem" }}>
-        <h3 style={{ marginBottom: 8 }}>Marcar tareas como saldadas</h3>
+      <div className="modal">
+        <h3>Marcar tareas como saldadas</h3>
         <p>
           <strong>Saldo total disponible:</strong>{" "}
           <span style={{ fontWeight: 600 }}>{saldoTotal.toFixed(2)}€</span>
@@ -123,8 +123,32 @@ function AsignadorDeEstado({
             paddingTop: "1rem",
           }}
         >
-          <h4 style={{ marginBottom: "0.5rem" }}>Trabajos</h4>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          <div style={{ marginTop: 16, marginBottom: 12 }}>
+            <div
+              style={{
+                height: 8,
+                width: "100%",
+                background: "#e5e7eb",
+                borderRadius: 4,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${(totalSeleccionado / saldoTotal) * 100}%`,
+                  background: "#4f46e5",
+                  height: "100%",
+                  transition: "width 0.3s ease",
+                }}
+              />
+            </div>
+            <small style={{ display: "block", marginTop: 4, color: "#6b7280" }}>
+              {totalSeleccionado.toFixed(2)}€ usados de {saldoTotal.toFixed(2)}€
+            </small>
+          </div>
+
+          <h4>Trabajos</h4>
+          <ul>
             {[...trabajos]
               .sort((a, b) => a.fecha.localeCompare(b.fecha))
               .map((t) => {
@@ -134,37 +158,29 @@ function AsignadorDeEstado({
                 );
                 return (
                   <li
-                    key={t.id}
-                    style={{
-                      marginBottom: "6px",
-                      background: seleccionado ? "#eef6fb" : "transparent",
-                      padding: "4px 6px",
-                      borderRadius: "6px",
-                    }}
+                    key={`trabajo-${t.id}`}
+                    className={`tarea-card ${seleccionado ? "selected" : ""}`}
                   >
-                    <label style={{ cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={seleccionado}
-                        disabled={
-                          // Solo puedes marcar si tienes saldo suficiente o ya está seleccionado
-                          (!seleccionado && saldoRestante < coste - 0.01) ||
-                          guardando
-                        }
-                        onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
-                        style={{ marginRight: 8 }}
-                      />
+                    <input
+                      type="checkbox"
+                      checked={seleccionado}
+                      disabled={
+                        (!seleccionado && saldoRestante < coste - 0.01) ||
+                        guardando
+                      }
+                      onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
+                    />
+                    <span>
                       {t.fecha || "Sin fecha"} – {t.horas}h × {t.precioHora}€/h
                       = <strong>{coste.toFixed(2)}€</strong>
-                    </label>
+                    </span>
                   </li>
                 );
               })}
           </ul>
 
-          {/* Lista de materiales */}
-          <h4 style={{ margin: "1rem 0 0.5rem" }}>Materiales</h4>
-          <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+          <h4>Materiales</h4>
+          <ul>
             {[...materiales]
               .sort((a, b) => a.fecha.localeCompare(b.fecha))
               .map((m) => {
@@ -173,30 +189,24 @@ function AsignadorDeEstado({
                 );
                 return (
                   <li
-                    key={m.id}
-                    style={{
-                      marginBottom: "6px",
-                      background: seleccionado ? "#eef6fb" : "transparent",
-                      padding: "4px 6px",
-                      borderRadius: "6px",
-                    }}
+                    key={`material-${m.id}`}
+                    className={`tarea-card ${seleccionado ? "selected" : ""}`}
                   >
-                    <label style={{ cursor: "pointer" }}>
-                      <input
-                        type="checkbox"
-                        checked={seleccionado}
-                        disabled={
-                          (!seleccionado && saldoRestante < m.coste - 0.01) ||
-                          guardando
-                        }
-                        onChange={() =>
-                          toggleSeleccion(m.id, "material", m.coste)
-                        }
-                        style={{ marginRight: 8 }}
-                      />
+                    <input
+                      type="checkbox"
+                      checked={seleccionado}
+                      disabled={
+                        (!seleccionado && saldoRestante < m.coste - 0.01) ||
+                        guardando
+                      }
+                      onChange={() =>
+                        toggleSeleccion(m.id, "material", m.coste)
+                      }
+                    />
+                    <span>
                       {m.fecha || "Sin fecha"} – {m.descripcion || "Material"}:{" "}
                       <strong>{m.coste.toFixed(2)}€</strong>
-                    </label>
+                    </span>
                   </li>
                 );
               })}
