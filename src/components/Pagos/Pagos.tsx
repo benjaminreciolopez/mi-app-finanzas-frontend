@@ -156,6 +156,21 @@ function Pagos() {
       const saldoAnterior = resumenCliente?.saldoACuenta ?? 0;
       const saldoTotal = nuevoPago.cantidad + saldoAnterior;
 
+      // Debug logs
+      console.log("--- DEBUG MODAL ASIGNADOR ---");
+      console.log("Cliente ID:", clienteId);
+      console.log("Pendientes trabajos:", pendientes.trabajos);
+      console.log("Pendientes materiales:", pendientes.materiales);
+      console.log("Saldo Anterior:", saldoAnterior);
+      console.log("Nuevo Pago Cantidad:", nuevoPago.cantidad);
+      console.log("Saldo Total Calculado:", saldoTotal);
+      console.log(
+        "Condición Trabajos/Materiales OK?:",
+        pendientes.trabajos.length > 0 || pendientes.materiales.length > 0
+      );
+      console.log("Condición Saldo Total OK?:", saldoTotal > 0.01);
+      console.log("--- FIN DEBUG MODAL ASIGNADOR ---");
+
       // Mostrar el modal SOLO si hay tareas o materiales pendientes y saldo total > 0
       if (
         (pendientes.trabajos.length > 0 || pendientes.materiales.length > 0) &&
