@@ -29,7 +29,6 @@ interface Props {
 }
 
 function AsignadorDeEstado({
-  pago,
   trabajos,
   materiales,
   saldoACuenta,
@@ -46,8 +45,8 @@ function AsignadorDeEstado({
     [seleccionados]
   );
 
-  const saldoDisponible = pago ? pago.cantidad : 0;
-  const saldoTotal = +(saldoDisponible + saldoACuenta).toFixed(2);
+  // ✅ Solo usa el saldoACuenta como saldo total disponible
+  const saldoTotal = +saldoACuenta.toFixed(2);
   const saldoRestante = Math.max(
     +(saldoTotal - totalSeleccionado).toFixed(2),
     0
@@ -97,12 +96,8 @@ function AsignadorDeEstado({
       <div className="modal" style={{ maxWidth: 480, padding: "1.5rem" }}>
         <h3 style={{ marginBottom: 8 }}>Marcar tareas como saldadas</h3>
         <p>
-          <strong>Saldo nuevo pago:</strong> {saldoDisponible.toFixed(2)}€{" "}
-          <br />
-          <strong>Saldo anterior a cuenta:</strong> {saldoACuenta.toFixed(2)}€{" "}
-          <br />
           <strong>Saldo total disponible:</strong>{" "}
-          <span style={{ fontWeight: 600 }}>{saldoTotal.toFixed(2)}€</span>{" "}
+          <span style={{ fontWeight: 600 }}>{saldoTotal.toFixed(2)}€</span>
           <br />
           <strong>Saldo restante:</strong>{" "}
           <span
@@ -112,7 +107,7 @@ function AsignadorDeEstado({
             }}
           >
             {saldoRestante.toFixed(2)}€
-          </span>{" "}
+          </span>
           <br />
           <strong>Tareas seleccionadas:</strong> {seleccionados.length}
         </p>
