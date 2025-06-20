@@ -14,12 +14,10 @@
   flex: 0 0 100vw;
   height: 100%;
   overflow-y: auto;
-  padding: 16px;
+  padding: 70px 16px 16px; /* 👈 Ajusta aquí el padding-top */
   background-color: #fff;
   box-sizing: border-box;
   border-right: 1px solid #eee;
-
-  /* 👇 Esto ancla cada pantalla al scroll */
   scroll-snap-align: start;
 }
 .top-nav {
