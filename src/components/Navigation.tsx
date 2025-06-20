@@ -40,7 +40,9 @@ function Navigation({ scrollContainer }: Props) {
     if (!el) return;
 
     const handleScroll = () => {
-      const index = Math.round(el.scrollLeft / window.innerWidth);
+      const index = Math.floor(
+        (el.scrollLeft + window.innerWidth / 2) / window.innerWidth
+      );
       setActiveIndex(index);
     };
 
