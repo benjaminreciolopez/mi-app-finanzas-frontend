@@ -22,3 +22,34 @@
   /* 👇 Esto ancla cada pantalla al scroll */
   scroll-snap-align: start;
 }
+.top-nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: white;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+.top-nav button {
+  background: none;
+  border: none;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.top-nav button.active {
+  color: #4f46e5;
+  font-weight: bold;
+}
+.scroll-horizontal::-webkit-scrollbar {
+  display: none;
+}

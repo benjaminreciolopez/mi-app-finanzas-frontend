@@ -1,5 +1,11 @@
 import { useEffect } from "react";
 import "./pantallasSwipeables.css";
+import Evolucion from "./Evolucion/Evolucion";
+import Clientes from "./Clientes/Clientes";
+import Calendario from "./Calendario/Calendario";
+import Control from "./Control/Control";
+import Materiales from "./Materiales/Materiales";
+import Pagos from "./Pagos/Pagos";
 
 interface Props {
   scrollRef: React.RefObject<HTMLDivElement | null>;
@@ -15,22 +21,22 @@ function PantallasSwipeables({ scrollRef }: Props) {
   return (
     <div className="scroll-horizontal" ref={scrollRef}>
       <div className="pantalla">
-        <h2>Evolución</h2>
+        <Evolucion />
       </div>
       <div className="pantalla">
-        <h2>Clientes</h2>
+        <Clientes />
       </div>
       <div className="pantalla">
-        <h2>Calendario</h2>
+        <Calendario />
       </div>
       <div className="pantalla">
-        <h2>Control</h2>
+        <Control />
       </div>
       <div className="pantalla">
-        <h2>Materiales</h2>
+        <Materiales />
       </div>
       <div className="pantalla">
-        <h2>Pagos</h2>
+        <Pagos />
       </div>
     </div>
   );
