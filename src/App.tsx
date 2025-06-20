@@ -1,11 +1,12 @@
-import { useRef } from "react";
+import { BrowserRouter } from "react-router-dom";
 import GlobalStyles from "./styles/GlobalStyles";
 import PantallasSwipeables from "./components/PantallasSwipeables";
 import Navigation from "./components/Navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useRef } from "react";
 
-function App() {
+function AppContent() {
   const scrollRef = useRef<HTMLDivElement>(null!);
 
   return (
@@ -15,6 +16,14 @@ function App() {
       <PantallasSwipeables scrollRef={scrollRef} />
       <ToastContainer position="top-center" autoClose={2000} />
     </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 }
 
