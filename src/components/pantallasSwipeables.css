@@ -1,0 +1,18 @@
+.scroll-horizontal {
+  display: flex;
+  overflow-x: auto;
+  width: 100vw;
+  height: 100vh;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pantalla {
+  flex: 0 0 100vw;
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: #fff;
+  box-sizing: border-box;
+  border-right: 1px solid #eee;
+}
