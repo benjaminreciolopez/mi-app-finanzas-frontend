@@ -1,4 +1,3 @@
-import { useLocation } from "react-router-dom";
 import {
   AiOutlineUser,
   AiOutlineCalendar,
@@ -7,40 +6,59 @@ import {
   AiOutlineLineChart,
   AiOutlineDollar,
 } from "react-icons/ai";
+import { useState, useEffect } from "react";
 
 interface Props {
-  scrollContainer: React.RefObject<HTMLDivElement>;
+  scrollContainer: React.RefObject<HTMLDivElement | null>;
 }
 
-function Navigation({ scrollContainer }: Props) {
-  const location = useLocation();
+const navItems = [
+  { label: "Evolución", icon: <AiOutlineLineChart size={20} /> },
+  { label: "Clientes", icon: <AiOutlineUser size={20} /> },
+  { label: "Calendario", icon: <AiOutlineCalendar size={20} /> },
+  { label: "Control", icon: <AiOutlineControl size={20} /> },
+  { label: "Materiales", icon: <AiOutlineTool size={20} /> },
+  { label: "Pagos", icon: <AiOutlineDollar size={20} /> },
+];
 
-  const handleScrollTo = (index: number) => {
+function Navigation({ scrollContainer }: Props) {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const scrollToPage = (index: number) => {
     if (scrollContainer.current) {
-      const width = scrollContainer.current.offsetWidth;
       scrollContainer.current.scrollTo({
-        left: width * index,
+        left: index * window.innerWidth,
         behavior: "smooth",
       });
+      setActiveIndex(index);
     }
   };
 
-  const navItems = [
-    { label: "Evolución", icon: <AiOutlineLineChart size={20} /> },
-    { label: "Clientes", icon: <AiOutlineUser size={20} /> },
-    { label: "Calendario", icon: <AiOutlineCalendar size={20} /> },
-    { label: "Control", icon: <AiOutlineControl size={20} /> },
-    { label: "Materiales", icon: <AiOutlineTool size={20} /> },
-    { label: "Pagos", icon: <AiOutlineDollar size={20} /> },
-  ];
+  // Detectar la pantalla activa al hacer scroll manual
+  useEffect(() => {
+    const el = scrollContainer.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const index = Math.round(el.scrollLeft / window.innerWidth);
+      setActiveIndex(index);
+    };
+
+    el.addEventListener("scroll", handleScroll);
+
+    // ⚠️ Esto fuerza a que la pestaña inicial esté bien marcada
+    handleScroll();
+
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [scrollContainer]);
 
   return (
     <nav className="top-nav">
       {navItems.map((item, index) => (
         <button
           key={item.label}
-          className={index === 0 ? "active" : ""}
-          onClick={() => handleScrollTo(index)}
+          onClick={() => scrollToPage(index)}
+          className={index === activeIndex ? "active" : ""}
         >
           {item.icon}
           <span>{item.label}</span>
