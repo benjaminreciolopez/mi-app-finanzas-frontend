@@ -41,6 +41,17 @@ function Control() {
     }
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (localStorage.getItem("forzarRecargaControl") === "true") {
+        cargarDatos();
+        localStorage.removeItem("forzarRecargaControl");
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const cargarDatos = async () => {
     const [clientesData, trabajosData, materialesData] = await Promise.all([
       getClientes(),
