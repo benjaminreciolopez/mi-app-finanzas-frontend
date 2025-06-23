@@ -33,26 +33,18 @@ function Control() {
   }, [clienteSeleccionado]);
 
   useEffect(() => {
-    if (localStorage.getItem("forzarRecargaControl") === "true") {
-      cargarDatos();
-      localStorage.removeItem("forzarRecargaControl");
-    } else {
-      cargarDatos();
-    }
+    cargarDatos();
+  }, []);
 
-    // Listener para detectar cuando se vuelve a la pestaña
-    const handleVisibilityChange = () => {
-      if (!document.hidden && localStorage.getItem("forzarRecargaControl") === "true") {
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (localStorage.getItem("forzarRecargaControl") === "true") {
         cargarDatos();
         localStorage.removeItem("forzarRecargaControl");
       }
-    };
+    }, 1000);
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   const cargarDatos = async () => {

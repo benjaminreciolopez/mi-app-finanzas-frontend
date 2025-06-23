@@ -49,21 +49,17 @@ function Calendario() {
       String(fecha.getDate()).padStart(2, "0"),
     ].join("-");
 
-    // Obtén el nombre solo cuando lo necesites (opcional, puedes quitar si el backend ya no lo pide)
     const cliente = clientes.find((c) => c.id === Number(clienteId));
     const clienteNombre = cliente ? cliente.nombre : "";
 
     await addTrabajo({
       clienteId: Number(clienteId),
-      nombre: clienteNombre, // elimina esta línea si el backend ya no lo requiere
       fecha: nuevaFecha,
       horas: parsedHoras,
       pagado: 0,
     });
 
-    // Forzar recarga del componente Control
     localStorage.setItem("forzarRecargaControl", "true");
-    
     toast.success("✅ Trabajo añadido correctamente");
     setResumen(
       `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`

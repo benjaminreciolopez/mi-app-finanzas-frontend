@@ -12,6 +12,7 @@ export interface Trabajo {
   pagado: number; // debe ser 0 o 1
   cuadrado: number; // también 0 o 1
   observaciones?: string;
+  nombre?: string; // Campo opcional para compatibilidad
 }
 
 export const getTrabajos = async (): Promise<Trabajo[]> => {
@@ -32,7 +33,6 @@ export const updateTrabajo = async (
 
 export const addTrabajo = async (trabajo: {
   clienteId: number;
-  nombre: string;
   fecha: string;
   horas: number;
   pagado: number;
