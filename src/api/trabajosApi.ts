@@ -33,6 +33,7 @@ export const updateTrabajo = async (
 
 export const addTrabajo = async (trabajo: {
   clienteId: number;
+  nombre: string;
   fecha: string;
   horas: number;
   pagado: number;

@@ -33,18 +33,12 @@ function Control() {
   }, [clienteSeleccionado]);
 
   useEffect(() => {
-    cargarDatos();
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (localStorage.getItem("forzarRecargaControl") === "true") {
-        cargarDatos();
-        localStorage.removeItem("forzarRecargaControl");
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
+    if (localStorage.getItem("forzarRecargaControl") === "true") {
+      cargarDatos();
+      localStorage.removeItem("forzarRecargaControl");
+    } else {
+      cargarDatos();
+    }
   }, []);
 
   const cargarDatos = async () => {
