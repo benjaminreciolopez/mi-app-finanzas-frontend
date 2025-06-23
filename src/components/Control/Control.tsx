@@ -39,6 +39,20 @@ function Control() {
     } else {
       cargarDatos();
     }
+
+    // Listener para detectar cuando se vuelve a la pestaña
+    const handleVisibilityChange = () => {
+      if (!document.hidden && localStorage.getItem("forzarRecargaControl") === "true") {
+        cargarDatos();
+        localStorage.removeItem("forzarRecargaControl");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
 
   const cargarDatos = async () => {

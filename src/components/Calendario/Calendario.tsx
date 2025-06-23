@@ -61,6 +61,9 @@ function Calendario() {
       pagado: 0,
     });
 
+    // Forzar recarga del componente Control
+    localStorage.setItem("forzarRecargaControl", "true");
+    
     toast.success("✅ Trabajo añadido correctamente");
     setResumen(
       `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`
