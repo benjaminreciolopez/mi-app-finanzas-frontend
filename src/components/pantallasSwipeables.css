@@ -47,6 +47,9 @@
 .top-nav button.active {
   color: #4f46e5;
   font-weight: bold;
+  background: none;
+  border-radius: 0;
+  transition: color 0.2s;
 }
 .scroll-horizontal::-webkit-scrollbar {
   display: none;
