@@ -33,22 +33,13 @@ function Control() {
   }, [clienteSeleccionado]);
 
   useEffect(() => {
-    if (localStorage.getItem("forzarRecargaControl") === "true") {
-      cargarDatos();
-      localStorage.removeItem("forzarRecargaControl");
-    } else {
-      cargarDatos();
-    }
-  }, []);
-
-  useEffect(() => {
+    cargarDatos(); // Al montar, carga siempre
     const interval = setInterval(() => {
       if (localStorage.getItem("forzarRecargaControl") === "true") {
         cargarDatos();
         localStorage.removeItem("forzarRecargaControl");
       }
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
