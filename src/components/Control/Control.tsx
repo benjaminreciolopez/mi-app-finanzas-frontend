@@ -27,6 +27,9 @@ function Control() {
   const [trabajoSeleccionado, setTrabajoSeleccionado] = useState<number | null>(
     null
   );
+  const [trabajosPagadosVisibles, setTrabajosPagadosVisibles] = useState<{
+    [clienteId: number]: boolean;
+  }>({});
 
   useEffect(() => {
     setTrabajoSeleccionado(null);
@@ -130,6 +133,13 @@ function Control() {
                       .reduce((acc, t) => acc + t.horas, 0);
                     const totalCobrado = totalHorasPagadas * cliente.precioHora;
 
+                    const trabajosPendientes = trabajosCliente.filter(
+                      (t) => !t.pagado
+                    );
+                    const trabajosPagados = trabajosCliente.filter(
+                      (t) => t.pagado
+                    );
+
                     const todoCero =
                       (deuda?.totalTareasPendientes ?? 0) === 0 &&
                       (deuda?.saldoACuenta ?? 0) === 0 &&
@@ -223,103 +233,127 @@ function Control() {
                                 style={{ marginTop: "0.5rem" }}
                               >
                                 <h4>🛠️ Trabajos</h4>
-                                {trabajosCliente.length === 0 ? (
-                                  <p>No hay trabajos.</p>
+                                {/* Trabajos pendientes (SIEMPRE VISIBLES) */}
+                                <p>
+                                  <strong>Trabajos pendientes:</strong>{" "}
+                                  {trabajosPendientes.length} de{" "}
+                                  {trabajosCliente.length}
+                                </p>
+                                <p>
+                                  <strong>Total horas trabajadas:</strong>{" "}
+                                  {totalHoras}h
+                                </p>
+                                <p>
+                                  <strong>Total cobrado:</strong>{" "}
+                                  {totalCobrado.toFixed(2)} €
+                                </p>
+                                {trabajosPendientes.length === 0 ? (
+                                  <p style={{ color: "#888" }}>
+                                    No hay trabajos pendientes.
+                                  </p>
                                 ) : (
-                                  <>
-                                    <p>
-                                      <strong>Trabajos pendientes:</strong>{" "}
-                                      {
-                                        trabajosCliente.filter((t) => !t.pagado)
-                                          .length
-                                      }{" "}
-                                      de {trabajosCliente.length}
-                                    </p>
-                                    <p>
-                                      <strong>Total horas trabajadas:</strong>{" "}
-                                      {totalHoras}h
-                                    </p>
-                                    <p>
-                                      <strong>Total cobrado:</strong>{" "}
-                                      {totalCobrado.toFixed(2)} €
-                                    </p>
+                                  <ul>
+                                    {trabajosPendientes.map((t) => (
+                                      <li
+                                        key={t.id}
+                                        style={{
+                                          background:
+                                            trabajoSeleccionado === t.id
+                                              ? "#eef6fb"
+                                              : "transparent",
+                                          cursor: "pointer",
+                                          borderRadius: "6px",
+                                          padding: "2px 4px",
+                                          marginBottom: "2px",
+                                          position: "relative",
+                                        }}
+                                        onClick={() =>
+                                          setTrabajoSeleccionado(
+                                            trabajoSeleccionado === t.id
+                                              ? null
+                                              : t.id
+                                          )
+                                        }
+                                      >
+                                        {t.fecha}: {t.horas}h (Pendiente)
+                                        <AnimatePresence>
+                                          {trabajoSeleccionado === t.id && (
+                                            <motion.div
+                                              key="botones"
+                                              initial={{
+                                                opacity: 0,
+                                                x: 20,
+                                              }}
+                                              animate={{
+                                                opacity: 1,
+                                                x: 0,
+                                              }}
+                                              exit={{ opacity: 0, x: 20 }}
+                                              transition={{
+                                                duration: 0.18,
+                                              }}
+                                              style={{
+                                                display: "inline-block",
+                                                marginLeft: 12,
+                                              }}
+                                            >
+                                              <button
+                                                className="boton-accion"
+                                                onClick={async (e) => {
+                                                  e.stopPropagation();
+                                                  await eliminarTrabajo(t.id);
+                                                  setTrabajoSeleccionado(null);
+                                                }}
+                                              >
+                                                🗑️ Eliminar
+                                              </button>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+
+                                {/* Botón y trabajos pagados (ocultos por defecto) */}
+                                <div style={{ marginTop: 14 }}>
+                                  <button
+                                    className="boton-accion"
+                                    style={{
+                                      background: "#eee",
+                                      color: "#4f46e5",
+                                      fontWeight: 600,
+                                      marginBottom: 4,
+                                    }}
+                                    onClick={() =>
+                                      setTrabajosPagadosVisibles((prev) => ({
+                                        ...prev,
+                                        [cliente.id]: !prev[cliente.id],
+                                      }))
+                                    }
+                                  >
+                                    {trabajosPagadosVisibles[cliente.id]
+                                      ? "Ocultar trabajos pagados"
+                                      : `Mostrar trabajos pagados (${trabajosPagados.length})`}
+                                  </button>
+                                  {trabajosPagadosVisibles[cliente.id] && (
                                     <ul>
-                                      {trabajosCliente.map((t) => (
+                                      {trabajosPagados.length === 0 && (
+                                        <li style={{ color: "#888" }}>
+                                          No hay trabajos pagados.
+                                        </li>
+                                      )}
+                                      {trabajosPagados.map((t) => (
                                         <li
                                           key={t.id}
-                                          style={{
-                                            background:
-                                              !t.pagado &&
-                                              trabajoSeleccionado === t.id
-                                                ? "#eef6fb"
-                                                : "transparent",
-                                            cursor: !t.pagado
-                                              ? "pointer"
-                                              : "default",
-                                            borderRadius: "6px",
-                                            padding: "2px 4px",
-                                            marginBottom: "2px",
-                                            position: "relative",
-                                          }}
-                                          onClick={() => {
-                                            if (!t.pagado) {
-                                              setTrabajoSeleccionado(
-                                                trabajoSeleccionado === t.id
-                                                  ? null
-                                                  : t.id
-                                              );
-                                            }
-                                          }}
+                                          style={{ color: "#22c55e" }}
                                         >
-                                          {t.fecha}: {t.horas}h{" "}
-                                          {t.pagado
-                                            ? "(Pagado)"
-                                            : "(Pendiente)"}
-                                          <AnimatePresence>
-                                            {/* Solo queda el botón eliminar */}
-                                            {!t.pagado &&
-                                              trabajoSeleccionado === t.id && (
-                                                <motion.div
-                                                  key="botones"
-                                                  initial={{
-                                                    opacity: 0,
-                                                    x: 20,
-                                                  }}
-                                                  animate={{
-                                                    opacity: 1,
-                                                    x: 0,
-                                                  }}
-                                                  exit={{ opacity: 0, x: 20 }}
-                                                  transition={{
-                                                    duration: 0.18,
-                                                  }}
-                                                  style={{
-                                                    display: "inline-block",
-                                                    marginLeft: 12,
-                                                  }}
-                                                >
-                                                  <button
-                                                    className="boton-accion"
-                                                    onClick={async (e) => {
-                                                      e.stopPropagation();
-                                                      await eliminarTrabajo(
-                                                        t.id
-                                                      );
-                                                      setTrabajoSeleccionado(
-                                                        null
-                                                      );
-                                                    }}
-                                                  >
-                                                    🗑️ Eliminar
-                                                  </button>
-                                                </motion.div>
-                                              )}
-                                          </AnimatePresence>
+                                          {t.fecha}: {t.horas}h (Pagado)
                                         </li>
                                       ))}
                                     </ul>
-                                  </>
-                                )}
+                                  )}
+                                </div>
 
                                 <h4>🧱 Materiales</h4>
                                 {materialesCliente.length === 0 ? (
