@@ -95,60 +95,38 @@ function AsignadorDeEstado({
     <div className="modal-backdrop">
       <div className="modal">
         <h3>Marcar tareas como saldadas</h3>
-        <p>
-          <strong>Saldo total disponible:</strong>{" "}
-          <span style={{ fontWeight: 600 }}>{saldoTotal.toFixed(2)}€</span>
-          <br />
-          <strong>Saldo restante:</strong>{" "}
-          <span
+        <div>
+          Saldo total disponible: <strong>{saldoTotal.toFixed(2)}€</strong>
+        </div>
+        <div className="saldo-restante">
+          Saldo restante: {saldoRestante.toFixed(2)}€
+        </div>
+        <div className="tareas-azul">
+          Tareas seleccionadas: {seleccionados.length}
+        </div>
+
+        {/* Barra de progreso */}
+        <div className="barra-progreso">
+          <div
+            className="relleno"
             style={{
-              color: saldoRestante < 0 ? "crimson" : "#2d2",
-              fontWeight: 600,
+              width: saldoTotal
+                ? `${(totalSeleccionado / saldoTotal) * 100}%`
+                : "0%",
             }}
-          >
-            {saldoRestante.toFixed(2)}€
-          </span>
-          <br />
-          <strong>Tareas seleccionadas:</strong> {seleccionados.length}
-        </p>
+          />
+        </div>
+        <div className="info-barra">
+          {totalSeleccionado.toFixed(2)}€ usados de {saldoTotal.toFixed(2)}€
+        </div>
 
-        {/* Lista de trabajos */}
-        <div
-          style={{
-            maxHeight: "320px",
-            overflowY: "auto",
-            paddingRight: "6px",
-            marginTop: "1rem",
-            borderTop: "1px solid #ddd",
-            paddingTop: "1rem",
-          }}
-        >
-          <div style={{ marginTop: 16, marginBottom: 12 }}>
-            <div
-              style={{
-                height: 8,
-                width: "100%",
-                background: "#e5e7eb",
-                borderRadius: 4,
-                overflow: "hidden",
-              }}
-            >
-              <div
-                style={{
-                  width: `${(totalSeleccionado / saldoTotal) * 100}%`,
-                  background: "#4f46e5",
-                  height: "100%",
-                  transition: "width 0.3s ease",
-                }}
-              />
-            </div>
-            <small style={{ display: "block", marginTop: 4, color: "#6b7280" }}>
-              {totalSeleccionado.toFixed(2)}€ usados de {saldoTotal.toFixed(2)}€
-            </small>
-          </div>
-
-          <h4>Trabajos</h4>
-          <ul>
+        {/* Lista de tareas y materiales */}
+        <div style={{ maxHeight: 220, overflowY: "auto", marginBottom: 12 }}>
+          <h4>Trabajos pendientes</h4>
+          <ul style={{ margin: 0, padding: 0 }}>
+            {trabajos.length === 0 && (
+              <li className="tarea-card vacio">Ningún trabajo pendiente.</li>
+            )}
             {[...trabajos]
               .sort((a, b) => a.fecha.localeCompare(b.fecha))
               .map((t) => {
@@ -159,7 +137,7 @@ function AsignadorDeEstado({
                 return (
                   <li
                     key={`trabajo-${t.id}`}
-                    className={`tarea-card ${seleccionado ? "selected" : ""}`}
+                    className={`tarea-card${seleccionado ? " selected" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -171,7 +149,7 @@ function AsignadorDeEstado({
                       onChange={() => toggleSeleccion(t.id, "trabajo", coste)}
                     />
                     <span>
-                      {t.fecha || "Sin fecha"} – {t.horas}h × {t.precioHora}€/h
+                      {t.fecha || "Sin fecha"} — {t.horas}h × {t.precioHora}€/h
                       = <strong>{coste.toFixed(2)}€</strong>
                     </span>
                   </li>
@@ -179,8 +157,11 @@ function AsignadorDeEstado({
               })}
           </ul>
 
-          <h4>Materiales</h4>
+          <h4>Materiales pendientes</h4>
           <ul>
+            {materiales.length === 0 && (
+              <li className="tarea-card vacio">Ningún material pendiente.</li>
+            )}
             {[...materiales]
               .sort((a, b) => a.fecha.localeCompare(b.fecha))
               .map((m) => {
@@ -190,7 +171,7 @@ function AsignadorDeEstado({
                 return (
                   <li
                     key={`material-${m.id}`}
-                    className={`tarea-card ${seleccionado ? "selected" : ""}`}
+                    className={`tarea-card${seleccionado ? " selected" : ""}`}
                   >
                     <input
                       type="checkbox"
@@ -204,7 +185,7 @@ function AsignadorDeEstado({
                       }
                     />
                     <span>
-                      {m.fecha || "Sin fecha"} – {m.descripcion || "Material"}:{" "}
+                      {m.fecha || "Sin fecha"} — {m.descripcion || "Material"}:{" "}
                       <strong>{m.coste.toFixed(2)}€</strong>
                     </span>
                   </li>
@@ -212,18 +193,107 @@ function AsignadorDeEstado({
               })}
           </ul>
         </div>
+        <button
+          className="seleccionar-todo-btn"
+          disabled={guardando}
+          onClick={() => {
+            // Si están todas seleccionadas, deselecciona todo
+            const tareasTotales = (() => {
+              const tareas = [];
+              for (const t of [...trabajos].sort((a, b) =>
+                a.fecha.localeCompare(b.fecha)
+              )) {
+                tareas.push({
+                  id: t.id,
+                  tipo: "trabajo" as const,
+                  coste: +(t.horas * t.precioHora).toFixed(2),
+                });
+              }
+              for (const m of [...materiales].sort((a, b) =>
+                a.fecha.localeCompare(b.fecha)
+              )) {
+                tareas.push({
+                  id: m.id,
+                  tipo: "material" as const,
+                  coste: m.coste,
+                });
+              }
+              return tareas;
+            })();
 
-        <div style={{ marginTop: "1.5rem", display: "flex", gap: "8px" }}>
-          <button
-            onClick={handleGuardar}
-            disabled={guardando || seleccionados.length === 0}
-          >
-            {guardando ? "Guardando..." : "Guardar cambios"}
-          </button>
-          <button onClick={onCancelar} disabled={guardando}>
-            Cancelar
-          </button>
-        </div>
+            if (seleccionados.length === tareasTotales.length) {
+              setSeleccionados([]);
+            } else {
+              // Selecciona automáticamente hasta agotar saldo
+              let saldo = saldoTotal;
+              const nuevasSeleccionadas: {
+                id: number;
+                tipo: "trabajo" | "material";
+                coste: number;
+              }[] = [];
+              for (const tarea of tareasTotales) {
+                if (saldo >= tarea.coste - 0.01) {
+                  nuevasSeleccionadas.push(tarea);
+                  saldo -= tarea.coste;
+                } else {
+                  break;
+                }
+              }
+              setSeleccionados(nuevasSeleccionadas);
+            }
+          }}
+        >
+          {/* Cambia el texto del botón */}
+          {(() => {
+            const tareasTotales = trabajos.length + materiales.length;
+            if (seleccionados.length === tareasTotales && tareasTotales > 0) {
+              return "Deseleccionar todo";
+            }
+            // Si ya están todas las que caben en saldo seleccionadas:
+            let saldo = saldoTotal;
+            let todasLasQueCaben = 0;
+            for (const t of [...trabajos].sort((a, b) =>
+              a.fecha.localeCompare(b.fecha)
+            )) {
+              const coste = +(t.horas * t.precioHora).toFixed(2);
+              if (saldo >= coste - 0.01) {
+                todasLasQueCaben++;
+                saldo -= coste;
+              } else {
+                break;
+              }
+            }
+            for (const m of [...materiales].sort((a, b) =>
+              a.fecha.localeCompare(b.fecha)
+            )) {
+              if (saldo >= m.coste - 0.01) {
+                todasLasQueCaben++;
+                saldo -= m.coste;
+              } else {
+                break;
+              }
+            }
+            if (
+              seleccionados.length === todasLasQueCaben &&
+              todasLasQueCaben > 0
+            ) {
+              return "Deseleccionar todo";
+            }
+            return "Seleccionar todo lo que cubre el saldo";
+          })()}
+        </button>
+      </div>
+
+      <div className="botones">
+        <button
+          onClick={handleGuardar}
+          disabled={guardando || seleccionados.length === 0}
+        >
+          {guardando ? "Guardando..." : "Guardar cambios"}
+        </button>
+        <button onClick={onCancelar} disabled={guardando}>
+          Cancelar
+        </button>
       </div>
     </div>
   );

@@ -458,6 +458,161 @@ input[type="date"]:disabled {
     transform: scale(1);
   }
 }
+/* Mejoras para el modal de AsignadorDeEstado */
+
+.modal {
+  background: #fff;
+  padding: 24px 16px;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px 0 rgba(36, 44, 65, 0.12);
+  max-width: 420px;
+  width: 100%;
+  margin: 40px auto;
+  z-index: 2000;
+  position: relative;
+  animation: aparecer 0.25s cubic-bezier(.43,0,.43,1.18);
+}
+
+.modal h3 {
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #22223b;
+}
+
+.modal p,
+.modal > div {
+  font-size: 1rem;
+}
+
+.modal strong {
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.modal .saldo-restante {
+  color: #22c55e !important;
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+.modal .tareas-azul {
+  color: #4f46e5;
+  font-weight: 700;
+}
+
+.modal .barra-progreso {
+  margin: 12px 0 6px 0;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+}
+.modal .barra-progreso .relleno {
+  background: #4f46e5;
+  height: 100%;
+  transition: width 0.3s;
+}
+.modal .info-barra {
+  color: #6b7280;
+  font-size: 0.94em;
+  margin-bottom: 2px;
+}
+
+/* Listados de tareas/materiales */
+.modal h4 {
+  font-size: 1.05rem;
+  margin: 14px 0 4px 0;
+  color: #222;
+  font-weight: 600;
+}
+
+.modal ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px 0;
+}
+.modal li {
+  background: #f5f7fa;
+  border-radius: 7px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 4px 10px;
+  font-size: 0.99rem;
+}
+.modal .tarea-card.selected,
+.modal li.selected {
+  background: #e8f0fe !important;
+  position: relative;
+}
+.modal .tarea-card.selected::after,
+.modal li.selected::after {
+  content: '✓';
+  color: #22c55e;
+  font-weight: bold;
+  margin-left: auto;
+  font-size: 1.1em;
+  animation: aparecerCheck 0.2s;
+}
+
+.modal input[type="checkbox"] {
+  accent-color: #4f46e5;
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.modal li span {
+  margin-left: 2px;
+}
+
+/* Botones del modal */
+.modal button {
+  min-width: 120px;
+  font-size: 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-right: 0;
+}
+.modal button:last-child {
+  margin-left: 10px;
+}
+
+@media (max-width: 430px) {
+  .modal {
+    padding: 13px 2vw 16px 2vw;
+    min-width: unset;
+    margin: 12vw auto;
+  }
+}
+@media (max-width: 480px) {
+  .modal {
+    max-height: 94vh;
+    overflow-y: auto;
+    padding-bottom: 54px;
+  }
+  .modal .seleccionar-todo-btn {
+    margin-top: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+}
+.modal .botones {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 1.3rem;
+}
+
+.tarea-card.vacio {
+  color: #bbb;
+  text-align: center;
+  font-size: 14px;
+}
 
 `;
 
