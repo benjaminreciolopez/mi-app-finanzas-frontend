@@ -63,8 +63,10 @@ function Calendario() {
     // Forzar recarga del componente Control
     localStorage.setItem("forzarRecargaControl", "true");
     toast.success(
-      `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`
+      `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`,
+      { autoClose: 3000 }
     );
+
     setClienteId("");
     setFecha(new Date()); // Reiniciar fecha a hoy
     setHoras("");
