@@ -3,6 +3,7 @@ import { addTrabajo } from "../../api/trabajosApi";
 import { getClientes, Cliente } from "../../api/clientesApi";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { toast } from "react-toastify";
 
 function Calendario() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
@@ -10,7 +11,6 @@ function Calendario() {
   const [fecha, setFecha] = useState<Date>(new Date());
   const [horas, setHoras] = useState("");
   const [mostrarBotonHoy, setMostrarBotonHoy] = useState(false);
-  const [resumen, setResumen] = useState<string | null>(null);
   const [calendarKey, setCalendarKey] = useState(0);
 
   useEffect(() => {
@@ -62,14 +62,11 @@ function Calendario() {
 
     // Forzar recarga del componente Control
     localStorage.setItem("forzarRecargaControl", "true");
-
-    setResumen(
+    toast.success(
       `Trabajo añadido: ${parsedHoras}h para ${clienteNombre} en ${nuevaFecha}`
     );
-
-    setTimeout(() => {
-      setResumen(null);
-    }, 3000);
+    setClienteId("");
+    setFecha(new Date()); // Reiniciar fecha a hoy
     setHoras("");
   };
 
@@ -77,23 +74,6 @@ function Calendario() {
     <div className="container">
       <h2 className="title">Añadir Trabajo</h2>
       <form onSubmit={handleSubmit} className="card form-scroll">
-        {resumen && (
-          <div
-            style={{
-              marginTop: "1rem",
-              backgroundColor: "#ecfdf5",
-              border: "1px solid #10b981",
-              padding: "12px",
-              borderRadius: "8px",
-              color: "#065f46",
-              fontWeight: "500",
-              textAlign: "center",
-            }}
-          >
-            ✅ {resumen}
-          </div>
-        )}
-
         <label>Cliente:</label>
         <select
           value={clienteId}
